@@ -4,15 +4,25 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      animation: {
+        gradient: "gradientAnimation 3s ease-in-out infinite",
+      },
       colors: {
-        primary: "#fea928",
-        secondary: "#ed8900",
+        primary: "#0041C2",
+        secondary: "#1E90FF",
       },
       container: {
         center: true,
         padding: {
           DEFAULT: "1rem",
           sm: "3rem",
+        },
+      },
+      keyframes: {
+        gradientAnimation: {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
         },
       },
     },
