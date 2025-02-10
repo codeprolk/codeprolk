@@ -4,7 +4,7 @@ import Hero from "../components/Hero/Hero";
 import Products from "../components/Products/Products";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import TopProducts from "../components/TopProducts/TopProducts";
+import Services from "../components/Services/Services";
 import Banner from "../components/Banner/Banner";
 import Subscribe from "../components/Subscribe/Subscribe";
 import Testimonials from "../components/Testimonials/Testimonials";
@@ -32,10 +32,10 @@ const Index = () => {
       <Navbar handleOrderPopup={handleOrderPopup} />
       <Hero handleOrderPopup={handleOrderPopup} />
       <Products />
-      <TopProducts handleOrderPopup={handleOrderPopup} />
+      <Services handleOrderPopup={handleOrderPopup} />
       <Banner />
       <Subscribe />
-      <Products />
+      {/* <Products /> */}
       <Testimonials />
       <Footer />
       <Popup orderPopup={orderPopup} setOrderPopup={setOrderPopup} />

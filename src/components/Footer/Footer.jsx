@@ -6,25 +6,44 @@ import {
   FaLinkedin,
   FaLocationArrow,
   FaMobileAlt,
-  FaVoicemail,
+  FaEnvelope,
 } from "react-icons/fa";
 
-const FooterLinks = [
-  {
-    title: "Home",
-    link: "/#",
-  },
+const PageLinks = [
   {
     title: "About",
-    link: "/#about",
+    link: "/about",
   },
   {
-    title: "Contact",
-    link: "/#contact",
+    title: "Terms and Conditions",
+    link: "/terms-and-conditions",
   },
   {
-    title: "Blog",
-    link: "/#blog",
+    title: "Disclaimer",
+    link: "/disclaimer",
+  },
+  {
+    title: "Privacy Policy",
+    link: "/privacy-policy",
+  },
+];
+
+const ServiceLinks = [
+  {
+    title: "AI/ML Solutions",
+    link: "/services/ai-ml-solutions",
+  },
+  {
+    title: "Software Development",
+    link: "/services/software-development",
+  },
+  {
+    title: "Algorithmic Design",
+    link: "/services/algorithmic-design",
+  },
+  {
+    title: "Data Analytics & Insights",
+    link: "/services/data-analytics-and-insights",
   },
 ];
 
@@ -49,15 +68,17 @@ const Footer = () => {
             <div>
               <div className="py-8 px-4">
                 <h1 className="sm:text-xl text-xl font-bold sm:text-left text-justify mb-3">
-                  Important Links
+                  Services
                 </h1>
                 <ul className="flex flex-col gap-3">
-                  {FooterLinks.map((link) => (
+                  {ServiceLinks.map((link) => (
                     <li
                       className="cursor-pointer hover:text-primary hover:translate-x-1 duration-300 text-black"
                       key={link.title}
                     >
-                      <span>{link.title}</span>
+                      <a href={link.link}>
+                        <span>{link.title}</span>
+                      </a>
                     </li>
                   ))}
                 </ul>
@@ -66,15 +87,17 @@ const Footer = () => {
             <div>
               <div className="py-8 px-4">
                 <h1 className="sm:text-xl text-xl font-bold sm:text-left text-justify mb-3">
-                  Links
+                  Pages
                 </h1>
                 <ul className="flex flex-col gap-3">
-                  {FooterLinks.map((link) => (
+                  {PageLinks.map((link) => (
                     <li
                       className="cursor-pointer hover:text-primary hover:translate-x-1 duration-300 text-black"
                       key={link.title}
                     >
-                      <span>{link.title}</span>
+                      <a href={link.link}>
+                        <span>{link.title}</span>
+                      </a>
                     </li>
                   ))}
                 </ul>
@@ -101,7 +124,7 @@ const Footer = () => {
                   <p>Kolonnawa, Western Province, Sri Lanka</p>
                 </div>
                 <div className="flex items-center gap-3 mt-3">
-                  <FaVoicemail />
+                  <FaEnvelope />
                   <p>info@codeprolk.com</p>
                 </div>
                 <div className="flex items-center gap-3 mt-3">
