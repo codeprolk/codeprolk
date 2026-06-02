@@ -10,26 +10,37 @@ import Terms from './pages/Terms';
 import Disclaimer from './pages/Disclaimer';
 import Privacy from './pages/Privacy';
 
+const heroImage =
+  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80';
+
 const services = [
   {
     title: 'AI/ML Solutions',
     description:
       'We design and deploy advanced AI and ML solutions that enable automation, prediction, and optimization across industries.',
+    image:
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80',
   },
   {
     title: 'Software Development',
     description:
       'We build robust, user-friendly software products focused on performance, scalability, and intuitive experience.',
+    image:
+      'https://images.unsplash.com/photo-1555949963-aa79dcee981d?auto=format&fit=crop&w=900&q=80',
   },
   {
     title: 'Algorithmic Design',
     description:
       'We create customized algorithms that address complex problems efficiently with optimal performance.',
+    image:
+      'https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=900&q=80',
   },
   {
     title: 'Data Analytics & Insights',
     description:
       'We help organizations uncover trends through data analysis and visualization to support strategic decisions.',
+    image:
+      'https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&w=900&q=80',
   },
 ];
 
@@ -56,12 +67,17 @@ function HomePage() {
             </Link>
           </div>
         </div>
-        <div className="hero-features">
-          <div className="feature-card">Intelligent</div>
-          <div className="feature-card">Scalable</div>
-          <div className="feature-card">Secure</div>
-          <div className="feature-card">Efficient</div>
-          <div className="feature-card">Reliable</div>
+        <div className="hero-visual">
+          <div className="hero-image-wrapper">
+            <img src={heroImage} alt="Next generation technology workspace" />
+          </div>
+          <div className="hero-features">
+            <div className="feature-card">Intelligent</div>
+            <div className="feature-card">Scalable</div>
+            <div className="feature-card">Secure</div>
+            <div className="feature-card">Efficient</div>
+            <div className="feature-card">Reliable</div>
+          </div>
         </div>
       </section>
 
@@ -98,8 +114,12 @@ function HomePage() {
             <a className="button button-secondary" href="https://codeprolk.com/contact/">
               MORE INFO
             </a>
-          </div>
-        </div>
+          </div>          <div className="section-visual">
+            <img
+              src="https://images.unsplash.com/photo-1542831371-d531d36971e6?auto=format&fit=crop&w=900&q=80"
+              alt="Chatbot conversation on mobile screen"
+            />
+          </div>        </div>
       </section>
 
       <section id="services" className="section services-section">
@@ -109,9 +129,12 @@ function HomePage() {
         <div className="services-grid">
           {services.map((service) => (
             <article className="service-card" key={service.title}>
-              <h3>{service.title}</h3>
-              <p>{service.description}</p>
-              <a href="https://codeprolk.com/services/">LEARN MORE</a>
+              <img className="service-image" src={service.image} alt={service.title} />
+              <div className="service-card-content">
+                <h3>{service.title}</h3>
+                <p>{service.description}</p>
+                <a href="https://codeprolk.com/services/">LEARN MORE</a>
+              </div>
             </article>
           ))}
         </div>
@@ -140,6 +163,12 @@ function HomePage() {
               EXPLORE MORE
             </a>
           </div>
+          <div className="section-visual">
+            <img
+              src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80"
+              alt="Person learning data science with laptop and charts"
+            />
+          </div>
         </div>
       </section>
 
@@ -158,41 +187,6 @@ function HomePage() {
         <div className="section-content">
           <h2>About</h2>
           <p>Helping talented individuals to reach the International Market.</p>
-        </div>
-      </section>
-
-      <section className="section section-contact">
-        <div className="section-content contact-layout">
-          <div className="contact-copy">
-            <h2>Contact Us</h2>
-            <p>
-              Send your message directly to info@codeprolk.com. Use the form below for project inquiries,
-              service questions, or collaboration opportunities.
-            </p>
-          </div>
-          <form
-            className="contact-form"
-            action="https://formsubmit.co/info@codeprolk.com"
-            method="POST"
-          >
-            <input type="hidden" name="_subject" value="New message from website contact form" />
-            <input type="hidden" name="_captcha" value="false" />
-            <label>
-              <span>Name</span>
-              <input type="text" name="name" required />
-            </label>
-            <label>
-              <span>Email</span>
-              <input type="email" name="email" required />
-            </label>
-            <label className="full-width">
-              <span>Message</span>
-              <textarea name="message" rows="5" required />
-            </label>
-            <button type="submit" className="button button-primary">
-              Send Message
-            </button>
-          </form>
         </div>
       </section>
     </>
