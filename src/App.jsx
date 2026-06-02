@@ -172,8 +172,8 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="section stats-section">
-        <div className="stats-cards">
+      <section className="section section-about">
+                <div className="stats-cards">
           {stats.map((stat) => (
             <div className="stat-card" key={stat.label}>
               <span>{stat.value}</span>
@@ -181,12 +181,33 @@ function HomePage() {
             </div>
           ))}
         </div>
-      </section>
-
-      <section className="section section-about">
         <div className="section-content">
-          <h2>About</h2>
-          <p>Helping talented individuals to reach the International Market.</p>
+          <div className="social-links-section">
+            <h2>About</h2>
+            <p>Connect with CODEPRO LK on the platforms below for updates, support, and AI insights.</p>
+            <div className="social-grid about-social-grid">
+              <a href="https://www.youtube.com/example" target="_blank" rel="noreferrer" className="social-link">
+                <span className="social-icon">▶</span>
+                YouTube
+              </a>
+              <a href="https://wa.me/94770874042" target="_blank" rel="noreferrer" className="social-link">
+                <span className="social-icon">💬</span>
+                WhatsApp
+              </a>
+              <a href="https://www.facebook.com/example" target="_blank" rel="noreferrer" className="social-link">
+                <span className="social-icon">📘</span>
+                Facebook
+              </a>
+              <a href="https://www.tiktok.com/@example" target="_blank" rel="noreferrer" className="social-link">
+                <span className="social-icon">🎵</span>
+                TikTok
+              </a>
+              <a href="https://www.linkedin.com/company/example" target="_blank" rel="noreferrer" className="social-link">
+                <span className="social-icon">🔗</span>
+                LinkedIn
+              </a>
+            </div>
+          </div>
         </div>
       </section>
     </>
