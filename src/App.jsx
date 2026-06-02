@@ -196,6 +196,7 @@ function HomePage() {
 function App() {
   const [botOpen, setBotOpen] = useState(false);
   const [botLoadError, setBotLoadError] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const botUrl =
     'https://copilotstudio.microsoft.com/environments/Default-534253fc-dfb6-462f-b5ca-cbe81939f5ee/bots/crad5_WelcometoCODEPROLK/webchat?__version__=2&enableFileAttachment=true';
     // 'https://copilotstudio.microsoft.com/environments/Default-534253fc-dfb6-462f-b5ca-cbe81939f5ee/bots/crad5_WelcometoCODEPROLK/canvas?__version__=2&enableFileAttachment=true&tenantId=534253fc-dfb6-462f-b5ca-cbe81939f5ee'
@@ -204,13 +205,36 @@ function App() {
     <Router>
       <div className="page-shell">
         <header className="site-header">
-          <Link className="brand" to="/">CODEPRO LK</Link>
-          <nav className="site-nav">
-            <Link to="/">HOME</Link>
-            <Link to="/about">ABOUT</Link>
-            <Link to="/terms">TERMS</Link>
-            <Link to="/disclaimer">DISCLAIMER</Link>
-            <Link to="/privacy">PRIVACY</Link>
+          <Link className="brand" to="/" onClick={() => setMenuOpen(false)}>
+            CODEPRO LK
+          </Link>
+          <button
+            type="button"
+            className={`nav-toggle ${menuOpen ? 'open' : ''}`}
+            onClick={() => setMenuOpen((current) => !current)}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+          >
+            <span className="nav-toggle-bar" />
+            <span className="nav-toggle-bar" />
+            <span className="nav-toggle-bar" />
+          </button>
+          <nav className={`site-nav ${menuOpen ? 'open' : ''}`}>
+            <Link to="/" onClick={() => setMenuOpen(false)}>
+              HOME
+            </Link>
+            <Link to="/about" onClick={() => setMenuOpen(false)}>
+              ABOUT
+            </Link>
+            <Link to="/terms" onClick={() => setMenuOpen(false)}>
+              TERMS
+            </Link>
+            <Link to="/disclaimer" onClick={() => setMenuOpen(false)}>
+              DISCLAIMER
+            </Link>
+            <Link to="/privacy" onClick={() => setMenuOpen(false)}>
+              PRIVACY
+            </Link>
           </nav>
         </header>
 
