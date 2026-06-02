@@ -204,7 +204,7 @@ function App() {
     <Router>
       <div className="page-shell">
         <header className="site-header">
-          <div className="brand">CODEPRO LK</div>
+          <Link className="brand" to="/">CODEPRO LK</Link>
           <nav className="site-nav">
             <Link to="/">HOME</Link>
             <Link to="/about">ABOUT</Link>
