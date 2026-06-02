@@ -32,9 +32,34 @@ function About() {
 
         <h2>Contact</h2>
         <p>
-          For inquiries, collaborations or hiring, reach us at <strong>info@codeprolk.com</strong>
-          or visit the contact page on this site.
+          For inquiries, collaborations or hiring, reach us at <strong>info@codeprolk.com</strong>.
         </p>
+
+        <h2>Follow Us</h2>
+        <p>Stay connected across our most active channels for insights, updates, and direct support.</p>
+
+        <div className="social-grid about-social-grid">
+          <a href="https://www.youtube.com/example" target="_blank" rel="noreferrer" className="social-link">
+            <span className="social-icon">▶</span>
+            YouTube
+          </a>
+          <a href="https://wa.me/94770874042" target="_blank" rel="noreferrer" className="social-link">
+            <span className="social-icon">💬</span>
+            WhatsApp
+          </a>
+          <a href="https://www.facebook.com/example" target="_blank" rel="noreferrer" className="social-link">
+            <span className="social-icon">📘</span>
+            Facebook
+          </a>
+          <a href="https://www.tiktok.com/@example" target="_blank" rel="noreferrer" className="social-link">
+            <span className="social-icon">🎵</span>
+            TikTok
+          </a>
+          <a href="https://www.linkedin.com/company/example" target="_blank" rel="noreferrer" className="social-link">
+            <span className="social-icon">🔗</span>
+            LinkedIn
+          </a>
+        </div>
       </div>
     </section>
   );
