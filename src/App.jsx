@@ -5,14 +5,14 @@ import {
   Route,
   Link,
 } from 'react-router-dom';
+
 import About from './pages/About';
 import Terms from './pages/Terms';
 import Disclaimer from './pages/Disclaimer';
 import Privacy from './pages/Privacy';
-import logo from './assests/logo.png';
 
-const heroImage =
-  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80';
+import logo from './assests/logo.png';
+import landingImage from './assests/landing.jpg';
 
 const services = [
   {
@@ -56,11 +56,14 @@ function HomePage() {
     <>
       <section className="hero">
         <div className="hero-copy">
-          <p className="eyebrow">Welcome to</p>
+          <p className="eyebrow">Welcome to CODEPRO LK</p>
+
           <h1>Next Gen Tech</h1>
+
           <p>
-            Helping talented individuals to reach the International Market with a
-            Technological Background.
+            Helping talented individuals to reach the international market with a
+            strong technological background, modern digital skills, and AI-powered
+            innovation.
           </p>
 
           <div className="hero-actions">
@@ -72,7 +75,7 @@ function HomePage() {
 
         <div className="hero-visual">
           <div className="hero-image-wrapper">
-            <img src={heroImage} alt="Next generation technology workspace" />
+            <img src={landingImage} alt="CODEPRO LK technology landing visual" />
           </div>
 
           <div className="hero-features">
@@ -85,30 +88,39 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="section section-secondary">
+      <section className="section section-dark">
         <div className="section-content">
           <div>
+            <p className="section-tag">01 / Vision</p>
+
             <h2>Transform Your Vision with Next-Gen Tech</h2>
+
             <p>
-              CodePRO LK is a technology-driven platform dedicated to empowering individuals
-              and businesses through innovative services and cutting-edge education.
+              CodePRO LK is a technology-driven platform dedicated to empowering
+              individuals and businesses through innovative services and
+              cutting-edge education.
             </p>
+
             <p>
-              Our platform offers AI-powered services tailored to your needs, from automating
-              routine tasks to making data-driven decisions, with educational resources that
-              keep you ahead of the curve.
+              Our platform offers AI-powered services tailored to your needs,
+              from automating routine tasks to making data-driven decisions,
+              with educational resources that keep you ahead of the curve.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="section section-highlight">
+      <section className="section section-white">
         <div className="section-content split">
           <div>
+            <p className="section-tag">02 / Automation</p>
+
             <h2>Boost Your Business with AI-Powered Chatbots!</h2>
+
             <p>
-              Our AI-powered WhatsApp and Telegram chatbots help businesses automate interactions,
-              handle customer inquiries instantly, and enhance engagement.
+              Our AI-powered WhatsApp and Telegram chatbots help businesses
+              automate interactions, handle customer inquiries instantly, and
+              enhance engagement.
             </p>
 
             <ul>
@@ -117,7 +129,7 @@ function HomePage() {
               <li>Easy Integration & Customization</li>
             </ul>
 
-            <a className="button button-secondary" href="https://codeprolk.com/contact/">
+            <a className="button button-dark" href="https://codeprolk.com/contact/">
               MORE INFO
             </a>
           </div>
@@ -133,7 +145,12 @@ function HomePage() {
 
       <section id="services" className="section services-section">
         <div className="section-header">
+          <p className="section-tag">03 / Services</p>
           <h2>Our Services</h2>
+          <p>
+            We create practical technology solutions for AI, software, algorithms,
+            and data-driven business growth.
+          </p>
         </div>
 
         <div className="services-grid">
@@ -144,6 +161,7 @@ function HomePage() {
               <div className="service-card-content">
                 <h3>{service.title}</h3>
                 <p>{service.description}</p>
+
                 <a href="https://codeprolk.com/services/">LEARN MORE</a>
               </div>
             </article>
@@ -151,19 +169,23 @@ function HomePage() {
         </div>
       </section>
 
-      <section id="roadmap" className="section section-secondary">
+      <section id="roadmap" className="section section-gradient-blue">
         <div className="section-content split reverse">
           <div>
+            <p className="section-tag">04 / Roadmap</p>
+
             <h2>How to Become an AI/ML Engineer</h2>
+
             <p>
-              Explore the ultimate roadmap to kickstart your journey in AI and Machine Learning.
-              Take your first step toward an exciting tech career.
+              Explore the ultimate roadmap to kickstart your journey in AI and
+              Machine Learning. Take your first step toward an exciting tech
+              career.
             </p>
 
             <ul>
               <li>Mathematical Foundations</li>
               <li>Programming Fundamentals</li>
-              <li>Version Control (Git and GitHub)</li>
+              <li>Version Control with Git and GitHub</li>
               <li>Databases</li>
               <li>Data Manipulation and Analysis Libraries</li>
               <li>Machine Learning</li>
@@ -173,7 +195,7 @@ function HomePage() {
             </ul>
 
             <a
-              className="button button-primary"
+              className="button button-light"
               href="https://github.com/dineshpiyasamara/ai-ml-engineer-roadmap"
             >
               EXPLORE MORE
@@ -189,7 +211,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="section section-about">
+      <section className="section section-final">
         <div className="stats-cards">
           {stats.map((stat) => (
             <div className="stat-card" key={stat.label}>
@@ -201,33 +223,62 @@ function HomePage() {
 
         <div className="section-content">
           <div className="social-links-section">
-            <h2>About</h2>
+            <p className="section-tag">05 / Connect</p>
+
+            <h2>About CODEPRO LK</h2>
+
             <p>
-              Connect with CODEPRO LK on the platforms below for updates, support, and AI insights.
+              Connect with CODEPRO LK on the platforms below for updates, support,
+              and AI insights.
             </p>
 
             <div className="social-grid about-social-grid">
-              <a href="https://www.youtube.com/example" target="_blank" rel="noreferrer" className="social-link">
+              <a
+                href="https://www.youtube.com/example"
+                target="_blank"
+                rel="noreferrer"
+                className="social-link"
+              >
                 <span className="social-icon">▶</span>
                 YouTube
               </a>
 
-              <a href="https://wa.me/94770874042" target="_blank" rel="noreferrer" className="social-link">
+              <a
+                href="https://wa.me/94770874042"
+                target="_blank"
+                rel="noreferrer"
+                className="social-link"
+              >
                 <span className="social-icon">💬</span>
                 WhatsApp
               </a>
 
-              <a href="https://www.facebook.com/example" target="_blank" rel="noreferrer" className="social-link">
+              <a
+                href="https://www.facebook.com/example"
+                target="_blank"
+                rel="noreferrer"
+                className="social-link"
+              >
                 <span className="social-icon">📘</span>
                 Facebook
               </a>
 
-              <a href="https://www.tiktok.com/@example" target="_blank" rel="noreferrer" className="social-link">
+              <a
+                href="https://www.tiktok.com/@example"
+                target="_blank"
+                rel="noreferrer"
+                className="social-link"
+              >
                 <span className="social-icon">🎵</span>
                 TikTok
               </a>
 
-              <a href="https://www.linkedin.com/company/example" target="_blank" rel="noreferrer" className="social-link">
+              <a
+                href="https://www.linkedin.com/company/example"
+                target="_blank"
+                rel="noreferrer"
+                className="social-link"
+              >
                 <span className="social-icon">🔗</span>
                 LinkedIn
               </a>
