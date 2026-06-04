@@ -62,16 +62,19 @@ function HomePage() {
             Helping talented individuals to reach the International Market with a
             Technological Background.
           </p>
+
           <div className="hero-actions">
             <Link className="button button-primary" to="/about">
               ABOUT US
             </Link>
           </div>
         </div>
+
         <div className="hero-visual">
           <div className="hero-image-wrapper">
             <img src={heroImage} alt="Next generation technology workspace" />
           </div>
+
           <div className="hero-features">
             <div className="feature-card">Intelligent</div>
             <div className="feature-card">Scalable</div>
@@ -107,30 +110,37 @@ function HomePage() {
               Our AI-powered WhatsApp and Telegram chatbots help businesses automate interactions,
               handle customer inquiries instantly, and enhance engagement.
             </p>
+
             <ul>
               <li>24/7 Customer Support</li>
               <li>Instant Replies & Smart Conversations</li>
               <li>Easy Integration & Customization</li>
             </ul>
+
             <a className="button button-secondary" href="https://codeprolk.com/contact/">
               MORE INFO
             </a>
-          </div>          <div className="section-visual">
+          </div>
+
+          <div className="section-visual">
             <img
               src="https://images.unsplash.com/photo-1542831371-d531d36971e6?auto=format&fit=crop&w=900&q=80"
               alt="Chatbot conversation on mobile screen"
             />
-          </div>        </div>
+          </div>
+        </div>
       </section>
 
       <section id="services" className="section services-section">
         <div className="section-header">
           <h2>Our Services</h2>
         </div>
+
         <div className="services-grid">
           {services.map((service) => (
             <article className="service-card" key={service.title}>
               <img className="service-image" src={service.image} alt={service.title} />
+
               <div className="service-card-content">
                 <h3>{service.title}</h3>
                 <p>{service.description}</p>
@@ -149,6 +159,7 @@ function HomePage() {
               Explore the ultimate roadmap to kickstart your journey in AI and Machine Learning.
               Take your first step toward an exciting tech career.
             </p>
+
             <ul>
               <li>Mathematical Foundations</li>
               <li>Programming Fundamentals</li>
@@ -160,10 +171,15 @@ function HomePage() {
               <li>MLOps</li>
               <li>Generative AI</li>
             </ul>
-            <a className="button button-primary" href="https://github.com/dineshpiyasamara/ai-ml-engineer-roadmap">
+
+            <a
+              className="button button-primary"
+              href="https://github.com/dineshpiyasamara/ai-ml-engineer-roadmap"
+            >
               EXPLORE MORE
             </a>
           </div>
+
           <div className="section-visual">
             <img
               src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80"
@@ -174,7 +190,7 @@ function HomePage() {
       </section>
 
       <section className="section section-about">
-                <div className="stats-cards">
+        <div className="stats-cards">
           {stats.map((stat) => (
             <div className="stat-card" key={stat.label}>
               <span>{stat.value}</span>
@@ -182,27 +198,35 @@ function HomePage() {
             </div>
           ))}
         </div>
+
         <div className="section-content">
           <div className="social-links-section">
             <h2>About</h2>
-            <p>Connect with CODEPRO LK on the platforms below for updates, support, and AI insights.</p>
+            <p>
+              Connect with CODEPRO LK on the platforms below for updates, support, and AI insights.
+            </p>
+
             <div className="social-grid about-social-grid">
               <a href="https://www.youtube.com/example" target="_blank" rel="noreferrer" className="social-link">
                 <span className="social-icon">▶</span>
                 YouTube
               </a>
+
               <a href="https://wa.me/94770874042" target="_blank" rel="noreferrer" className="social-link">
                 <span className="social-icon">💬</span>
                 WhatsApp
               </a>
+
               <a href="https://www.facebook.com/example" target="_blank" rel="noreferrer" className="social-link">
                 <span className="social-icon">📘</span>
                 Facebook
               </a>
+
               <a href="https://www.tiktok.com/@example" target="_blank" rel="noreferrer" className="social-link">
                 <span className="social-icon">🎵</span>
                 TikTok
               </a>
+
               <a href="https://www.linkedin.com/company/example" target="_blank" rel="noreferrer" className="social-link">
                 <span className="social-icon">🔗</span>
                 LinkedIn
@@ -219,18 +243,19 @@ function App() {
   const [botOpen, setBotOpen] = useState(false);
   const [botLoadError, setBotLoadError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
   const botUrl =
     'https://copilotstudio.microsoft.com/environments/Default-534253fc-dfb6-462f-b5ca-cbe81939f5ee/bots/crad5_WelcometoCODEPROLK/webchat?__version__=2&enableFileAttachment=true';
-    // 'https://copilotstudio.microsoft.com/environments/Default-534253fc-dfb6-462f-b5ca-cbe81939f5ee/bots/crad5_WelcometoCODEPROLK/canvas?__version__=2&enableFileAttachment=true&tenantId=534253fc-dfb6-462f-b5ca-cbe81939f5ee'
 
   return (
     <Router>
       <div className="page-shell">
         <header className="site-header">
-        <Link className="brand" to="/" onClick={() => setMenuOpen(false)}>
-        <img src={logo} alt="CODEPRO LK logo" className="brand-logo" />
-        <span>CODEPRO LK</span>
-        </Link>
+          <Link className="brand" to="/" onClick={() => setMenuOpen(false)}>
+            <img src={logo} alt="CODEPRO LK logo" className="brand-logo" />
+            <span>CODEPRO LK</span>
+          </Link>
+
           <button
             type="button"
             className={`nav-toggle ${menuOpen ? 'open' : ''}`}
@@ -242,19 +267,24 @@ function App() {
             <span className="nav-toggle-bar" />
             <span className="nav-toggle-bar" />
           </button>
+
           <nav className={`site-nav ${menuOpen ? 'open' : ''}`}>
             <Link to="/" onClick={() => setMenuOpen(false)}>
               HOME
             </Link>
+
             <Link to="/about" onClick={() => setMenuOpen(false)}>
               ABOUT
             </Link>
+
             <Link to="/terms" onClick={() => setMenuOpen(false)}>
               TERMS
             </Link>
+
             <Link to="/disclaimer" onClick={() => setMenuOpen(false)}>
               DISCLAIMER
             </Link>
+
             <Link to="/privacy" onClick={() => setMenuOpen(false)}>
               PRIVACY
             </Link>
@@ -273,24 +303,13 @@ function App() {
         </main>
 
         <footer className="site-footer">
-          <div className="footer-grid">
-            <div>
-              <h3>Pages</h3>
-              <Link to="/about">About Us</Link>
-              <Link to="/terms">Terms & Conditions</Link>
-              <Link to="/disclaimer">Disclaimer</Link>
-              <Link to="/privacy">Privacy Policy</Link>
-            </div>
-            <div>
-              <h3>Contact</h3>
-              <p>Minuwangoda, Western Province, Sri Lanka</p>
-              <p>Email: info@codeprolk.com</p>
-              <p>Mobile: +9477 087 4042</p>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>Copyright © 2026 - CODEPRO LK</p>
-          </div>
+          <p className="footer-copy">Copyright © 2026 - CODEPRO LK</p>
+
+          <nav className="footer-links">
+            <Link to="/disclaimer">Disclaimer</Link>
+            <Link to="/terms">Terms & Conditions</Link>
+            <Link to="/privacy">Privacy Policy</Link>
+          </nav>
         </footer>
 
         <button
@@ -312,10 +331,17 @@ function App() {
             >
               ✕
             </button>
+
             {botLoadError ? (
               <div className="bot-error-state">
                 <p>Unable to load chat widget inside the page.</p>
-                <a href={botUrl} target="_blank" rel="noopener noreferrer" className="button button-primary">
+
+                <a
+                  href={botUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="button button-primary"
+                >
                   Open chat in new tab
                 </a>
               </div>
