@@ -9,6 +9,7 @@ import About from './pages/About';
 import Terms from './pages/Terms';
 import Disclaimer from './pages/Disclaimer';
 import Privacy from './pages/Privacy';
+import logo from './assests/logo.png';
 
 const heroImage =
   'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80';
@@ -226,9 +227,10 @@ function App() {
     <Router>
       <div className="page-shell">
         <header className="site-header">
-          <Link className="brand" to="/" onClick={() => setMenuOpen(false)}>
-            CODEPRO LK
-          </Link>
+        <Link className="brand" to="/" onClick={() => setMenuOpen(false)}>
+        <img src={logo} alt="CODEPRO LK logo" className="brand-logo" />
+        <span>CODEPRO LK</span>
+        </Link>
           <button
             type="button"
             className={`nav-toggle ${menuOpen ? 'open' : ''}`}
