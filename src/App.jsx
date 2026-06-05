@@ -97,6 +97,8 @@ function HomePage() {
               <div className="vision-title-track">
                 <h2>Transform Your Vision with Next-Gen Tech</h2>
                 <h2 aria-hidden="true">Transform Your Vision with Next-Gen Tech</h2>
+                <h2 aria-hidden="true">Transform Your Vision with Next-Gen Tech</h2>
+                <h2 aria-hidden="true">Transform Your Vision with Next-Gen Tech</h2>
               </div>
             </div>
 

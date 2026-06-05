@@ -428,19 +428,20 @@ a {
 /* Running title only for Transform section */
 
 .vision-title-marquee {
-  width: 100%;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
   overflow: hidden;
   white-space: nowrap;
-  margin: 0 0 1.2rem;
+  margin-bottom: 1.2rem;
 }
 
 .vision-title-track {
   display: inline-flex;
   align-items: center;
-  gap: 3rem;
+  gap: 2.5rem;
   width: max-content;
 
-  animation: visionTitleRun 13s linear infinite;
+  animation: visionTitleRun 23s linear infinite;
 }
 
 .vision-title-track h2 {
@@ -459,7 +460,7 @@ a {
   }
 
   to {
-    transform: translateX(calc(-50% - 1.5rem));
+    transform: translateX(calc(-50% - 2.5rem));
   }
 }
 
