@@ -12,7 +12,13 @@ import Disclaimer from './pages/Disclaimer';
 import Privacy from './pages/Privacy';
 
 import logo from './assests/logo.png';
-import landingImage from './assests/landing.jpg';
+import landingImage from './assests/landing-blue.jpg';
+
+import facebookIcon from './assests/black-icons/facebook.png';
+import linkedinIcon from './assests/black-icons/linkedin.png';
+import whatsappIcon from './assests/black-icons/whatsapp.png';
+import youtubeIcon from './assests/black-icons/youtube.png';
+import tiktokIcon from './assests/black-icons/tiktok.png';
 
 const services = [
   {
@@ -46,49 +52,43 @@ const services = [
 ];
 
 const stats = [
-  { label: 'Subscribers', value: '0K+' },
-  { label: 'Uploads', value: '0+' },
-  { label: 'Views', value: '0M+' },
+  { label: 'Subscribers', value: '55K+' },
+  { label: 'Uploads', value: '400+' },
+  { label: 'Views', value: '5M+' },
 ];
 
 function HomePage() {
   return (
     <>
       <section className="hero">
-        <div className="hero-copy">
-          <p className="eyebrow">Welcome to CODEPRO LK</p>
+        <div className="hero-image-bg">
+          <img src={landingImage} alt="CODEPRO LK landing visual" />
+        </div>
 
-          <h1>Next Gen Tech</h1>
+        <div className="hero-copy">
+          <p className="eyebrow">CODEPRO LK</p>
+
+          <h1>Next Gen Tech.</h1>
 
           <p>
-            Helping talented individuals to reach the international market with a
-            strong technological background, modern digital skills, and AI-powered
-            innovation.
+            Helping talented individuals reach the international market with
+            modern technology, AI-powered services, and future-ready digital skills.
           </p>
 
-          <div className="hero-actions">
-            <Link className="button button-primary" to="/about">
-              ABOUT US
-            </Link>
+          <div className="hero-explore">
+            <span>Explore</span>
+            <a href="#services">AI/ML</a>
+            <a href="#services">Software</a>
+            <a href="#roadmap">Roadmap</a>
           </div>
         </div>
 
-        <div className="hero-visual">
-          <div className="hero-image-wrapper">
-            <img src={landingImage} alt="CODEPRO LK technology landing visual" />
-          </div>
-
-          <div className="hero-features">
-            <div className="feature-card">Intelligent</div>
-            <div className="feature-card">Scalable</div>
-            <div className="feature-card">Secure</div>
-            <div className="feature-card">Efficient</div>
-            <div className="feature-card">Reliable</div>
-          </div>
-        </div>
+        <a className="scroll-cue" href="#vision" aria-label="Scroll to next section">
+          ↓
+        </a>
       </section>
 
-      <section className="section section-dark">
+      <section id="vision" className="section section-dark">
         <div className="section-content">
           <div>
             <p className="section-tag">01 / Vision</p>
@@ -110,7 +110,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="section section-white">
+      <section className="section section-logo-blue">
         <div className="section-content split">
           <div>
             <p className="section-tag">02 / Automation</p>
@@ -129,7 +129,7 @@ function HomePage() {
               <li>Easy Integration & Customization</li>
             </ul>
 
-            <a className="button button-dark" href="https://codeprolk.com/contact/">
+            <a className="button button-light" href="https://codeprolk.com/contact/">
               MORE INFO
             </a>
           </div>
@@ -231,58 +231,6 @@ function HomePage() {
               Connect with CODEPRO LK on the platforms below for updates, support,
               and AI insights.
             </p>
-
-            <div className="social-grid about-social-grid">
-              <a
-                href="https://www.youtube.com/example"
-                target="_blank"
-                rel="noreferrer"
-                className="social-link"
-              >
-                <span className="social-icon">▶</span>
-                YouTube
-              </a>
-
-              <a
-                href="https://wa.me/94770874042"
-                target="_blank"
-                rel="noreferrer"
-                className="social-link"
-              >
-                <span className="social-icon">💬</span>
-                WhatsApp
-              </a>
-
-              <a
-                href="https://www.facebook.com/example"
-                target="_blank"
-                rel="noreferrer"
-                className="social-link"
-              >
-                <span className="social-icon">📘</span>
-                Facebook
-              </a>
-
-              <a
-                href="https://www.tiktok.com/@example"
-                target="_blank"
-                rel="noreferrer"
-                className="social-link"
-              >
-                <span className="social-icon">🎵</span>
-                TikTok
-              </a>
-
-              <a
-                href="https://www.linkedin.com/company/example"
-                target="_blank"
-                rel="noreferrer"
-                className="social-link"
-              >
-                <span className="social-icon">🔗</span>
-                LinkedIn
-              </a>
-            </div>
           </div>
         </div>
       </section>
@@ -356,10 +304,51 @@ function App() {
         <footer className="site-footer">
           <p className="footer-copy">Copyright © 2026 - CODEPRO LK</p>
 
-          <nav className="footer-links">
-            <Link to="/disclaimer">Disclaimer</Link>
-            <Link to="/terms">Terms & Conditions</Link>
-            <Link to="/privacy">Privacy Policy</Link>
+          <nav className="footer-social-links" aria-label="CODEPRO LK social media links">
+            <a
+              href="https://www.youtube.com/@codeprolk"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="YouTube"
+            >
+              <img src={youtubeIcon} alt="YouTube" />
+            </a>
+
+            <a
+              href="https://wa.me/94770874042"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="WhatsApp"
+            >
+              <img src={whatsappIcon} alt="WhatsApp" />
+            </a>
+
+            <a
+              href="https://web.facebook.com/codeprolkofficial"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Facebook"
+            >
+              <img src={facebookIcon} alt="Facebook" />
+            </a>
+
+            <a
+              href="https://www.tiktok.com/@codeprolk"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="TikTok"
+            >
+              <img src={tiktokIcon} alt="TikTok" />
+            </a>
+
+            <a
+              href="https://www.linkedin.com/company/codepro-lk/posts/?feedView=all"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="LinkedIn"
+            >
+              <img src={linkedinIcon} alt="LinkedIn" />
+            </a>
           </nav>
         </footer>
 
