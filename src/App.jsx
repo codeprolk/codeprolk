@@ -22,6 +22,9 @@ import whatsappIcon from './assests/black-icons/whatsapp.png';
 import youtubeIcon from './assests/black-icons/youtube.png';
 import tiktokIcon from './assests/black-icons/tiktok.png';
 
+import softwareDevelopmentImage from './assests/services/software-development.jpg';
+import dataAnalyticsImage from './assests/services/data-analytics.jpg';
+
 const services = [
   {
     title: 'AI/ML Solutions',
@@ -34,8 +37,8 @@ const services = [
     title: 'Software Development',
     description:
       'We build robust, user-friendly software products focused on performance, scalability, and intuitive experience.',
-    image:
-      'https://images.unsplash.com/photo-1555949963-aa79dcee981d?auto=format&fit=crop&w=900&q=80',
+    image: softwareDevelopmentImage,
+    
   },
   {
     title: 'Algorithmic Design',
@@ -48,8 +51,7 @@ const services = [
     title: 'Data Analytics & Insights',
     description:
       'We help organizations uncover trends through data analysis and visualization to support strategic decisions.',
-    image:
-      'https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&w=900&q=80',
+    image: dataAnalyticsImage,
   },
 ];
 

@@ -752,15 +752,12 @@ a {
 }
 
 /* =========================
-   SERVICE SLIDE CARD
+   SERVICE SLIDE CARD - FULL BACKGROUND IMAGE
 ========================= */
 
 .service-slide-card {
+  position: relative;
   min-height: 260px;
-
-  display: grid;
-  grid-template-columns: 0.85fr 1.15fr;
-  align-items: stretch;
 
   overflow: hidden;
   border-radius: 2rem;
@@ -784,27 +781,58 @@ a {
   box-shadow: 0 34px 90px rgba(2, 6, 23, 0.48);
 }
 
+/* Full background image */
 .service-slide-card img.service-image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
   width: 100%;
   height: 100%;
-  min-height: 260px;
+  min-height: 100%;
 
   display: block;
   object-fit: cover;
+  object-position: center center;
 
   filter: saturate(1.08) contrast(1.05);
+  transform: scale(1.02);
+
   transition:
     transform 0.55s ease,
     filter 0.55s ease;
 }
 
 .service-slide-card:hover img.service-image {
-  transform: scale(1.08);
+  transform: scale(1.1);
   filter: saturate(1.22) contrast(1.08);
 }
 
+/* Dark overlay so text is readable */
+.service-slide-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(2, 6, 23, 0.9) 0%,
+      rgba(2, 6, 23, 0.72) 45%,
+      rgba(2, 6, 23, 0.35) 100%
+    );
+}
+
+/* Text content on top of image */
 .service-slide-card .service-card-content {
-  padding: 2rem;
+  position: relative;
+  z-index: 2;
+
+  max-width: 680px;
+  min-height: 260px;
+
+  padding: 2.1rem;
 
   display: flex;
   flex-direction: column;
@@ -823,7 +851,7 @@ a {
 .service-slide-card p {
   margin: 0 0 1.4rem;
 
-  color: rgba(219, 234, 254, 0.92);
+  color: rgba(219, 234, 254, 0.95);
   font-size: 0.98rem;
   line-height: 1.65;
 }
