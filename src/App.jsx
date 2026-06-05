@@ -93,7 +93,12 @@ function HomePage() {
           <div>
             <p className="section-tag">01 / Vision</p>
 
-            <h2>Transform Your Vision with Next-Gen Tech</h2>
+            <div className="vision-title-marquee">
+              <div className="vision-title-track">
+                <h2>Transform Your Vision with Next-Gen Tech</h2>
+                <h2 aria-hidden="true">Transform Your Vision with Next-Gen Tech</h2>
+              </div>
+            </div>
 
             <p>
               CodePRO LK is a technology-driven platform dedicated to empowering

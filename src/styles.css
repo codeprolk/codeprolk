@@ -425,6 +425,44 @@ a {
   }
 }
 
+/* Running title only for Transform section */
+
+.vision-title-marquee {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 0 0 1.2rem;
+}
+
+.vision-title-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 3rem;
+  width: max-content;
+
+  animation: visionTitleRun 13s linear infinite;
+}
+
+.vision-title-track h2 {
+  flex: 0 0 auto;
+  margin: 0;
+
+  color: #ffffff;
+  font-size: clamp(2.4rem, 5vw, 5rem);
+  line-height: 0.95;
+  letter-spacing: -0.07em;
+}
+
+@keyframes visionTitleRun {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-50% - 1.5rem));
+  }
+}
+
 /* Boost Chatbots → landing image blue */
 .section-logo-blue {
   background: linear-gradient(135deg, #d8eef3 0%, #eefbff 58%, #c6e3eb 100%);
