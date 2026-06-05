@@ -281,6 +281,19 @@ function HomePage() {
         ref={servicesRef}
         className="section services-section services-swipe-section"
       >
+        <div className="services-sparkles" aria-hidden="true">
+        <span className="sparkle sparkle-1"></span>
+        <span className="sparkle sparkle-2"></span>
+        <span className="sparkle sparkle-3"></span>
+        <span className="sparkle sparkle-4"></span>
+        <span className="sparkle sparkle-5"></span>
+        <span className="sparkle sparkle-6"></span>
+        <span className="sparkle sparkle-7"></span>
+        <span className="sparkle sparkle-8"></span>
+        <span className="sparkle sparkle-9"></span>
+        <span className="sparkle sparkle-10"></span>
+        </div>
+
         <div className="section-header">
           <p className="section-tag">03 / Services</p>
 
@@ -292,24 +305,37 @@ function HomePage() {
           </p>
         </div>
 
-        <div className="services-grid">
-          {services.map((service) => (
-            <article className="service-card" key={service.title}>
-              <img className="service-image" src={service.image} alt={service.title} />
+        <div className="services-vertical-slider">
+          <div className="services-vertical-track">
+            {[...services, ...services].map((service, index) => (
+              <article
+                className="service-card service-slide-card"
+                key={`${service.title}-${index}`}
+              >
+                <img
+                  className="service-image"
+                  src={service.image}
+                  alt={service.title}
+                />
 
-              <div className="service-card-content">
-                <h3>{service.title}</h3>
+                <div className="service-card-content">
+                  <h3>{service.title}</h3>
 
-                <p>{service.description}</p>
+                  <p>{service.description}</p>
 
-                <a href="https://codeprolk.com/services/">LEARN MORE</a>
-              </div>
-            </article>
-          ))}
+                  <a href="https://codeprolk.com/services/">LEARN MORE</a>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section id="roadmap" className="section section-gradient-blue">
+      <section
+        id="roadmap"
+        className="section section-gradient-blue roadmap-side-image-section"
+        style={{ '--roadmap-bg': `url(${roadmapImage})` }}
+      >
         <div className="section-content split reverse">
           <div>
             <p className="section-tag">04 / Roadmap</p>
@@ -340,14 +366,6 @@ function HomePage() {
             >
               EXPLORE MORE
             </a>
-          </div>
-
-          <div className="section-visual roadmap-visual">
-            <img
-              className="roadmap-image"
-              src={roadmapImage}
-              alt="Robotic hand on a blue background"
-            />
           </div>
         </div>
       </section>

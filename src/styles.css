@@ -524,7 +524,10 @@ a {
   color: var(--landing-muted);
 }
 
-/* Our Services → dark gradient + square grid */
+/* =========================
+   OUR SERVICES SECTION
+========================= */
+
 .services-section {
   position: relative;
   overflow: hidden;
@@ -553,29 +556,436 @@ a {
   z-index: 0;
 }
 
-/* keep content above the grid */
+/* Tiny sparkle background for Services section */
+
+.services-sparkles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+
+  background: rgba(125, 211, 252, 0.95);
+  box-shadow:
+    0 0 10px rgba(125, 211, 252, 0.9),
+    0 0 22px rgba(56, 189, 248, 0.55);
+
+  opacity: 0.25;
+  animation: sparkleTwinkle 4s ease-in-out infinite;
+}
+
+.sparkle::before,
+.sparkle::after {
+  content: "";
+  position: absolute;
+  inset: 50%;
+  width: 14px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(219, 234, 254, 0.95),
+    transparent
+  );
+  transform: translate(-50%, -50%);
+}
+
+.sparkle::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.sparkle-1 {
+  top: 14%;
+  left: 12%;
+  animation-delay: 0s;
+}
+
+.sparkle-2 {
+  top: 22%;
+  left: 72%;
+  animation-delay: 0.7s;
+}
+
+.sparkle-3 {
+  top: 38%;
+  left: 28%;
+  animation-delay: 1.4s;
+}
+
+.sparkle-4 {
+  top: 54%;
+  left: 84%;
+  animation-delay: 2.1s;
+}
+
+.sparkle-5 {
+  top: 70%;
+  left: 18%;
+  animation-delay: 2.8s;
+}
+
+.sparkle-6 {
+  top: 82%;
+  left: 62%;
+  animation-delay: 3.5s;
+}
+
+.sparkle-7 {
+  top: 30%;
+  left: 48%;
+  width: 3px;
+  height: 3px;
+  animation-delay: 1s;
+}
+
+.sparkle-8 {
+  top: 66%;
+  left: 42%;
+  width: 3px;
+  height: 3px;
+  animation-delay: 1.8s;
+}
+
+.sparkle-9 {
+  top: 12%;
+  left: 90%;
+  width: 3px;
+  height: 3px;
+  animation-delay: 2.6s;
+}
+
+.sparkle-10 {
+  top: 88%;
+  left: 8%;
+  width: 3px;
+  height: 3px;
+  animation-delay: 3.2s;
+}
+
+@keyframes sparkleTwinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.7) translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.35) translateY(-8px);
+  }
+}
+
+/* keep content above the background grid */
 .services-section .section-header,
-.services-section .services-grid {
+.services-section .services-vertical-slider {
   position: relative;
   z-index: 1;
 }
 
-.services-section .section-tag {
-  color: #7dd3fc;
-}
-
+/* section heading */
 .services-section .section-header {
   max-width: 760px;
-  margin: 0 auto 2rem;
+  margin: 0 auto 3rem;
   text-align: center;
+}
+
+.services-section .section-tag {
+  color: #7dd3fc;
+  opacity: 1;
 }
 
 .services-section .section-header h2 {
   color: #ffffff;
+  opacity: 1;
 }
 
 .services-section .section-header p {
   color: #dbeafe;
+  opacity: 1;
+}
+
+/* =========================
+   VERTICAL SERVICES SLIDER
+========================= */
+
+.services-vertical-slider {
+  max-width: 980px;
+  height: 560px;
+  margin: 0 auto;
+
+  position: relative;
+  overflow: hidden;
+
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+}
+
+.services-vertical-track {
+  display: grid;
+  gap: 1.4rem;
+
+  /* lower seconds = faster */
+  animation: servicesVerticalSlide 15s linear infinite;
+}
+
+.services-vertical-slider:hover .services-vertical-track {
+  animation-play-state: paused;
+}
+
+/* =========================
+   SERVICE SLIDE CARD
+========================= */
+
+.service-slide-card {
+  min-height: 260px;
+
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  align-items: stretch;
+
+  overflow: hidden;
+  border-radius: 2rem;
+
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.32);
+
+  color: #ffffff;
+
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.service-slide-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(125, 211, 252, 0.42);
+  box-shadow: 0 34px 90px rgba(2, 6, 23, 0.48);
+}
+
+.service-slide-card img.service-image {
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+
+  display: block;
+  object-fit: cover;
+
+  filter: saturate(1.08) contrast(1.05);
+  transition:
+    transform 0.55s ease,
+    filter 0.55s ease;
+}
+
+.service-slide-card:hover img.service-image {
+  transform: scale(1.08);
+  filter: saturate(1.22) contrast(1.08);
+}
+
+.service-slide-card .service-card-content {
+  padding: 2rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.service-slide-card h3 {
+  margin: 0 0 1rem;
+
+  color: #ffffff;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.service-slide-card p {
+  margin: 0 0 1.4rem;
+
+  color: rgba(219, 234, 254, 0.92);
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.service-slide-card a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  width: fit-content;
+
+  color: #7dd3fc;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.service-slide-card a::after {
+  content: "→";
+  font-size: 1rem;
+  transform: translateX(0);
+  transition: transform 0.25s ease;
+}
+
+.service-slide-card:hover a::after {
+  transform: translateX(5px);
+}
+
+/* =========================
+   SLIDER ANIMATION
+========================= */
+
+@keyframes servicesVerticalSlide {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+/* =========================
+   SERVICES REVEAL ANIMATION
+========================= */
+
+.services-swipe-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.services-swipe-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+
+  background:
+    radial-gradient(circle at 30% 20%, rgba(56, 189, 248, 0.32), transparent 34%),
+    linear-gradient(135deg, #d8eef3 0%, #eefbff 58%, #c6e3eb 100%);
+
+  transform: translateX(0);
+  transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.services-swipe-section.services-swipe-visible::after {
+  transform: translateX(105%);
+}
+
+.services-swipe-section .services-vertical-slider {
+  opacity: 0;
+  transform: translateY(45px);
+  transition:
+    opacity 0.85s ease,
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.services-swipe-section.services-swipe-visible .services-vertical-slider {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* keep header visible always */
+.services-swipe-section .section-header {
+  opacity: 1;
+  transform: none;
+}
+
+/* =========================
+   RESPONSIVE SERVICES
+========================= */
+
+@media (max-width: 900px) {
+  .services-vertical-slider {
+    max-width: 760px;
+    height: 620px;
+  }
+
+  .service-slide-card {
+    grid-template-columns: 1fr;
+    min-height: 380px;
+  }
+
+  .service-slide-card img.service-image {
+    height: 190px;
+    min-height: 190px;
+  }
+
+  .service-slide-card .service-card-content {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .services-section .section-header {
+    margin-bottom: 2rem;
+  }
+
+  .services-vertical-slider {
+    height: 590px;
+  }
+
+  .service-slide-card {
+    min-height: 360px;
+    border-radius: 1.5rem;
+  }
+
+  .service-slide-card img.service-image {
+    height: 180px;
+    min-height: 180px;
+  }
+
+  .service-slide-card .service-card-content {
+    padding: 1.35rem;
+  }
+
+  .service-slide-card h3 {
+    font-size: 1.35rem;
+  }
+
+  .service-slide-card p {
+    font-size: 0.92rem;
+  }
+}
+
+/* reduce motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .services-vertical-track,
+  .services-swipe-section::after,
+  .services-swipe-section .services-vertical-slider,
+  .service-slide-card,
+  .service-slide-card img.service-image {
+    animation: none;
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .services-swipe-section::after {
+    display: none;
+  }
 }
 
 /* AI/ML Engineer Roadmap → landing image blue */
@@ -619,49 +1029,141 @@ a {
   color: #dbeafe;
 }
 
-/* SERVICES */
+/* SERVICES - modern 4 card grid */
 
 .services-grid {
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  max-width: 1200px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.4rem;
+
+  max-width: 1220px;
   margin: 0 auto;
 }
 
 .service-card {
-  background: #ffffff;
-  border-radius: 1.5rem;
-  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.22);
+  position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #0f172a;
+
+  min-height: 460px;
+  border-radius: 2rem;
+
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.32);
+
+  color: #ffffff;
+
+  transform: translateY(0);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.service-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(2, 6, 23, 0.05) 0%,
+      rgba(2, 6, 23, 0.52) 48%,
+      rgba(2, 6, 23, 0.94) 100%
+    );
+}
+
+.service-card::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: 2;
+
+  border-radius: inherit;
+  border: 1px solid rgba(125, 211, 252, 0.08);
+
+  pointer-events: none;
+}
+
+.service-card:hover {
+  transform: translateY(-12px);
+  border-color: rgba(125, 211, 252, 0.42);
+  box-shadow: 0 34px 90px rgba(2, 6, 23, 0.48);
 }
 
 .service-card img.service-image {
   width: 100%;
-  height: 220px;
+  height: 100%;
+  min-height: 460px;
+
   object-fit: cover;
   display: block;
+
+  filter: saturate(1.05) contrast(1.05);
+  transform: scale(1.02);
+
+  transition:
+    transform 0.55s ease,
+    filter 0.55s ease;
+}
+
+.service-card:hover img.service-image {
+  transform: scale(1.1);
+  filter: saturate(1.25) contrast(1.08);
 }
 
 .service-card-content {
-  padding: 1.75rem 2rem 2rem;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+
+  padding: 1.8rem;
 }
 
 .service-card h3 {
-  margin-top: 0;
-  color: #061f62;
+  margin: 0 0 0.85rem;
+
+  color: #ffffff;
+  font-size: 1.45rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
 }
 
 .service-card p {
-  margin: 1rem 0 1.25rem;
-  color: #334155;
+  margin: 0 0 1.35rem;
+
+  color: rgba(219, 234, 254, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.65;
 }
 
 .service-card a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  width: fit-content;
+
+  color: #ffffff;
+  font-size: 0.78rem;
   font-weight: 800;
-  color: var(--logo-dark-blue);
+  letter-spacing: 0.08em;
+}
+
+.service-card a::after {
+  content: "→";
+  font-size: 1rem;
+  transform: translateX(0);
+  transition: transform 0.25s ease;
+}
+
+.service-card:hover a::after {
+  transform: translateX(5px);
 }
 
 /* STATS AND SOCIAL */
@@ -1217,14 +1719,13 @@ li {
   font-weight: 600;
 }
 
-/* Swipe reveal animation from Chatbot section to Services section */
+/* Services reveal animation */
 
 .services-swipe-section {
   position: relative;
   overflow: hidden;
 }
 
-/* Cover layer that swipes to the right */
 .services-swipe-section::after {
   content: "";
   position: absolute;
@@ -1232,57 +1733,58 @@ li {
   z-index: 5;
   pointer-events: none;
 
-  background: linear-gradient(
-    135deg,
-    #d8eef3 0%,
-    #eefbff 58%,
-    #c6e3eb 100%
-  );
+  background:
+    radial-gradient(circle at 30% 20%, rgba(56, 189, 248, 0.32), transparent 34%),
+    linear-gradient(135deg, #d8eef3 0%, #eefbff 58%, #c6e3eb 100%);
 
   transform: translateX(0);
   transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-/* When services becomes visible, the cover moves right */
 .services-swipe-section.services-swipe-visible::after {
   transform: translateX(105%);
 }
 
-/* Services content starts slightly from the right */
-.services-swipe-section .section-header,
-.services-swipe-section .service-card {
+.services-swipe-section .section-header {
   opacity: 0;
-  transform: translateX(70px);
+  transform: translateY(35px);
   transition:
-    opacity 0.8s ease,
-    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.75s ease,
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Content appears after the swipe starts */
+.services-swipe-section .service-card {
+  opacity: 0;
+  transform: translateY(55px) scale(0.96);
+  transition:
+    opacity 0.75s ease,
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+
 .services-swipe-section.services-swipe-visible .section-header,
 .services-swipe-section.services-swipe-visible .service-card {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateY(0) scale(1);
 }
 
-/* Small delay for nicer card animation */
 .services-swipe-section.services-swipe-visible .service-card:nth-child(1) {
-  transition-delay: 0.2s;
+  transition-delay: 0.18s;
 }
 
 .services-swipe-section.services-swipe-visible .service-card:nth-child(2) {
-  transition-delay: 0.32s;
+  transition-delay: 0.3s;
 }
 
 .services-swipe-section.services-swipe-visible .service-card:nth-child(3) {
-  transition-delay: 0.44s;
+  transition-delay: 0.42s;
 }
 
 .services-swipe-section.services-swipe-visible .service-card:nth-child(4) {
-  transition-delay: 0.56s;
+  transition-delay: 0.54s;
 }
 
-/* Accessibility: reduce animation if user prefers less motion */
 @media (prefers-reduced-motion: reduce) {
   .services-swipe-section::after,
   .services-swipe-section .section-header,
@@ -1294,6 +1796,39 @@ li {
 
   .services-swipe-section::after {
     display: none;
+  }
+}
+
+/* Services responsive grid */
+
+@media (max-width: 1180px) {
+  .services-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .service-card,
+  .service-card img.service-image {
+    min-height: 420px;
+  }
+}
+
+@media (max-width: 640px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .service-card,
+  .service-card img.service-image {
+    min-height: 390px;
+  }
+
+  .service-card-content {
+    padding: 1.45rem;
+  }
+
+  .service-card h3 {
+    font-size: 1.35rem;
   }
 }
 
@@ -1345,39 +1880,39 @@ li {
   line-height: 1.8;
 }
 
-/* Roadmap image - taller portrait style */
+/* Roadmap section with transparent image covering the left side */
 
-.section-visual img.roadmap-image {
-  width: min(430px, 100%);
-  max-width: 430px;
-  height: 620px;
-
-  border-radius: 1.5rem;
-  object-fit: cover;
-  object-position: center bottom;
-
-  box-shadow: 0 24px 56px rgba(15, 23, 42, 0.22);
+.roadmap-side-image-section {
+  position: relative;
+  overflow: hidden;
 }
 
-.roadmap-visual {
-  align-items: center;
+.roadmap-side-image-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 48%;
+  height: 100%;
+
+  background-image: var(--roadmap-bg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+
+  opacity: 0.99;
+  pointer-events: none;
 }
 
-/* Responsive roadmap image */
-
-@media (max-width: 980px) {
-  .section-visual img.roadmap-image {
-    width: min(520px, 100%);
-    max-width: 520px;
-    height: 560px;
-  }
+.roadmap-side-image-section .section-content {
+  position: relative;
+  z-index: 1;
 }
 
-@media (max-width: 560px) {
-  .section-visual img.roadmap-image {
-    width: 100%;
-    height: 430px;
-  }
+.roadmap-side-image-section .section-content {
+  position: relative;
+  z-index: 1;
 }
 
 /* About section logo with running ray */
