@@ -1306,10 +1306,17 @@ li {
 .final-heading-block {
   margin-top: 0;
   margin-bottom: 2rem;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  gap: 1rem;
 }
 
 .final-heading-block h2 {
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .section-final .stats-cards {
@@ -1371,4 +1378,94 @@ li {
     width: 100%;
     height: 430px;
   }
+}
+
+/* About section logo with running ray */
+
+.about-logo-ray {
+  position: relative;
+
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
+  box-shadow: none;
+}
+
+.about-logo-ray img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  position: relative;
+  z-index: 2;
+}
+
+/* Same timing as the Vision running line: 3.8s */
+.about-logo-ray::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 260deg,
+    rgba(125, 211, 252, 0.95) 315deg,
+    transparent 360deg
+  );
+
+  animation: aboutLogoRay 3.8s linear infinite;
+  z-index: 0;
+}
+
+
+
+@keyframes aboutLogoRay {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Force About + logo to stay in one single line */
+
+.section-final .final-heading-block {
+  margin: 0 auto 2rem;
+
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 1rem;
+  width: auto;
+  white-space: nowrap;
+}
+
+.section-final .final-heading-block h2 {
+  margin: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+.section-final .about-logo-ray {
+  flex: 0 0 74px;
+  width: 74px;
+  height: 74px;
+  margin: 0;
+}
+
+.section-final .about-logo-ray img {
+  width: 60px;
+  height: 60px;
 }

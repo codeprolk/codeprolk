@@ -355,7 +355,11 @@ function HomePage() {
       <section className="section section-final" ref={statsRef}>
         <div className="section-content final-content">
           <div className="social-links-section final-heading-block">
-            <h2>About CODEPRO LK</h2>
+            <h2>About</h2>
+
+            <div className="about-logo-ray" aria-hidden="true">
+              <img src={logo} alt="" />
+            </div>
           </div>
 
           <div className="stats-cards">
