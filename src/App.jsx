@@ -14,6 +14,7 @@ import Privacy from './pages/Privacy';
 import logo from './assests/logo.png';
 import landingImage from './assests/landing-blue.jpg';
 import siriSvg from './assests/Siri.svg';
+import roadmapImage from './assests/how-to.jpg';
 
 import facebookIcon from './assests/black-icons/facebook.png';
 import linkedinIcon from './assests/black-icons/linkedin.png';
@@ -341,10 +342,11 @@ function HomePage() {
             </a>
           </div>
 
-          <div className="section-visual">
+          <div className="section-visual roadmap-visual">
             <img
-              src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80"
-              alt="Person learning data science with laptop and charts"
+              className="roadmap-image"
+              src={roadmapImage}
+              alt="Robotic hand on a blue background"
             />
           </div>
         </div>
