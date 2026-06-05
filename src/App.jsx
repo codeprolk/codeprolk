@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -53,12 +53,135 @@ const services = [
 ];
 
 const stats = [
-  { label: 'Subscribers', value: '55K+' },
-  { label: 'Uploads', value: '400+' },
-  { label: 'Views', value: '5M+' },
+  { label: 'Subscribers', target: 55, suffix: 'K+' },
+  { label: 'Uploads', target: 400, suffix: '+' },
+  { label: 'Views', target: 5, suffix: 'M+' },
 ];
 
+function AnimatedStat({ target, suffix, label, start }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!start) return;
+
+    let animationFrame;
+    const duration = 1800;
+    const startTime = performance.now();
+
+    const animate = (currentTime) => {
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+      setCount(Math.round(target * easedProgress));
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, [start, target]);
+
+  return (
+    <div className="stat-card">
+      <span>
+        {count}
+        {suffix}
+      </span>
+      <p>{label}</p>
+    </div>
+  );
+}
+
 function HomePage() {
+  const servicesRef = useRef(null);
+  const statsRef = useRef(null);
+
+  const [statsStarted, setStatsStarted] = useState(false);
+  const [animatedStats, setAnimatedStats] = useState({
+    Subscribers: 0,
+    Uploads: 0,
+    Views: 0,
+  });
+
+  const finalStats = [
+    { label: 'Subscribers', target: 55, suffix: 'K+' },
+    { label: 'Uploads', target: 400, suffix: '+' },
+    { label: 'Views', target: 5, suffix: 'M+' },
+  ];
+
+  useEffect(() => {
+    const servicesSection = servicesRef.current;
+
+    if (!servicesSection) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          servicesSection.classList.add('services-swipe-visible');
+        }
+      },
+      {
+        threshold: 0.25,
+      }
+    );
+
+    observer.observe(servicesSection);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const statsSection = statsRef.current;
+
+    if (!statsSection) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setStatsStarted(true);
+          observer.disconnect();
+        }
+      },
+      {
+        threshold: 0.35,
+      }
+    );
+
+    observer.observe(statsSection);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!statsStarted) return;
+
+    let animationFrame;
+    const duration = 1800;
+    const startTime = performance.now();
+
+    const animateNumbers = (currentTime) => {
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+      setAnimatedStats({
+        Subscribers: Math.round(55 * easedProgress),
+        Uploads: Math.round(400 * easedProgress),
+        Views: Math.round(5 * easedProgress),
+      });
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animateNumbers);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animateNumbers);
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, [statsStarted]);
+
   return (
     <>
       <section className="hero">
@@ -152,10 +275,16 @@ function HomePage() {
         </div>
       </section>
 
-      <section id="services" className="section services-section">
+      <section
+        id="services"
+        ref={servicesRef}
+        className="section services-section services-swipe-section"
+      >
         <div className="section-header">
           <p className="section-tag">03 / Services</p>
+
           <h2>Our Services</h2>
+
           <p>
             We create practical technology solutions for AI, software, algorithms,
             and data-driven business growth.
@@ -169,6 +298,7 @@ function HomePage() {
 
               <div className="service-card-content">
                 <h3>{service.title}</h3>
+
                 <p>{service.description}</p>
 
                 <a href="https://codeprolk.com/services/">LEARN MORE</a>
@@ -220,27 +350,29 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="section section-final">
-        <div className="stats-cards">
-          {stats.map((stat) => (
-            <div className="stat-card" key={stat.label}>
-              <span>{stat.value}</span>
-              <p>{stat.label}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="section-content">
-          <div className="social-links-section">
-            <p className="section-tag">05 / Connect</p>
-
+      <section className="section section-final" ref={statsRef}>
+        <div className="section-content final-content">
+          <div className="social-links-section final-heading-block">
             <h2>About CODEPRO LK</h2>
-
-            <p>
-              Connect with CODEPRO LK on the platforms below for updates, support,
-              and AI insights.
-            </p>
           </div>
+
+          <div className="stats-cards">
+            {finalStats.map((stat) => (
+              <div className="stat-card" key={stat.label}>
+                <span>
+                  {animatedStats[stat.label]}
+                  {stat.suffix}
+                </span>
+
+                <p>{stat.label}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="final-connect-text">
+            Connect with CODEPRO LK on the platforms below for updates, support,
+            and AI insights.
+          </p>
         </div>
       </section>
     </>

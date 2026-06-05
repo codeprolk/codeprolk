@@ -1216,3 +1216,124 @@ li {
   font-family: 'PP Neue Montreal Text', Arial, sans-serif;
   font-weight: 600;
 }
+
+/* Swipe reveal animation from Chatbot section to Services section */
+
+.services-swipe-section {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cover layer that swipes to the right */
+.services-swipe-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+
+  background: linear-gradient(
+    135deg,
+    #d8eef3 0%,
+    #eefbff 58%,
+    #c6e3eb 100%
+  );
+
+  transform: translateX(0);
+  transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* When services becomes visible, the cover moves right */
+.services-swipe-section.services-swipe-visible::after {
+  transform: translateX(105%);
+}
+
+/* Services content starts slightly from the right */
+.services-swipe-section .section-header,
+.services-swipe-section .service-card {
+  opacity: 0;
+  transform: translateX(70px);
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Content appears after the swipe starts */
+.services-swipe-section.services-swipe-visible .section-header,
+.services-swipe-section.services-swipe-visible .service-card {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Small delay for nicer card animation */
+.services-swipe-section.services-swipe-visible .service-card:nth-child(1) {
+  transition-delay: 0.2s;
+}
+
+.services-swipe-section.services-swipe-visible .service-card:nth-child(2) {
+  transition-delay: 0.32s;
+}
+
+.services-swipe-section.services-swipe-visible .service-card:nth-child(3) {
+  transition-delay: 0.44s;
+}
+
+.services-swipe-section.services-swipe-visible .service-card:nth-child(4) {
+  transition-delay: 0.56s;
+}
+
+/* Accessibility: reduce animation if user prefers less motion */
+@media (prefers-reduced-motion: reduce) {
+  .services-swipe-section::after,
+  .services-swipe-section .section-header,
+  .services-swipe-section .service-card {
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .services-swipe-section::after {
+    display: none;
+  }
+}
+
+/* Final section counter animation layout */
+
+.final-content {
+  text-align: center;
+}
+
+.final-heading-block {
+  margin-top: 0;
+  margin-bottom: 2rem;
+}
+
+.final-heading-block h2 {
+  margin-bottom: 0;
+}
+
+.section-final .stats-cards {
+  margin: 0 auto 2rem;
+}
+
+.stat-card {
+  transform: translateY(0);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 55px rgba(2, 6, 23, 0.24);
+}
+
+.stat-card span {
+  font-variant-numeric: tabular-nums;
+}
+
+.final-connect-text {
+  max-width: 720px;
+  margin: 2rem auto 0;
+  color: #dbeafe;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
