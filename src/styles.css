@@ -1,6 +1,38 @@
+@font-face {
+  font-family: 'PP Neue Montreal Title';
+  src: url('./assests/fonts/PPNeueMontreal-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal Title';
+  src: url('./assests/fonts/PPNeueMontreal-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal Text';
+  src: url('./assests/fonts/PPNeueMontrealText-Book.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal Text';
+  src: url('./assests/fonts/PPNeueMontreal-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: 'PP Neue Montreal Text', Arial, sans-serif;
   background: #020617;
   color: #0f172a;
   line-height: 1.65;
@@ -22,6 +54,7 @@
 
 * {
   box-sizing: border-box;
+  font-family: inherit;
 }
 
 html,
@@ -38,6 +71,14 @@ body {
   margin: 0;
   padding: 0;
   background: #020617;
+  font-family: 'PP Neue Montreal Text', Arial, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: 'PP Neue Montreal Text', Arial, sans-serif;
 }
 
 a {
@@ -1087,4 +1128,91 @@ a {
   .section-header h2 {
     font-size: clamp(2.4rem, 13vw, 3.5rem);
   }
+}
+
+/* Siri SVG visual */
+
+.section-visual img.siri-svg-visual {
+  width: min(420px, 90vw);
+  height: auto;
+  max-width: 420px;
+
+  border-radius: 0;
+  object-fit: contain;
+  box-shadow: none;
+
+  filter: drop-shadow(0 28px 45px rgba(6, 71, 184, 0.28));
+  animation: siriSvgFloat 4s ease-in-out infinite;
+}
+
+@keyframes siriSvgFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-18px) scale(1.04);
+  }
+}
+
+@media (max-width: 560px) {
+  .section-visual img.siri-svg-visual {
+    width: 280px;
+  }
+}
+
+/* Final font control */
+
+/* Other texts: screenshot-style readable font */
+html,
+body,
+#root,
+.page-shell {
+  font-family: 'PP Neue Montreal Text', Arial, sans-serif;
+}
+
+.page-shell * {
+  font-family: inherit;
+}
+
+/* Titles: slightly bolder than Hairline */
+.hero h1,
+.section h2,
+.section-header h2,
+.vision-title-track h2 {
+  font-family: 'PP Neue Montreal Title', Arial, sans-serif !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.055em;
+  line-height: 1.03;
+}
+
+/* Main hero title */
+.hero h1 {
+  font-size: clamp(3.2rem, 5.8vw, 5.2rem);
+}
+
+/* Section titles */
+.section h2,
+.section-header h2,
+.vision-title-track h2 {
+  font-size: clamp(2.6rem, 4.8vw, 4.6rem);
+}
+
+/* Normal paragraph/list text */
+p,
+li {
+  font-family: 'PP Neue Montreal Text', Arial, sans-serif;
+  font-weight: 400;
+}
+
+/* Small labels and navigation */
+.eyebrow,
+.section-tag,
+.site-nav a,
+.brand,
+.button,
+.hero-explore a {
+  font-family: 'PP Neue Montreal Text', Arial, sans-serif;
+  font-weight: 600;
 }

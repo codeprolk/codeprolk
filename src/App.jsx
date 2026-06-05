@@ -13,6 +13,7 @@ import Privacy from './pages/Privacy';
 
 import logo from './assests/logo.png';
 import landingImage from './assests/landing-blue.jpg';
+import siriSvg from './assests/Siri.svg';
 
 import facebookIcon from './assests/black-icons/facebook.png';
 import linkedinIcon from './assests/black-icons/linkedin.png';
@@ -143,8 +144,9 @@ function HomePage() {
 
           <div className="section-visual">
             <img
-              src="https://images.unsplash.com/photo-1542831371-d531d36971e6?auto=format&fit=crop&w=900&q=80"
-              alt="Chatbot conversation on mobile screen"
+              className="siri-svg-visual"
+              src={siriSvg}
+              alt="Siri-style AI assistant animation"
             />
           </div>
         </div>
