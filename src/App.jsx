@@ -10,6 +10,8 @@ import About from './pages/About';
 import Terms from './pages/Terms';
 import Disclaimer from './pages/Disclaimer';
 import Privacy from './pages/Privacy';
+import Courses from './pages/Courses';
+import Services from './pages/Services';
 
 import logo from './assests/logo.png';
 import landingImage from './assests/landing-blue.jpg';
@@ -439,6 +441,14 @@ function App() {
               HOME
             </Link>
 
+            <Link to="/services" onClick={() => setMenuOpen(false)}>
+              SERVICES
+            </Link>
+
+            <Link to="/courses" onClick={() => setMenuOpen(false)}>
+              COURSES
+            </Link>
+
             <Link to="/about" onClick={() => setMenuOpen(false)}>
               ABOUT
             </Link>
@@ -464,7 +474,10 @@ function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/courses" element={<Courses />} />
             <Route path="*" element={<HomePage />} />
+
           </Routes>
         </main>
 
