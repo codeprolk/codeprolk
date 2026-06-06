@@ -158,7 +158,8 @@ function HomePage() {
 
           <p>
             Helping talented individuals reach the international market with
-            modern technology, AI-powered services, and future-ready digital skills.
+            modern technology, AI-powered services, and future-ready digital
+            skills.
           </p>
 
           <div className="hero-explore">
@@ -261,8 +262,8 @@ function HomePage() {
           <h2>Our Services</h2>
 
           <p>
-            We create practical technology solutions for AI, software, algorithms,
-            and data-driven business growth.
+            We create practical technology solutions for AI, software,
+            algorithms, and data-driven business growth.
           </p>
         </div>
 
@@ -372,18 +373,6 @@ function App() {
             <Link to="/about" onClick={() => setMenuOpen(false)}>
               ABOUT
             </Link>
-
-            <Link to="/terms" onClick={() => setMenuOpen(false)}>
-              TERMS
-            </Link>
-
-            <Link to="/disclaimer" onClick={() => setMenuOpen(false)}>
-              DISCLAIMER
-            </Link>
-
-            <Link to="/privacy" onClick={() => setMenuOpen(false)}>
-              PRIVACY
-            </Link>
           </nav>
         </header>
 
@@ -402,6 +391,12 @@ function App() {
 
         <footer className="site-footer">
           <p className="footer-copy">Copyright © 2026 - CODEPRO LK</p>
+
+          <nav className="footer-legal-links" aria-label="CODEPRO LK legal links">
+            <Link to="/terms">Terms</Link>
+            <Link to="/disclaimer">Disclaimer</Link>
+            <Link to="/privacy">Privacy</Link>
+          </nav>
 
           <nav className="footer-social-links" aria-label="CODEPRO LK social media links">
             <a
