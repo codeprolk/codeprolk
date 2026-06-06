@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import Particles from '@tsparticles/react';
 
 const journeySteps = [
   {
@@ -50,35 +51,226 @@ const journeySteps = [
 ];
 
 function JourneyRoadmap() {
+  const particlesOptions = useMemo(
+    () => ({
+      fullScreen: {
+        enable: false,
+      },
+
+      background: {
+        color: {
+          value: 'transparent',
+        },
+      },
+
+      fpsLimit: 60,
+      detectRetina: true,
+      pauseOnBlur: true,
+      pauseOnOutsideViewport: true,
+
+      particles: {
+        number: {
+          value: 72,
+          density: {
+            enable: true,
+            width: 1200,
+            height: 900,
+          },
+        },
+
+        color: {
+          value: ['#ffffff', '#93c5fd', '#60a5fa', '#38bdf8', '#2563eb', '#0647b8'],
+        },
+
+        shape: {
+          type: 'circle',
+        },
+
+        opacity: {
+          value: {
+            min: 0.22,
+            max: 0.58,
+          },
+          animation: {
+            enable: true,
+            speed: 0.75,
+            sync: false,
+            startValue: 'random',
+          },
+        },
+
+        size: {
+          value: {
+            min: 1.2,
+            max: 3.6,
+          },
+          animation: {
+            enable: true,
+            speed: 1.15,
+            sync: false,
+          },
+        },
+
+        links: {
+          enable: true,
+          distance: 170,
+          color: '#2563eb',
+          opacity: 0.24,
+          width: 1.25,
+          triangles: {
+            enable: false,
+          },
+        },
+
+        move: {
+          enable: true,
+          speed: 0.48,
+          direction: 'none',
+          random: true,
+          straight: false,
+          outModes: {
+            default: 'bounce',
+          },
+        },
+
+        shadow: {
+          enable: true,
+          color: '#60a5fa',
+          blur: 8,
+          offset: {
+            x: 0,
+            y: 0,
+          },
+        },
+      },
+
+      interactivity: {
+        detectsOn: 'window',
+        events: {
+          onHover: {
+            enable: true,
+            mode: ['grab', 'attract'],
+          },
+          onClick: {
+            enable: false,
+          },
+          resize: {
+            enable: true,
+          },
+        },
+
+        modes: {
+          grab: {
+            distance: 215,
+            links: {
+              opacity: 0.5,
+            },
+          },
+
+          attract: {
+            distance: 200,
+            duration: 0.35,
+            factor: 1.6,
+            speed: 0.75,
+          },
+        },
+      },
+
+      responsive: [
+        {
+          maxWidth: 768,
+          options: {
+            particles: {
+              number: {
+                value: 32,
+              },
+              links: {
+                distance: 125,
+                opacity: 0.16,
+                width: 0.95,
+              },
+              move: {
+                speed: 0.34,
+              },
+              size: {
+                value: {
+                  min: 1,
+                  max: 2.6,
+                },
+              },
+            },
+            interactivity: {
+              events: {
+                onHover: {
+                  enable: false,
+                },
+              },
+            },
+          },
+        },
+        {
+          maxWidth: 480,
+          options: {
+            particles: {
+              number: {
+                value: 22,
+              },
+              links: {
+                distance: 105,
+                opacity: 0.13,
+                width: 0.85,
+              },
+            },
+          },
+        },
+      ],
+    }),
+    []
+  );
+
   return (
     <section
       id="roadmap"
       className="
         relative isolate overflow-hidden
         bg-[linear-gradient(135deg,#d8eef3_0%,#eefbff_58%,#c6e3eb_100%)]
-        px-6 pb-28 pt-40 text-[#071216]
-        md:pt-44
+        px-4 pb-20 pt-28 text-[#071216]
+        sm:px-6 sm:pb-24 sm:pt-36
+        md:pb-28 md:pt-44
       "
       style={{
         fontFamily:
           "'PP Neue Montreal Text', 'PP Neue Montreal', Arial, sans-serif",
       }}
     >
-      {/* subtle premium grid only - corner circles removed */}
+      {/* very subtle premium grid */}
       <div
         className="
-          pointer-events-none absolute inset-0 opacity-[0.2]
+          pointer-events-none absolute inset-0 z-0 opacity-[0.05]
           bg-[linear-gradient(rgba(6,71,184,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(6,71,184,0.03)_1px,transparent_1px)]
           bg-size-[72px_72px]
         "
         aria-hidden="true"
       />
 
-      {/* soft center glass wash, not corner blobs */}
+      {/* interactive blue neural network constellation background */}
+      <Particles
+        id="roadmap-neural-network"
+        options={particlesOptions}
+        className="
+          absolute inset-0 z-1 opacity-100
+        "
+        style={{
+          filter:
+            'drop-shadow(0 0 7px rgba(96, 165, 250, 0.42)) drop-shadow(0 0 16px rgba(56, 189, 248, 0.26))',
+        }}
+      />
+
+      {/* ultra-soft readability wash */}
       <div
         className="
-          pointer-events-none absolute inset-0
-          bg-[radial-gradient(circle_at_50%_22%,rgba(255,255,255,0.52),transparent_38%)]
+          pointer-events-none absolute inset-0 z-2
+          bg-[linear-gradient(180deg,rgba(216,238,243,0.012)_0%,rgba(238,251,255,0.004)_45%,rgba(198,227,235,0.012)_100%)]
         "
         aria-hidden="true"
       />
@@ -90,7 +282,7 @@ function JourneyRoadmap() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.35 }}
           transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-          className="mx-auto mb-24 max-w-5xl text-center"
+          className="mx-auto mb-16 max-w-5xl text-center sm:mb-20 md:mb-24"
         >
           <p className="mb-5 text-xs font-extrabold uppercase tracking-[0.3em] text-[#0647b8]">
             04 / Journey
@@ -98,10 +290,10 @@ function JourneyRoadmap() {
 
           <h2
             className="
-              mx-auto max-w-5xl
-              text-[clamp(2.6rem,5.8vw,5.6rem)]
-              font-light leading-[0.9]
-              tracking-[-0.08em]
+              mx-auto max-w-4xl
+              text-[clamp(2.15rem,4.8vw,4.7rem)]
+              font-light leading-[0.94]
+              tracking-[-0.075em]
               text-[#071216]
             "
             style={{
@@ -112,14 +304,14 @@ function JourneyRoadmap() {
             How to Become an AI/ML Engineer?
           </h2>
 
-          <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-[#52666c]">
+          <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-[#52666c] sm:mt-7 sm:text-base sm:leading-8">
             A structured roadmap from fundamentals to production-ready AI,
             designed as a premium journey you can follow step by step.
           </p>
         </motion.div>
 
         {/* Timeline */}
-        <div className="relative mx-auto max-w-6xl">
+        <div className="relative mx-auto max-w-6xl overflow-hidden">
           {/* vertical center line */}
           <motion.div
             initial={{ scaleY: 0, opacity: 0 }}
@@ -127,14 +319,36 @@ function JourneyRoadmap() {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 1.25, ease: [0.22, 1, 0.36, 1] }}
             className="
-              absolute left-6 top-0 hidden h-full w-px origin-top
-              bg-linear-to-b from-transparent via-[#0647b8]/40 to-transparent
-              md:left-1/2 md:block
+              absolute left-6 top-0 h-full w-px origin-top
+              bg-linear-to-b from-transparent via-[#0647b8]/30 to-transparent
+              md:left-1/2
             "
             aria-hidden="true"
           />
 
-          <div className="grid gap-8">
+          {/* always-running shooting-star light on the roadmap line */}
+          <motion.div
+            className="
+              pointer-events-none absolute left-6 top-0 z-20
+              h-28 w-0.5 -translate-x-1/2 rounded-full
+              bg-[linear-gradient(180deg,transparent,rgba(255,255,255,0.98),rgba(56,189,248,0.86),transparent)]
+              shadow-[0_0_12px_rgba(255,255,255,0.85),0_0_26px_rgba(56,189,248,0.58),0_0_46px_rgba(6,71,184,0.32)]
+              md:left-1/2
+            "
+            animate={{
+              top: ['-10%', '108%'],
+              opacity: [0, 1, 1, 0],
+            }}
+            transition={{
+              duration: 3.8,
+              repeat: Infinity,
+              repeatDelay: 0.45,
+              ease: 'linear',
+            }}
+            aria-hidden="true"
+          />
+
+          <div className="grid gap-6 sm:gap-7 md:gap-8">
             {journeySteps.map((step, index) => {
               const isLeft = index % 2 === 0;
 
@@ -153,15 +367,15 @@ function JourneyRoadmap() {
                     x: 0,
                     filter: 'blur(0px)',
                   }}
-                  viewport={{ once: true, amount: 0.28 }}
+                  viewport={{ once: true, amount: 0.24 }}
                   transition={{
                     duration: 0.8,
-                    delay: index * 0.15,
+                    delay: index * 0.12,
                     ease: [0.22, 1, 0.36, 1],
                   }}
                   className="
-                    group relative grid gap-5
-                    md:grid-cols-[1fr_72px_1fr] md:items-center
+                    group relative grid gap-5 pl-16
+                    md:grid-cols-[1fr_72px_1fr] md:items-center md:pl-0
                   "
                 >
                   {/* Card */}
@@ -169,27 +383,32 @@ function JourneyRoadmap() {
                     whileHover={{ y: -4 }}
                     transition={{ duration: 0.28, ease: 'easeOut' }}
                     className={`
-                      ${isLeft ? 'md:col-start-1 md:text-right' : 'md:col-start-3 md:text-left'}
+                      ${
+                        isLeft
+                          ? 'md:col-start-1 md:text-right'
+                          : 'md:col-start-3 md:text-left'
+                      }
                       md:row-start-1
                     `}
                   >
                     <div
                       className="
                         relative overflow-hidden rounded-3xl
-                        border border-white/55 bg-white/34
-                        p-6 shadow-[0_22px_65px_rgba(15,23,42,0.06)]
+                        border border-white/60 bg-white/38
+                        p-5 shadow-[0_22px_65px_rgba(15,23,42,0.06)]
                         backdrop-blur-xl
                         transition duration-500
-                        group-hover:border-black/20
-                        group-hover:bg-white/55
+                        group-hover:border-[#2563eb]/25
+                        group-hover:bg-white/58
                         group-hover:shadow-[0_28px_80px_rgba(15,23,42,0.1)]
+                        sm:p-6
                       "
                     >
-                      {/* premium glass shine */}
+                      {/* premium glass shine on hover */}
                       <div
                         className="
                           pointer-events-none absolute inset-y-0 -left-1/2 w-1/2
-                          bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.42),transparent)]
+                          bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.48),transparent)]
                           opacity-0 blur-sm transition duration-700
                           group-hover:left-full group-hover:opacity-100
                         "
@@ -204,13 +423,13 @@ function JourneyRoadmap() {
                         aria-hidden="true"
                       />
 
-                      <span className="mb-4 block text-xs font-extrabold uppercase tracking-[0.24em] text-[#0647b8]">
+                      <span className="mb-4 block text-[0.68rem] font-extrabold uppercase tracking-[0.24em] text-[#0647b8]">
                         Stage {String(index + 1).padStart(2, '0')}
                       </span>
 
                       <h3
                         className="
-                          m-0 text-[clamp(1.45rem,2.45vw,2.1rem)]
+                          m-0 text-[clamp(1.35rem,2.35vw,2.05rem)]
                           font-light leading-[1.04]
                           tracking-[-0.035em] text-[#071216]
                           transition-transform duration-500
@@ -219,7 +438,7 @@ function JourneyRoadmap() {
                         style={{
                           fontFamily:
                             "'PP Neue Montreal Text', 'PP Neue Montreal', Arial, sans-serif",
-                            fontWeight: 300,
+                          fontWeight: 300,
                         }}
                       >
                         {step.title}
@@ -227,9 +446,10 @@ function JourneyRoadmap() {
 
                       <p
                         className="
-                          mt-4 text-[0.98rem] leading-7 text-[#52666c]
+                          mt-4 text-[0.92rem] leading-7 text-[#52666c]
                           transition duration-500
                           group-hover:text-[#071216]
+                          sm:text-[0.98rem]
                         "
                       >
                         {step.description}
@@ -250,13 +470,13 @@ function JourneyRoadmap() {
                       transition={{ duration: 0.25, ease: 'easeOut' }}
                       className="
                         flex h-12 w-12 items-center justify-center rounded-full
-                        border border-white/75
-                        bg-white/75 text-xs font-black tracking-[0.12em]
+                        border border-white/80
+                        bg-white/78 text-xs font-black tracking-[0.12em]
                         text-[#0647b8]
-                        shadow-[0_0_0_8px_rgba(56,189,248,0.08),0_18px_38px_rgba(15,23,42,0.08)]
+                        shadow-[0_0_0_8px_rgba(96,165,250,0.08),0_18px_38px_rgba(15,23,42,0.08)]
                         backdrop-blur-xl
                         transition duration-500
-                        group-hover:shadow-[0_0_0_10px_rgba(56,189,248,0.12),0_22px_48px_rgba(15,23,42,0.12)]
+                        group-hover:shadow-[0_0_0_10px_rgba(96,165,250,0.16),0_22px_48px_rgba(15,23,42,0.12)]
                       "
                     >
                       {String(index + 1).padStart(2, '0')}
@@ -267,9 +487,13 @@ function JourneyRoadmap() {
                   <div
                     className={`
                       pointer-events-none hidden h-px bg-linear-to-r
-                      from-[#0647b8]/35 via-[#38bdf8]/40 to-transparent
+                      from-[#2563eb]/36 via-[#38bdf8]/42 to-transparent
                       md:block md:row-start-1
-                      ${isLeft ? 'md:col-start-2 md:translate-x-9' : 'md:col-start-2 md:-translate-x-9 md:rotate-180'}
+                      ${
+                        isLeft
+                          ? 'md:col-start-2 md:translate-x-9'
+                          : 'md:col-start-2 md:-translate-x-9 md:rotate-180'
+                      }
                     `}
                     aria-hidden="true"
                   />
@@ -288,7 +512,7 @@ function JourneyRoadmap() {
             delay: 0.55,
             ease: [0.22, 1, 0.36, 1],
           }}
-          className="mt-16 flex justify-center"
+          className="mt-14 flex justify-center sm:mt-16"
         >
           <a
             href="https://github.com/dineshpiyasamara/ai-ml-engineer-roadmap"
