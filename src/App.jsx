@@ -12,11 +12,11 @@ import Disclaimer from './pages/Disclaimer';
 import Privacy from './pages/Privacy';
 import Courses from './pages/Courses';
 import Services from './pages/Services';
+import JourneyRoadmap from './components/JourneyRoadmap';
 
 import logo from './assests/logo.png';
 import landingImage from './assests/landing-blue.jpg';
 import siriSvg from './assests/Siri.svg';
-import roadmapImage from './assests/how-to.jpg';
 
 import facebookIcon from './assests/black-icons/facebook.png';
 import linkedinIcon from './assests/black-icons/linkedin.png';
@@ -40,7 +40,6 @@ const services = [
     description:
       'We build robust, user-friendly software products focused on performance, scalability, and intuitive experience.',
     image: softwareDevelopmentImage,
-    
   },
   {
     title: 'Algorithmic Design',
@@ -57,57 +56,11 @@ const services = [
   },
 ];
 
-const stats = [
-  { label: 'Subscribers', target: 55, suffix: 'K+' },
-  { label: 'Uploads', target: 400, suffix: '+' },
-  { label: 'Views', target: 5, suffix: 'M+' },
-];
-
-function AnimatedStat({ target, suffix, label, start }) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!start) return;
-
-    let animationFrame;
-    const duration = 1800;
-    const startTime = performance.now();
-
-    const animate = (currentTime) => {
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-      const easedProgress = 1 - Math.pow(1 - progress, 3);
-
-      setCount(Math.round(target * easedProgress));
-
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
-      }
-    };
-
-    animationFrame = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(animationFrame);
-  }, [start, target]);
-
-  return (
-    <div className="stat-card">
-      <span>
-        {count}
-        {suffix}
-      </span>
-      <p>{label}</p>
-    </div>
-  );
-}
-
 function HomePage() {
   const servicesRef = useRef(null);
   const statsRef = useRef(null);
-  const roadmapRef = useRef(null);
 
   const [statsStarted, setStatsStarted] = useState(false);
-  const [roadmapVisible, setRoadmapVisible] = useState(false);
-  const [roadmapOffset, setRoadmapOffset] = useState(0);
 
   const [animatedStats, setAnimatedStats] = useState({
     Subscribers: 0,
@@ -119,18 +72,6 @@ function HomePage() {
     { label: 'Subscribers', target: 55, suffix: 'K+' },
     { label: 'Uploads', target: 400, suffix: '+' },
     { label: 'Views', target: 5, suffix: 'M+' },
-  ];
-
-  const roadmapSteps = [
-    'Mathematical Foundations',
-    'Programming Fundamentals',
-    'Version Control with Git and GitHub',
-    'Databases',
-    'Data Manipulation and Analysis Libraries',
-    'Machine Learning',
-    'Deep Learning',
-    'MLOps',
-    'Generative AI',
   ];
 
   useEffect(() => {
@@ -174,54 +115,6 @@ function HomePage() {
     observer.observe(statsSection);
 
     return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const roadmapSection = roadmapRef.current;
-
-    if (!roadmapSection) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setRoadmapVisible(true);
-          observer.disconnect();
-        }
-      },
-      {
-        threshold: 0.25,
-      }
-    );
-
-    observer.observe(roadmapSection);
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const handleRoadmapParallax = () => {
-      const roadmapSection = roadmapRef.current;
-
-      if (!roadmapSection) return;
-
-      const rect = roadmapSection.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-
-      const progress = (windowHeight - rect.top) / (windowHeight + rect.height);
-      const limitedProgress = Math.min(Math.max(progress, 0), 1);
-
-      setRoadmapOffset((limitedProgress - 0.5) * 90);
-    };
-
-    handleRoadmapParallax();
-
-    window.addEventListener('scroll', handleRoadmapParallax, { passive: true });
-    window.addEventListener('resize', handleRoadmapParallax);
-
-    return () => {
-      window.removeEventListener('scroll', handleRoadmapParallax);
-      window.removeEventListener('resize', handleRoadmapParallax);
-    };
   }, []);
 
   useEffect(() => {
@@ -399,61 +292,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section
-        id="roadmap"
-        ref={roadmapRef}
-        className={`section section-gradient-blue roadmap-luxury-section ${
-          roadmapVisible ? 'roadmap-visible' : ''
-        }`}
-      >
-        <div className="roadmap-luxury-layout">
-          <div className="roadmap-image-panel" aria-hidden="true">
-            <img
-              className="roadmap-parallax-image"
-              src={roadmapImage}
-              alt=""
-              style={{
-                transform: `translateY(${roadmapOffset}px)`,
-              }}
-            />
-          </div>
-
-          <div className="roadmap-content-panel">
-            <p className="section-tag">04 / Roadmap</p>
-
-            <h2 className="roadmap-gradient-title">
-              How to Become an AI/ML Engineer
-            </h2>
-
-            <p className="roadmap-description">
-              Explore the ultimate roadmap to kickstart your journey in AI and
-              Machine Learning. Take your first step toward an exciting tech career.
-            </p>
-
-            <div className="roadmap-steps">
-              {roadmapSteps.map((step, index) => (
-                <div
-                  className="roadmap-step"
-                  key={step}
-                  style={{
-                    '--step-delay': `${index * 0.1}s`,
-                  }}
-                >
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                  <p>{step}</p>
-                </div>
-              ))}
-            </div>
-
-            <a
-              className="button button-light roadmap-button"
-              href="https://github.com/dineshpiyasamara/ai-ml-engineer-roadmap"
-            >
-              EXPLORE MORE
-            </a>
-          </div>
-        </div>
-      </section>
+      <JourneyRoadmap />
 
       <section className="section section-final" ref={statsRef}>
         <div className="section-content final-content">
@@ -558,7 +397,6 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="*" element={<HomePage />} />
-
           </Routes>
         </main>
 
