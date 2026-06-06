@@ -988,23 +988,260 @@ a {
   }
 }
 
-/* AI/ML Engineer Roadmap → landing image blue */
-.section-gradient-blue {
+/* =========================
+   LUXURY ROADMAP SECTION
+========================= */
+
+.roadmap-luxury-section {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+
   background: linear-gradient(135deg, #d8eef3 0%, #eefbff 58%, #c6e3eb 100%);
-  color: #0b0b0b;
-}
-
-.section-gradient-blue .section-tag {
-  color: var(--logo-dark-blue);
-}
-
-.section-gradient-blue h2 {
   color: #071216;
 }
 
-.section-gradient-blue p,
-.section-gradient-blue li {
-  color: var(--landing-muted);
+.roadmap-luxury-layout {
+  min-height: 110svh;
+
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(420px, 0.85fr);
+  align-items: stretch;
+}
+
+/* Left side robot hand */
+
+.roadmap-image-panel {
+  position: relative;
+  min-height: 110svh;
+  overflow: hidden;
+}
+
+.roadmap-image-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(216, 238, 243, 0.08) 0%,
+      rgba(216, 238, 243, 0.2) 55%,
+      rgba(216, 238, 243, 0.78) 100%
+    );
+}
+
+.roadmap-parallax-image {
+  width: 100%;
+  height: 120%;
+
+  object-fit: cover;
+  object-position: center center;
+
+  opacity: 0.74;
+  will-change: transform;
+  transition: transform 0.12s linear;
+}
+
+/* Right side content */
+
+.roadmap-content-panel {
+  position: sticky;
+  top: 110px;
+  align-self: start;
+
+  max-width: 680px;
+  padding: clamp(5rem, 7vw, 8rem) clamp(2rem, 6vw, 6rem);
+}
+
+.roadmap-description {
+  max-width: 540px;
+  margin: 0 0 2.4rem;
+
+  color: #5d6a6d;
+  font-size: 1rem;
+  line-height: 1.85;
+}
+
+/* Title gradient */
+
+.roadmap-gradient-title {
+  display: inline-block;
+  width: fit-content;
+
+  margin-bottom: 1.4rem;
+
+  background-image: linear-gradient(
+    90deg,
+    #071216 0%,
+    #071216 26%,
+    #0647b8 42%,
+    #38bdf8 52%,
+    #8b5cf6 62%,
+    #071216 76%,
+    #071216 100%
+  );
+
+  background-size: 280% 100%;
+  background-position: 0% 50%;
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+
+  animation: roadmapGradientMove 2.8s linear infinite;
+}
+
+@keyframes roadmapGradientMove {
+  from {
+    background-position: 0% 50%;
+  }
+
+  to {
+    background-position: 280% 50%;
+  }
+}
+
+/* Numbered roadmap steps */
+
+.roadmap-steps {
+  display: grid;
+  gap: 0;
+  margin-top: 2rem;
+  margin-bottom: 2.4rem;
+}
+
+.roadmap-step {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  align-items: center;
+  gap: 1rem;
+
+  padding: 1rem 0;
+
+  border-bottom: 1px solid rgba(7, 18, 22, 0.12);
+
+  opacity: 0;
+  transform: translateY(24px);
+
+  transition:
+    opacity 0.65s ease,
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--step-delay);
+}
+
+.roadmap-visible .roadmap-step {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.roadmap-step::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+
+  width: 0%;
+  height: 1px;
+
+  background: linear-gradient(
+    90deg,
+    var(--logo-dark-blue),
+    var(--logo-light-blue)
+  );
+
+  transition: width 0.35s ease;
+}
+
+.roadmap-step:hover::after {
+  width: 100%;
+}
+
+.roadmap-step span {
+  color: var(--logo-dark-blue);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+
+.roadmap-step p {
+  margin: 0;
+
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.5;
+
+  transition:
+    transform 0.3s ease,
+    color 0.3s ease;
+}
+
+.roadmap-step:hover p {
+  color: #071216;
+  transform: translateX(8px);
+}
+
+.roadmap-button {
+  margin-top: 0.8rem;
+}
+
+/* Responsive roadmap */
+
+@media (max-width: 980px) {
+  .roadmap-luxury-layout {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .roadmap-image-panel {
+    min-height: 250px;
+  }
+
+  .roadmap-parallax-image {
+    height: 100%;
+    opacity: 0.99;
+  }
+
+  .roadmap-image-panel::after {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(216, 238, 243, 0.08) 0%,
+        rgba(216, 238, 243, 0.84) 100%
+      );
+  }
+
+  .roadmap-content-panel {
+    position: relative;
+    top: auto;
+
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 5rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .roadmap-image-panel {
+    min-height: 320px;
+  }
+
+  .roadmap-content-panel {
+    padding: 3.5rem 1.25rem 4rem;
+  }
+
+  .roadmap-step {
+    grid-template-columns: 44px 1fr;
+    gap: 0.8rem;
+  }
+
+  .roadmap-step p {
+    font-size: 0.95rem;
+  }
 }
 
 /* About CODEPRO LK → blue gradient */
