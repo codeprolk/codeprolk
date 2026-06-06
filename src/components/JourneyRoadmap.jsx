@@ -69,7 +69,7 @@ function JourneyRoadmap() {
         className="
           pointer-events-none absolute inset-0 opacity-[0.2]
           bg-[linear-gradient(rgba(6,71,184,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(6,71,184,0.03)_1px,transparent_1px)]
-          bg-[size:72px_72px]
+          bg-size-[72px_72px]
         "
         aria-hidden="true"
       />
@@ -99,7 +99,7 @@ function JourneyRoadmap() {
           <h2
             className="
               mx-auto max-w-5xl
-              text-[clamp(3.1rem,7vw,7rem)]
+              text-[clamp(2.6rem,5.8vw,5.6rem)]
               font-light leading-[0.9]
               tracking-[-0.08em]
               text-[#071216]
@@ -128,7 +128,7 @@ function JourneyRoadmap() {
             transition={{ duration: 1.25, ease: [0.22, 1, 0.36, 1] }}
             className="
               absolute left-6 top-0 hidden h-full w-px origin-top
-              bg-gradient-to-b from-transparent via-[#0647b8]/40 to-transparent
+              bg-linear-to-b from-transparent via-[#0647b8]/40 to-transparent
               md:left-1/2 md:block
             "
             aria-hidden="true"
@@ -199,7 +199,7 @@ function JourneyRoadmap() {
                       <div
                         className="
                           pointer-events-none absolute inset-x-0 top-0 h-px
-                          bg-gradient-to-r from-transparent via-white/90 to-transparent
+                          bg-linear-to-r from-transparent via-white/90 to-transparent
                         "
                         aria-hidden="true"
                       />
@@ -210,8 +210,8 @@ function JourneyRoadmap() {
 
                       <h3
                         className="
-                          m-0 text-[clamp(1.55rem,2.7vw,2.35rem)]
-                          font-semibold leading-[1.02]
+                          m-0 text-[clamp(1.45rem,2.45vw,2.1rem)]
+                          font-light leading-[1.04]
                           tracking-[-0.035em] text-[#071216]
                           transition-transform duration-500
                           group-hover:translate-x-1
@@ -219,6 +219,7 @@ function JourneyRoadmap() {
                         style={{
                           fontFamily:
                             "'PP Neue Montreal Text', 'PP Neue Montreal', Arial, sans-serif",
+                            fontWeight: 300,
                         }}
                       >
                         {step.title}
@@ -265,7 +266,7 @@ function JourneyRoadmap() {
                   {/* Connector line */}
                   <div
                     className={`
-                      pointer-events-none hidden h-px bg-gradient-to-r
+                      pointer-events-none hidden h-px bg-linear-to-r
                       from-[#0647b8]/35 via-[#38bdf8]/40 to-transparent
                       md:block md:row-start-1
                       ${isLeft ? 'md:col-start-2 md:translate-x-9' : 'md:col-start-2 md:-translate-x-9 md:rotate-180'}
