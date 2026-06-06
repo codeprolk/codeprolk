@@ -4,39 +4,48 @@ import { motion } from 'framer-motion';
 const journeySteps = [
   {
     title: 'Mathematical Foundations',
-    description: 'Learn linear algebra, calculus, probability, and statistics to build the base for AI and ML thinking.',
+    description:
+      'Learn linear algebra, calculus, probability, and statistics to build the base for AI and ML thinking.',
   },
   {
     title: 'Programming Fundamentals',
-    description: 'Build strong Python, OOP, clean coding, and problem-solving skills before moving into AI tools.',
+    description:
+      'Build strong Python, OOP, clean coding, and problem-solving skills before moving into AI tools.',
   },
   {
     title: 'Version Control',
-    description: 'Use Git and GitHub to manage projects, collaborate, and maintain professional development workflows.',
+    description:
+      'Use Git and GitHub to manage projects, collaborate, and maintain professional development workflows.',
   },
   {
     title: 'Databases',
-    description: 'Understand SQL, relational design, data storage, and the basics of vector storage for AI systems.',
+    description:
+      'Understand SQL, relational design, data storage, and the basics of vector storage for AI systems.',
   },
   {
     title: 'Data Analysis',
-    description: 'Learn how to clean, transform, explore, and visualize data using modern analysis libraries.',
+    description:
+      'Learn how to clean, transform, explore, and visualize data using modern analysis libraries.',
   },
   {
     title: 'Machine Learning',
-    description: 'Study supervised and unsupervised models, training workflows, testing, evaluation, and model improvement.',
+    description:
+      'Study supervised and unsupervised models, training workflows, testing, evaluation, and model improvement.',
   },
   {
     title: 'Deep Learning',
-    description: 'Move into neural networks, CNNs, transformers, and the foundations behind modern AI architectures.',
+    description:
+      'Move into neural networks, CNNs, transformers, and the foundations behind modern AI architectures.',
   },
   {
     title: 'MLOps',
-    description: 'Learn deployment, monitoring, versioning, automation, and production pipelines for real-world ML systems.',
+    description:
+      'Learn deployment, monitoring, versioning, automation, and production pipelines for real-world ML systems.',
   },
   {
     title: 'Generative AI',
-    description: 'Explore LLMs, RAG, AI agents, prompt workflows, and modern AI-powered applications.',
+    description:
+      'Explore LLMs, RAG, AI agents, prompt workflows, and modern AI-powered applications.',
   },
 ];
 
@@ -55,29 +64,21 @@ function JourneyRoadmap() {
           "'PP Neue Montreal Text', 'PP Neue Montreal', Arial, sans-serif",
       }}
     >
-      {/* soft glow background */}
+      {/* subtle premium grid only - corner circles removed */}
       <div
         className="
-          pointer-events-none absolute -left-40 top-20 h-[32rem] w-[32rem]
-          rounded-full bg-cyan-300/30 blur-[110px]
-        "
-        aria-hidden="true"
-      />
-
-      <div
-        className="
-          pointer-events-none absolute -right-40 bottom-20 h-[34rem] w-[34rem]
-          rounded-full bg-blue-300/25 blur-[120px]
-        "
-        aria-hidden="true"
-      />
-
-      {/* faint premium grid */}
-      <div
-        className="
-          pointer-events-none absolute inset-0 opacity-[0.23]
-          bg-[linear-gradient(rgba(6,71,184,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(6,71,184,0.035)_1px,transparent_1px)]
+          pointer-events-none absolute inset-0 opacity-[0.2]
+          bg-[linear-gradient(rgba(6,71,184,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(6,71,184,0.03)_1px,transparent_1px)]
           bg-[size:72px_72px]
+        "
+        aria-hidden="true"
+      />
+
+      {/* soft center glass wash, not corner blobs */}
+      <div
+        className="
+          pointer-events-none absolute inset-0
+          bg-[radial-gradient(circle_at_50%_22%,rgba(255,255,255,0.52),transparent_38%)]
         "
         aria-hidden="true"
       />
@@ -108,7 +109,7 @@ function JourneyRoadmap() {
                 "'PP Neue Montreal Title', 'PP Neue Montreal', Arial, sans-serif",
             }}
           >
-            How to Become an AI/ML Engineer
+            How to Become an AI/ML Engineer?
           </h2>
 
           <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-[#52666c]">
@@ -163,8 +164,10 @@ function JourneyRoadmap() {
                     md:grid-cols-[1fr_72px_1fr] md:items-center
                   "
                 >
-                  {/* Left card */}
-                  <div
+                  {/* Card */}
+                  <motion.div
+                    whileHover={{ y: -4 }}
+                    transition={{ duration: 0.28, ease: 'easeOut' }}
                     className={`
                       ${isLeft ? 'md:col-start-1 md:text-right' : 'md:col-start-3 md:text-left'}
                       md:row-start-1
@@ -177,12 +180,22 @@ function JourneyRoadmap() {
                         p-6 shadow-[0_22px_65px_rgba(15,23,42,0.06)]
                         backdrop-blur-xl
                         transition duration-500
-                        group-hover:-translate-y-1
                         group-hover:border-black/20
                         group-hover:bg-white/55
                         group-hover:shadow-[0_28px_80px_rgba(15,23,42,0.1)]
                       "
                     >
+                      {/* premium glass shine */}
+                      <div
+                        className="
+                          pointer-events-none absolute inset-y-0 -left-1/2 w-1/2
+                          bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.42),transparent)]
+                          opacity-0 blur-sm transition duration-700
+                          group-hover:left-full group-hover:opacity-100
+                        "
+                        aria-hidden="true"
+                      />
+
                       <div
                         className="
                           pointer-events-none absolute inset-x-0 top-0 h-px
@@ -197,15 +210,15 @@ function JourneyRoadmap() {
 
                       <h3
                         className="
-                          m-0 text-[clamp(1.65rem,3vw,2.65rem)]
-                          font-semibold leading-[0.95]
-                          tracking-[-0.06em] text-[#071216]
+                          m-0 text-[clamp(1.55rem,2.7vw,2.35rem)]
+                          font-semibold leading-[1.02]
+                          tracking-[-0.035em] text-[#071216]
                           transition-transform duration-500
                           group-hover:translate-x-1
                         "
                         style={{
                           fontFamily:
-                            "'PP Neue Montreal Title', 'PP Neue Montreal', Arial, sans-serif",
+                            "'PP Neue Montreal Text', 'PP Neue Montreal', Arial, sans-serif",
                         }}
                       >
                         {step.title}
@@ -221,7 +234,7 @@ function JourneyRoadmap() {
                         {step.description}
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
 
                   {/* Center number node */}
                   <div
@@ -231,7 +244,9 @@ function JourneyRoadmap() {
                       md:flex md:justify-center
                     "
                   >
-                    <div
+                    <motion.div
+                      whileHover={{ scale: 1.12 }}
+                      transition={{ duration: 0.25, ease: 'easeOut' }}
                       className="
                         flex h-12 w-12 items-center justify-center rounded-full
                         border border-white/75
@@ -240,12 +255,11 @@ function JourneyRoadmap() {
                         shadow-[0_0_0_8px_rgba(56,189,248,0.08),0_18px_38px_rgba(15,23,42,0.08)]
                         backdrop-blur-xl
                         transition duration-500
-                        group-hover:scale-110
                         group-hover:shadow-[0_0_0_10px_rgba(56,189,248,0.12),0_22px_48px_rgba(15,23,42,0.12)]
                       "
                     >
                       {String(index + 1).padStart(2, '0')}
-                    </div>
+                    </motion.div>
                   </div>
 
                   {/* Connector line */}
