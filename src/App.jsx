@@ -17,7 +17,6 @@ import JourneyRoadmap from './components/JourneyRoadmap';
 import logo from './assests/logo.png';
 import landingImage from './assests/landing-blue.jpg';
 import siriSvg from './assests/Siri.svg';
-import mermaidImage from './assests/mermaid.png';
 
 import facebookIcon from './assests/black-icons/facebook.png';
 import linkedinIcon from './assests/black-icons/linkedin.png';
@@ -60,10 +59,8 @@ const services = [
 function HomePage() {
   const servicesRef = useRef(null);
   const statsRef = useRef(null);
-  const roadmapShellRef = useRef(null);
 
   const [statsStarted, setStatsStarted] = useState(false);
-  const [mermaidReady, setMermaidReady] = useState(false);
 
   const [animatedStats, setAnimatedStats] = useState({
     Subscribers: 0,
@@ -118,53 +115,6 @@ function HomePage() {
     observer.observe(statsSection);
 
     return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const roadmapSection = roadmapShellRef.current;
-
-    if (!roadmapSection) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          roadmapSection.classList.add('roadmap-mermaid-visible');
-          observer.disconnect();
-        }
-      },
-      {
-        threshold: 0.04,
-        rootMargin: '260px 0px -10% 0px',
-      }
-    );
-
-    observer.observe(roadmapSection);
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const image = new Image();
-
-    const finishLoading = () => {
-      if (!cancelled) {
-        setMermaidReady(true);
-      }
-    };
-
-    image.src = mermaidImage;
-
-    if (image.decode) {
-      image.decode().then(finishLoading).catch(finishLoading);
-    } else {
-      image.onload = finishLoading;
-      image.onerror = finishLoading;
-    }
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   useEffect(() => {
@@ -343,23 +293,7 @@ function HomePage() {
         </div>
       </section>
 
-      <div
-        ref={roadmapShellRef}
-        className={`roadmap-mermaid-stage ${
-          mermaidReady ? 'roadmap-mermaid-ready' : ''
-        }`}
-      >
-        <img
-          className="roadmap-mermaid-art"
-          src={mermaidImage}
-          alt=""
-          aria-hidden="true"
-          loading="eager"
-          decoding="async"
-        />
-
-        <JourneyRoadmap />
-      </div>
+      <JourneyRoadmap />
 
       <section className="section section-final" ref={statsRef}>
         <div className="section-content final-content">

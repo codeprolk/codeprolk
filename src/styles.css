@@ -1247,80 +1247,6 @@ a {
   }
 }
 
-/* =========================
-   ROADMAP MERMAID DECORATION
-========================= */
-
-.roadmap-mermaid-stage {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-
-  background: linear-gradient(135deg, #d8eef3 0%, #eefbff 58%, #c6e3eb 100%);
-}
-
-.roadmap-mermaid-art {
-  position: absolute;
-  left: max(-5rem, -6vw);
-  bottom: 2rem;
-  z-index: 8;
-
-  width: clamp(220px, 24vw, 430px);
-  height: auto;
-
-  pointer-events: none;
-  user-select: none;
-
-  opacity: 0;
-  transform: translateX(-28px) translateY(24px) scale(0.96);
-
-  filter:
-    drop-shadow(0 0 10px rgba(255, 255, 255, 0.78))
-    drop-shadow(0 0 28px rgba(250, 204, 21, 0.26))
-    drop-shadow(0 20px 45px rgba(2, 6, 23, 0.12));
-
-  transition:
-    opacity 0.9s ease,
-    transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.roadmap-mermaid-stage.roadmap-mermaid-ready .roadmap-mermaid-art {
-  opacity: 0.58;
-}
-
-.roadmap-mermaid-stage.roadmap-mermaid-visible .roadmap-mermaid-art {
-  transform: translateX(0) translateY(0) scale(1);
-}
-
-.roadmap-mermaid-stage .roadmap-cs-section,
-.roadmap-mermaid-stage .roadmap-luxury-section {
-  background: transparent;
-}
-
-/* smoother roadmap rendering */
-.roadmap-mermaid-stage,
-.roadmap-mermaid-stage * {
-  backface-visibility: hidden;
-}
-
-@media (max-width: 980px) {
-  .roadmap-mermaid-art {
-    left: -4rem;
-    bottom: 1.5rem;
-    width: clamp(170px, 34vw, 300px);
-    opacity: 0.38;
-  }
-}
-
-@media (max-width: 640px) {
-  .roadmap-mermaid-art {
-    left: -5.5rem;
-    bottom: 0.5rem;
-    width: 230px;
-    opacity: 0.24;
-  }
-}
-
 /* About CODEPRO LK → blue gradient */
 .section-final {
   background:
@@ -5831,3 +5757,4 @@ li {
     font-size: 0.94rem;
   }
 }
+
