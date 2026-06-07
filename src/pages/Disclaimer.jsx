@@ -1,46 +1,84 @@
 import React from 'react';
 
+const disclaimerPoints = [
+  {
+    number: '01',
+    title: 'General Information',
+    body:
+      'The information provided on CodePRO LK is for general informational purposes only. We strive for accuracy, but we do not guarantee that all content is complete, current, or error-free.',
+  },
+  {
+    number: '02',
+    title: 'Use at Your Own Risk',
+    body:
+      'Any reliance you place on the information on this website is strictly at your own risk. CodePRO LK is not responsible for any losses or damages arising from your use of the website or its services.',
+  },
+];
+
 function Disclaimer() {
   return (
-    <section className="section section-secondary">
-      <div className="section-content">
-        <h2>Disclaimer</h2>
-<main class="container">
+    <section className="disclaimer-page">
+      <div className="disclaimer-grid-bg" aria-hidden="true" />
+      <div className="disclaimer-orb disclaimer-orb-one" aria-hidden="true" />
+      <div className="disclaimer-orb disclaimer-orb-two" aria-hidden="true" />
 
-    <article class="content">
-      <section id="intro">
-        <p>
-          All the information on this website – https://codeprolk.com/ – is published in good faith and for general information purpose only. CodePRO LK does not make any warranties about the completeness, reliability and accuracy of this information. Any action you take upon the information you find on this website (CodePRO LK), is strictly at your own risk. CodePRO LK will not be liable for any losses and/or damages in connection with the use of our website.
-        </p>
-        <p>
-          From our website, you can visit other websites by following hyperlinks to such external sites. While we strive to provide only quality links to useful and ethical websites, we have no control over the content and nature of these sites. These links to other websites do not imply a recommendation for all the content found on these sites. Site owners and content may change without notice and may occur before we have the opportunity to remove a link which may have gone ‘bad’.
-        </p>
-        <p>
-          Please be also aware that when you leave our website, other sites may have different privacy policies and terms which are beyond our control. Please be sure to check the Privacy Policies of these sites as well as their “Terms of Service” before engaging in any business or uploading any information.
-        </p>
-      </section>
+      <div className="disclaimer-inner">
+        <header className="disclaimer-hero">
+          <div className="disclaimer-hero-left">
+            <p className="disclaimer-tag">CODEPRO LK / LEGAL NOTICE</p>
 
-      <section id="contact">
-        <h2>Consent</h2>
-        <p>By using our website, you hereby consent to our disclaimer and agree to its terms.</p>
-      </section>
+            <h1>Disclaimer</h1>
 
-      <section id="contact">
-        <h2>Update</h2>
-        <p>Should we update, amend or make any changes to this document, those changes will be prominently posted here.</p>
-      </section>
+            <p>
+              Please read this notice carefully before relying on any information,
+              content, service details, or guidance provided through CODEPRO LK.
+            </p>
+          </div>
 
-      <section id="contact">
-        <h2>Contact Us</h2>
-        <p>If you have any questions about this Disclaimers, You can contact us:</p>
+          <div className="disclaimer-hero-badge" aria-hidden="true">
+            <div className="disclaimer-badge-ring">
+              <span>!</span>
+            </div>
 
-        <div class="contact-card">
-          <strong>Website:</strong> CodePRO LK
+            <p>Important Notice</p>
+          </div>
+        </header>
+
+        <div className="disclaimer-content-shell">
+          <aside className="disclaimer-side-panel">
+            <span>Notice</span>
+
+            <h2>Transparency comes first.</h2>
+
+            <p>
+              Our goal is to provide helpful and accurate information, but all
+              content should be understood as general guidance rather than a
+              guaranteed outcome.
+            </p>
+          </aside>
+
+          <div className="disclaimer-card-list">
+            {disclaimerPoints.map((point) => (
+              <article className="disclaimer-card" key={point.number}>
+                <div className="disclaimer-card-number">{point.number}</div>
+
+                <div>
+                  <h2>{point.title}</h2>
+                  <p>{point.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
-      </section>
 
-    </article>
-  </main>
+        <div className="disclaimer-bottom-note">
+          <span aria-hidden="true">↳</span>
+
+          <p>
+            By using this website, you acknowledge that you understand this
+            disclaimer and accept the conditions described above.
+          </p>
+        </div>
       </div>
     </section>
   );
