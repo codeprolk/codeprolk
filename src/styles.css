@@ -3139,7 +3139,7 @@ li {
   margin: 0 0 1.1rem;
 
   font-family: 'PP Neue Montreal Title', Arial, sans-serif;
-  font-size: clamp(2.2rem, 4vw, 4.4rem);
+  font-size: clamp(1.9rem, 3vw, 3.1rem);
   font-weight: 300;
   line-height: 0.96;
   letter-spacing: -0.065em;
@@ -3245,7 +3245,15 @@ li {
   }
 
   .services-page-header h1 {
+    margin: 0;
+  
+    font-family: 'PP Neue Montreal Title', Arial, sans-serif;
     font-size: clamp(2.8rem, 16vw, 4.5rem);
+    font-weight: 300;
+    line-height: 0.86;
+    letter-spacing: -0.09em;
+  
+    color: #ffffff;
   }
 
   .services-page-card {
@@ -3267,6 +3275,351 @@ li {
   .services-page-contact-btn {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* =========================
+   SERVICES PAGE - FULL TEXT BOX VERSION
+   No split inside boxes
+   Wider boxes + smaller titles + slightly bigger content
+   Paste at the END of styles.css
+========================= */
+
+.services-page {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  min-height: 100svh;
+  padding: 9rem 2rem 6rem;
+
+  background:
+    radial-gradient(circle at 12% 22%, rgba(56, 189, 248, 0.23), transparent 30%),
+    radial-gradient(circle at 86% 18%, rgba(6, 71, 184, 0.32), transparent 32%),
+    linear-gradient(135deg, #020617 0%, #071226 48%, #020617 100%);
+
+  color: #ffffff;
+}
+
+/* Wider page area */
+.services-page-inner {
+  position: relative;
+  z-index: 2;
+
+  width: min(1380px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.services-page-header {
+  max-width: 900px;
+  margin: 0 auto 4.5rem;
+  text-align: center;
+}
+
+.services-page-header h1 {
+  margin: 0;
+
+  font-family: 'PP Neue Montreal Title', Arial, sans-serif;
+  font-size: clamp(4.8rem, 8vw, 8.4rem);
+  font-weight: 300;
+  line-height: 0.86;
+  letter-spacing: -0.09em;
+
+  color: #ffffff;
+}
+
+.services-page-header p {
+  max-width: 760px;
+  margin: 1.3rem auto 0;
+
+  color: rgba(219, 234, 254, 0.78);
+  font-size: 1.08rem;
+  line-height: 1.82;
+}
+
+.services-page-tag {
+  margin: 0 0 1rem;
+
+  color: rgba(191, 219, 254, 0.78);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+/* Wider cards list */
+.services-page-list {
+  display: grid;
+  gap: 1.65rem;
+
+  width: min(1160px, 100%);
+  margin: 0 auto;
+}
+
+/* Remove all previous media/split styling */
+.services-page-card-media,
+.services-page-abstract-visual,
+.services-visual-orb,
+.services-visual-line,
+.services-visual-core {
+  display: none !important;
+}
+
+.services-page-card-reverse {
+  grid-template-columns: none !important;
+}
+
+.services-page-card {
+  position: relative;
+  overflow: hidden;
+
+  display: block !important;
+  grid-template-columns: none !important;
+
+  min-height: auto;
+
+  padding: clamp(2.15rem, 3.2vw, 3.1rem);
+  padding-left: clamp(6.1rem, 7vw, 7.6rem);
+
+  border-radius: 2rem;
+  border: 1px solid rgba(125, 211, 252, 0.2);
+
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.08), transparent 30%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.035)),
+    rgba(15, 23, 42, 0.72);
+
+  box-shadow:
+    0 24px 72px rgba(2, 6, 23, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease,
+    background 0.35s ease;
+}
+
+.services-page-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(125, 211, 252, 0.46);
+
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.12), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.045)),
+    rgba(15, 23, 42, 0.8);
+
+  box-shadow:
+    0 34px 92px rgba(2, 6, 23, 0.5),
+    0 0 34px rgba(56, 189, 248, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+/* Number badge */
+.services-page-card-number {
+  position: absolute !important;
+  left: 2rem !important;
+  top: 2.15rem !important;
+  z-index: 3;
+
+  width: 56px;
+  height: 56px;
+
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+
+  box-shadow:
+    0 14px 30px rgba(2, 6, 23, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Body now uses full card width */
+.services-page-card-body {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  max-width: none;
+
+  padding: 0 !important;
+  text-align: left;
+
+  display: block;
+}
+
+.services-page-card-eyebrow {
+  margin: 0 0 0.95rem;
+
+  color: rgba(191, 219, 254, 0.86);
+  font-size: 0.86rem;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+/* Reduced service title size */
+.services-page-card-body h2 {
+  margin: 0 0 1.15rem;
+
+  font-family: 'PP Neue Montreal Title', Arial, sans-serif;
+  font-size: clamp(2.45rem, 4.2vw, 4.25rem);
+  font-weight: 300;
+  line-height: 0.92;
+  letter-spacing: -0.075em;
+
+  color: #ffffff;
+}
+
+/* Slightly bigger and more readable content */
+.services-page-card-body > p:not(.services-page-card-eyebrow) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+
+  color: rgba(219, 234, 254, 0.8);
+  font-size: 1.08rem;
+  line-height: 1.88;
+}
+
+.services-page-contact-btn {
+  width: fit-content;
+  margin-top: 1.75rem;
+}
+
+/* Responsive */
+@media (max-width: 780px) {
+  .services-page {
+    padding: 8rem 1.25rem 5rem;
+  }
+
+  .services-page-inner {
+    width: 100%;
+  }
+
+  .services-page-header {
+    margin-bottom: 3.2rem;
+    text-align: left;
+  }
+
+  .services-page-header h1 {
+    font-size: clamp(3.6rem, 14vw, 6rem);
+  }
+
+  .services-page-header p {
+    margin-left: 0;
+    margin-right: 0;
+    font-size: 1rem;
+  }
+
+  .services-page-list {
+    width: 100%;
+  }
+
+  .services-page-card {
+    padding: 1.6rem;
+    padding-top: 5.8rem;
+    border-radius: 1.45rem;
+  }
+
+  .services-page-card-number {
+    left: 1.5rem !important;
+    top: 1.5rem !important;
+    width: 48px;
+    height: 48px;
+    font-size: 0.76rem;
+  }
+
+  .services-page-card-eyebrow {
+    font-size: 0.72rem;
+  }
+
+  .services-page-card-body h2 {
+    font-size: clamp(2.15rem, 11vw, 3.25rem);
+    line-height: 0.94;
+  }
+
+  .services-page-card-body > p:not(.services-page-card-eyebrow) {
+    font-size: 0.98rem;
+    line-height: 1.72;
+  }
+
+  .services-page-contact-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .services-page-card {
+    transition: none !important;
+  }
+}
+
+/* =========================
+   SERVICES PAGE - FINAL TITLE SIZE FIX
+   Paste at the VERY END of styles.css
+========================= */
+
+/* Main page title: "Our Services" */
+.services-page-header h1 {
+  font-size: clamp(3.2rem, 5.2vw, 5.4rem) !important;
+  line-height: 0.9 !important;
+  letter-spacing: -0.075em !important;
+}
+
+/* Service card titles: AI/ML Solutions, Software Development, etc. */
+.services-page-card-body h2 {
+  font-size: clamp(2.1rem, 3.2vw, 3.4rem) !important;
+  line-height: 0.95 !important;
+  letter-spacing: -0.065em !important;
+  margin-bottom: 1.05rem !important;
+}
+
+/* Keep boxes wider */
+.services-page-inner {
+  width: min(1460px, calc(100% - 2rem)) !important;
+}
+
+.services-page-list {
+  width: min(1180px, 100%) !important;
+}
+
+/* Slightly bigger content text */
+.services-page-card-body > p:not(.services-page-card-eyebrow) {
+  font-size: 1.08rem !important;
+  line-height: 1.88 !important;
+}
+
+/* Responsive title control */
+@media (max-width: 780px) {
+  .services-page-header h1 {
+    font-size: clamp(2.8rem, 12vw, 4.2rem) !important;
+  }
+
+  .services-page-card-body h2 {
+    font-size: clamp(2rem, 10vw, 3rem) !important;
+  }
+
+  .services-page-card-body > p:not(.services-page-card-eyebrow) {
+    font-size: 0.98rem !important;
+    line-height: 1.72 !important;
   }
 }
 
