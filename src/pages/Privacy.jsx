@@ -15,16 +15,24 @@ const privacyItems = [
   },
 ];
 
+const trustItems = [
+  'No data selling',
+  'Secure handling',
+  'Clear purpose',
+  'Responsible use',
+];
+
 function Privacy() {
   return (
     <section className="privacy-page">
-      <div className="privacy-grid-bg" aria-hidden="true" />
-      <div className="privacy-orb privacy-orb-one" aria-hidden="true" />
-      <div className="privacy-orb privacy-orb-two" aria-hidden="true" />
+      <div className="privacy-bg-grid" aria-hidden="true" />
+      <div className="privacy-bg-scan" aria-hidden="true" />
+      <div className="privacy-bg-orb privacy-bg-orb-one" aria-hidden="true" />
+      <div className="privacy-bg-orb privacy-bg-orb-two" aria-hidden="true" />
 
       <div className="privacy-inner">
-        <header className="privacy-hero">
-          <div className="privacy-hero-copy">
+        <header className="privacy-vault-hero">
+          <div className="privacy-vault-copy">
             <p className="privacy-tag">CODEPRO LK / PRIVACY</p>
 
             <h1>Privacy Policy</h1>
@@ -36,42 +44,83 @@ function Privacy() {
             </p>
           </div>
 
-          <div className="privacy-shield-card" aria-hidden="true">
-            <div className="privacy-shield-icon">
+          <div className="privacy-vault-visual" aria-hidden="true">
+            <div className="privacy-orbit privacy-orbit-one" />
+            <div className="privacy-orbit privacy-orbit-two" />
+
+            <div className="privacy-lock-core">
               <span>✓</span>
             </div>
 
-            <p>Protected by Design</p>
+            <div className="privacy-mini-node privacy-mini-node-one" />
+            <div className="privacy-mini-node privacy-mini-node-two" />
+            <div className="privacy-mini-node privacy-mini-node-three" />
           </div>
         </header>
 
-        <div className="privacy-content-layout">
-          <aside className="privacy-side-note">
-            <span>Data Care</span>
+        <section className="privacy-trust-strip" aria-label="Privacy trust points">
+          {trustItems.map((item, index) => (
+            <div className="privacy-trust-pill" key={item}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <p>{item}</p>
+            </div>
+          ))}
+        </section>
 
-            <h2>Simple, secure, and respectful.</h2>
+        <section className="privacy-console">
+          <div className="privacy-console-topbar">
+            <div className="privacy-console-dots" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
 
-            <p>
-              We keep privacy clear and intentional. Information is used only to
-              support user experience, communication, and service delivery.
-            </p>
-          </aside>
-
-          <div className="privacy-card-list">
-            {privacyItems.map((item) => (
-              <article className="privacy-card" key={item.number}>
-                <div className="privacy-card-number">{item.number}</div>
-
-                <div>
-                  <h2>{item.title}</h2>
-                  <p>{item.body}</p>
-                </div>
-              </article>
-            ))}
+            <p>privacy_policy.config</p>
           </div>
-        </div>
 
-        <div className="privacy-bottom-panel">
+          <div className="privacy-console-body">
+            <aside className="privacy-console-sidebar">
+              <p className="privacy-sidebar-label">Policy Index</p>
+
+              <nav className="privacy-index-links" aria-label="Privacy policy index">
+                {privacyItems.map((item) => (
+                  <a href={`#privacy-${item.number}`} key={item.number}>
+                    <span>{item.number}</span>
+                    {item.title}
+                  </a>
+                ))}
+              </nav>
+
+              <div className="privacy-data-note">
+                <span>Data Care</span>
+
+                <p>
+                  Simple, secure, and respectful handling of information shared
+                  through our website.
+                </p>
+              </div>
+            </aside>
+
+            <div className="privacy-policy-stack">
+              {privacyItems.map((item) => (
+                <article
+                  className="privacy-policy-card"
+                  id={`privacy-${item.number}`}
+                  key={item.number}
+                >
+                  <div className="privacy-policy-number">{item.number}</div>
+
+                  <div>
+                    <h2>{item.title}</h2>
+                    <p>{item.body}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="privacy-commitment-panel">
           <div>
             <p className="privacy-tag">OUR COMMITMENT</p>
 
@@ -82,7 +131,7 @@ function Privacy() {
               improving your experience or providing the services you request.
             </p>
           </div>
-        </div>
+        </section>
       </div>
     </section>
   );
