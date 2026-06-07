@@ -164,8 +164,7 @@ function HomePage() {
 
           <div className="hero-explore">
             <span>Explore</span>
-            <a href="#services">AI/ML</a>
-            <a href="#services">Software</a>
+            <a href="#services">Services</a>
             <a href="#roadmap">Roadmap</a>
           </div>
         </div>
