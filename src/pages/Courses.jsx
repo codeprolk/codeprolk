@@ -23,8 +23,9 @@ function Courses() {
   return (
     <section className="courses-page">
       <div className="courses-page-grid" aria-hidden="true" />
-      <div className="courses-page-glow courses-page-glow-one" aria-hidden="true" />
-      <div className="courses-page-glow courses-page-glow-two" aria-hidden="true" />
+      <div className="courses-page-orb courses-page-orb-one" aria-hidden="true" />
+      <div className="courses-page-orb courses-page-orb-two" aria-hidden="true" />
+      <div className="courses-page-orb courses-page-orb-three" aria-hidden="true" />
 
       <div className="courses-page-inner">
         <header className="courses-page-header">
@@ -39,27 +40,35 @@ function Courses() {
           </p>
         </header>
 
-        <div className="courses-page-list">
+        <div className="courses-learning-path">
+          <div className="courses-path-line" aria-hidden="true" />
+
           {courses.map((course) => (
             <article className="courses-page-card" key={course.title}>
+              <div className="courses-page-big-number" aria-hidden="true">
+                {course.number}
+              </div>
+
               <div className="courses-page-card-top">
                 <span className="courses-page-number">{course.number}</span>
                 <span className="courses-page-type">{course.type}</span>
               </div>
 
-              <h2>{course.title}</h2>
+              <div className="courses-page-card-content">
+                <h2>{course.title}</h2>
 
-              <p>{course.description}</p>
+                <p>{course.description}</p>
 
-              <a
-                className="courses-page-btn"
-                href={course.link}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Enroll Now
-                <span aria-hidden="true">→</span>
-              </a>
+                <a
+                  className="courses-page-btn"
+                  href={course.link}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Enroll Now
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
             </article>
           ))}
         </div>

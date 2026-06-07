@@ -3572,59 +3572,10 @@ li {
   }
 }
 
-/* =========================
-   SERVICES PAGE - FINAL TITLE SIZE FIX
-   Paste at the VERY END of styles.css
-========================= */
-
-/* Main page title: "Our Services" */
-.services-page-header h1 {
-  font-size: clamp(3.2rem, 5.2vw, 5.4rem) !important;
-  line-height: 0.9 !important;
-  letter-spacing: -0.075em !important;
-}
-
-/* Service card titles: AI/ML Solutions, Software Development, etc. */
-.services-page-card-body h2 {
-  font-size: clamp(2.1rem, 3.2vw, 3.4rem) !important;
-  line-height: 0.95 !important;
-  letter-spacing: -0.065em !important;
-  margin-bottom: 1.05rem !important;
-}
-
-/* Keep boxes wider */
-.services-page-inner {
-  width: min(1460px, calc(100% - 2rem)) !important;
-}
-
-.services-page-list {
-  width: min(1180px, 100%) !important;
-}
-
-/* Slightly bigger content text */
-.services-page-card-body > p:not(.services-page-card-eyebrow) {
-  font-size: 1.08rem !important;
-  line-height: 1.88 !important;
-}
-
-/* Responsive title control */
-@media (max-width: 780px) {
-  .services-page-header h1 {
-    font-size: clamp(2.8rem, 12vw, 4.2rem) !important;
-  }
-
-  .services-page-card-body h2 {
-    font-size: clamp(2rem, 10vw, 3rem) !important;
-  }
-
-  .services-page-card-body > p:not(.services-page-card-eyebrow) {
-    font-size: 0.98rem !important;
-    line-height: 1.72 !important;
-  }
-}
 
 /* =========================
-   COURSES PAGE
+   COURSES PAGE - LEARNING PATH STYLE
+   Different from Services page
 ========================= */
 
 .courses-page {
@@ -3636,9 +3587,9 @@ li {
   padding: 9rem 2rem 6rem;
 
   background:
-    radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.2), transparent 28%),
-    radial-gradient(circle at 88% 18%, rgba(6, 71, 184, 0.28), transparent 30%),
-    linear-gradient(135deg, #020617 0%, #071226 48%, #020617 100%);
+    radial-gradient(circle at 8% 16%, rgba(56, 189, 248, 0.22), transparent 30%),
+    radial-gradient(circle at 88% 14%, rgba(14, 165, 233, 0.18), transparent 30%),
+    linear-gradient(135deg, #020617 0%, #05111f 46%, #020617 100%);
 
   color: #ffffff;
 }
@@ -3650,49 +3601,60 @@ li {
   pointer-events: none;
 
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    linear-gradient(rgba(125, 211, 252, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(125, 211, 252, 0.045) 1px, transparent 1px);
 
-  background-size: 64px 64px;
-  opacity: 0.42;
+  background-size: 72px 72px;
+  opacity: 0.38;
+  mask-image: radial-gradient(circle at center, #000 0%, rgba(0, 0, 0, 0.68) 58%, transparent 92%);
+  -webkit-mask-image: radial-gradient(circle at center, #000 0%, rgba(0, 0, 0, 0.68) 58%, transparent 92%);
 }
 
-.courses-page-glow {
+.courses-page-orb {
   position: absolute;
   z-index: 0;
   pointer-events: none;
 
-  width: 34rem;
-  height: 34rem;
-  border-radius: 50%;
-
-  filter: blur(95px);
-  opacity: 0.25;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: 0.34;
 }
 
-.courses-page-glow-one {
-  top: 9%;
-  left: -12rem;
-  background: rgba(56, 189, 248, 0.72);
+.courses-page-orb-one {
+  top: 12%;
+  left: -10rem;
+  width: 30rem;
+  height: 30rem;
+  background: rgba(56, 189, 248, 0.65);
 }
 
-.courses-page-glow-two {
-  right: -14rem;
-  bottom: 10%;
-  background: rgba(6, 71, 184, 0.82);
+.courses-page-orb-two {
+  right: -12rem;
+  top: 28%;
+  width: 32rem;
+  height: 32rem;
+  background: rgba(6, 71, 184, 0.72);
+}
+
+.courses-page-orb-three {
+  left: 28%;
+  bottom: -14rem;
+  width: 38rem;
+  height: 38rem;
+  background: rgba(14, 165, 233, 0.22);
 }
 
 .courses-page-inner {
   position: relative;
   z-index: 1;
 
-  width: min(1120px, 100%);
+  width: min(1240px, calc(100% - 2rem));
   margin: 0 auto;
 }
 
 .courses-page-header {
   max-width: 900px;
-  margin: 0 auto 4.5rem;
+  margin: 0 auto 5rem;
   text-align: center;
 }
 
@@ -3701,8 +3663,8 @@ li {
 
   color: #7dd3fc;
   font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.2em;
+  font-weight: 900;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
 }
 
@@ -3710,49 +3672,80 @@ li {
   margin: 0;
 
   font-family: 'PP Neue Montreal Title', Arial, sans-serif;
-  font-size: clamp(3rem, 7vw, 6.8rem);
+  font-size: clamp(3rem, 6.2vw, 6rem);
   font-weight: 300;
-  line-height: 0.92;
-  letter-spacing: -0.075em;
+  line-height: 0.9;
+  letter-spacing: -0.08em;
 
   color: #ffffff;
 }
 
 .courses-page-header p {
-  max-width: 680px;
+  max-width: 720px;
   margin: 1.35rem auto 0;
 
   color: rgba(219, 234, 254, 0.78);
-  font-size: 1.02rem;
-  line-height: 1.8;
+  font-size: 1.05rem;
+  line-height: 1.82;
 }
 
-.courses-page-list {
+/* Learning path layout */
+
+.courses-learning-path {
+  position: relative;
+
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
+  gap: 2rem;
 }
+
+.courses-path-line {
+  position: absolute;
+  left: 2rem;
+  top: 1.5rem;
+  bottom: 1.5rem;
+
+  width: 1px;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(125, 211, 252, 0.55),
+      rgba(255, 255, 255, 0.65),
+      rgba(125, 211, 252, 0.38),
+      transparent
+    );
+
+  box-shadow:
+    0 0 18px rgba(125, 211, 252, 0.35),
+    0 0 36px rgba(255, 255, 255, 0.12);
+}
+
+/* Course cards */
 
 .courses-page-card {
   position: relative;
   overflow: hidden;
 
-  min-height: 520px;
-  padding: clamp(1.8rem, 3vw, 2.6rem);
+  min-height: 360px;
+  padding: clamp(2rem, 3vw, 3rem);
+  padding-left: clamp(5.2rem, 6vw, 6.8rem);
 
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 0.92fr 1.08fr;
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: center;
 
   border-radius: 2rem;
-  border: 1px solid rgba(125, 211, 252, 0.22);
+  border: 1px solid rgba(125, 211, 252, 0.18);
 
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035)),
+    linear-gradient(135deg, rgba(8, 47, 73, 0.62), rgba(15, 23, 42, 0.78)),
     rgba(15, 23, 42, 0.72);
 
   box-shadow:
-    0 28px 90px rgba(2, 6, 23, 0.46),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 28px 90px rgba(2, 6, 23, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -3760,30 +3753,25 @@ li {
   transition:
     transform 0.35s ease,
     border-color 0.35s ease,
-    box-shadow 0.35s ease;
+    box-shadow 0.35s ease,
+    background 0.35s ease;
 }
 
 .courses-page-card:hover {
   transform: translateY(-8px);
-  border-color: rgba(125, 211, 252, 0.48);
+  border-color: rgba(125, 211, 252, 0.5);
+
+  background:
+    linear-gradient(135deg, rgba(8, 47, 73, 0.76), rgba(15, 23, 42, 0.86)),
+    rgba(15, 23, 42, 0.78);
+
   box-shadow:
     0 36px 110px rgba(2, 6, 23, 0.58),
-    0 0 38px rgba(56, 189, 248, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 0 46px rgba(56, 189, 248, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .courses-page-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-
-  background:
-    radial-gradient(circle at 20% 10%, rgba(125, 211, 252, 0.2), transparent 32%),
-    radial-gradient(circle at 90% 90%, rgba(6, 71, 184, 0.32), transparent 34%);
-}
-
-.courses-page-card::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -3791,70 +3779,118 @@ li {
 
   background:
     linear-gradient(
-      120deg,
+      115deg,
       transparent 0%,
-      transparent 38%,
-      rgba(255, 255, 255, 0.13) 50%,
-      transparent 62%,
+      transparent 42%,
+      rgba(255, 255, 255, 0.12) 50%,
+      transparent 58%,
       transparent 100%
     );
 
   transform: translateX(-120%);
-  transition: transform 0.85s ease;
+  transition: transform 0.95s ease;
 }
 
-.courses-page-card:hover::after {
+.courses-page-card:hover::before {
   transform: translateX(120%);
 }
 
-.courses-page-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+.courses-page-card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
 
-  margin-bottom: 2.2rem;
+  width: 5px;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(125, 211, 252, 0.95),
+      rgba(255, 255, 255, 0.55),
+      rgba(6, 71, 184, 0.85)
+    );
+}
+
+.courses-page-big-number {
+  position: absolute;
+  right: 1.8rem;
+  bottom: -1.6rem;
+
+  font-family: 'PP Neue Montreal Title', Arial, sans-serif;
+  font-size: clamp(8rem, 15vw, 16rem);
+  font-weight: 300;
+  line-height: 0.7;
+  letter-spacing: -0.08em;
+
+  color: rgba(255, 255, 255, 0.035);
+  pointer-events: none;
+}
+
+.courses-page-card-top {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.4rem;
 }
 
 .courses-page-number {
-  width: 4.2rem;
-  height: 4.2rem;
+  width: 5.2rem;
+  height: 5.2rem;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 1.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.26);
 
-  background: rgba(255, 255, 255, 0.12);
+  background:
+    radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.22), transparent 42%),
+    rgba(255, 255, 255, 0.1);
+
   color: #ffffff;
 
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 900;
   letter-spacing: 0.12em;
+
+  box-shadow:
+    0 18px 44px rgba(2, 6, 23, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
 
 .courses-page-type {
+  max-width: 260px;
+
   color: #7dd3fc;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  text-align: right;
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1.7;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
+.courses-page-card-content {
+  position: relative;
+  z-index: 2;
+}
+
 .courses-page-card h2 {
-  margin: 0 0 1.2rem;
+  margin: 0 0 1.25rem;
 
   font-family: 'PP Neue Montreal Title', Arial, sans-serif;
-  font-size: clamp(2.15rem, 4vw, 4rem);
+  font-size: clamp(2.25rem, 4.2vw, 4.2rem);
   font-weight: 300;
-  line-height: 0.96;
-  letter-spacing: -0.065em;
+  line-height: 0.94;
+  letter-spacing: -0.07em;
 
   color: #ffffff;
 }
@@ -3862,27 +3898,27 @@ li {
 .courses-page-card p {
   margin: 0;
 
-  color: rgba(219, 234, 254, 0.76);
-  font-size: 0.98rem;
-  line-height: 1.78;
+  color: rgba(219, 234, 254, 0.78);
+  font-size: 1.02rem;
+  line-height: 1.82;
 }
 
 .courses-page-btn {
   width: fit-content;
-  margin-top: auto;
-  padding: 0.95rem 1.35rem;
+  margin-top: 2rem;
+  padding: 1rem 1.45rem;
 
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.6rem;
 
   border-radius: 999px;
-  border: 1px solid rgba(125, 211, 252, 0.28);
+  border: 1px solid rgba(125, 211, 252, 0.3);
 
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.09);
   color: #ffffff;
 
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -3916,23 +3952,30 @@ li {
   transform: translateX(4px);
 }
 
-/* COURSES PAGE RESPONSIVE */
+/* Responsive */
 
 @media (max-width: 980px) {
   .courses-page {
     padding: 8rem 1.5rem 5rem;
   }
 
-  .courses-page-list {
-    grid-template-columns: 1fr;
+  .courses-page-inner {
+    width: 100%;
   }
 
   .courses-page-card {
+    grid-template-columns: 1fr;
     min-height: auto;
+    gap: 1.8rem;
   }
 
-  .courses-page-btn {
-    margin-top: 2rem;
+  .courses-page-card-top {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .courses-page-type {
+    max-width: none;
   }
 }
 
@@ -3943,25 +3986,39 @@ li {
 
   .courses-page-header {
     margin-bottom: 3rem;
+    text-align: left;
   }
 
   .courses-page-header h1 {
     font-size: clamp(2.8rem, 16vw, 4.5rem);
   }
 
+  .courses-page-header p {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .courses-path-line {
+    left: 1.35rem;
+  }
+
   .courses-page-card {
-    border-radius: 1.5rem;
     padding: 1.5rem;
+    padding-left: 3.2rem;
+    border-radius: 1.5rem;
   }
 
   .courses-page-card-top {
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 1.7rem;
+    gap: 1rem;
   }
 
-  .courses-page-type {
-    text-align: left;
+  .courses-page-number {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 1rem;
+    font-size: 0.95rem;
   }
 
   .courses-page-card h2 {
@@ -3969,7 +4026,8 @@ li {
   }
 
   .courses-page-card p {
-    font-size: 0.92rem;
+    font-size: 0.94rem;
+    line-height: 1.7;
   }
 
   .courses-page-btn {
