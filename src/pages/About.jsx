@@ -31,15 +31,6 @@ function About() {
           </div>
 
           <div className="about-hero-panel">
-            <span
-              className="about-focus-sparkle about-focus-sparkle-main"
-              aria-hidden="true"
-            />
-            <span
-              className="about-focus-sparkle about-focus-sparkle-small"
-              aria-hidden="true"
-            />
-
             <span className="about-focus-label">Our Focus</span>
 
             <h2>Technology with practical impact.</h2>
