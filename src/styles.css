@@ -869,52 +869,7 @@ a {
   }
 }
 
-/* =========================
-   SERVICES REVEAL ANIMATION
-========================= */
 
-.services-swipe-section {
-  position: relative;
-  overflow: hidden;
-}
-
-.services-swipe-section::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-
-  background:
-    radial-gradient(circle at 30% 20%, rgba(56, 189, 248, 0.32), transparent 34%),
-    linear-gradient(135deg, #d8eef3 0%, #eefbff 58%, #c6e3eb 100%);
-
-  transform: translateX(0);
-  transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1);
-}
-
-.services-swipe-section.services-swipe-visible::after {
-  transform: translateX(105%);
-}
-
-.services-swipe-section .services-vertical-slider {
-  opacity: 0;
-  transform: translateY(45px);
-  transition:
-    opacity 0.85s ease,
-    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.services-swipe-section.services-swipe-visible .services-vertical-slider {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* keep header visible always */
-.services-swipe-section .section-header {
-  opacity: 1;
-  transform: none;
-}
 
 /* =========================
    RESPONSIVE SERVICES
@@ -2171,85 +2126,6 @@ li {
   font-weight: 600;
 }
 
-/* Services reveal animation */
-
-.services-swipe-section {
-  position: relative;
-  overflow: hidden;
-}
-
-.services-swipe-section::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-
-  background:
-    radial-gradient(circle at 30% 20%, rgba(56, 189, 248, 0.32), transparent 34%),
-    linear-gradient(135deg, #d8eef3 0%, #eefbff 58%, #c6e3eb 100%);
-
-  transform: translateX(0);
-  transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1);
-}
-
-.services-swipe-section.services-swipe-visible::after {
-  transform: translateX(105%);
-}
-
-.services-swipe-section .section-header {
-  opacity: 0;
-  transform: translateY(35px);
-  transition:
-    opacity 0.75s ease,
-    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.services-swipe-section .service-card {
-  opacity: 0;
-  transform: translateY(55px) scale(0.96);
-  transition:
-    opacity 0.75s ease,
-    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.35s ease,
-    border-color 0.35s ease;
-}
-
-.services-swipe-section.services-swipe-visible .section-header,
-.services-swipe-section.services-swipe-visible .service-card {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.services-swipe-section.services-swipe-visible .service-card:nth-child(1) {
-  transition-delay: 0.18s;
-}
-
-.services-swipe-section.services-swipe-visible .service-card:nth-child(2) {
-  transition-delay: 0.3s;
-}
-
-.services-swipe-section.services-swipe-visible .service-card:nth-child(3) {
-  transition-delay: 0.42s;
-}
-
-.services-swipe-section.services-swipe-visible .service-card:nth-child(4) {
-  transition-delay: 0.54s;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .services-swipe-section::after,
-  .services-swipe-section .section-header,
-  .services-swipe-section .service-card {
-    transition: none;
-    transform: none;
-    opacity: 1;
-  }
-
-  .services-swipe-section::after {
-    display: none;
-  }
-}
 
 /* Services responsive grid */
 
