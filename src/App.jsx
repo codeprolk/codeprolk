@@ -224,8 +224,13 @@ function HomePage() {
               <li>Easy Integration & Customization</li>
             </ul>
 
-            <a className="button button-light" href="https://codeprolk.com/contact/">
-              MORE INFO
+            <a
+               className="button button-light"
+               href="https://wa.me/94770874042?text=Hello%20CODEPRO%20LK%2C%20I%20would%20like%20to%20know%20more%20about%20your%20AI-powered%20chatbot%20services."
+               target="_blank"
+               rel="noreferrer"
+             >
+             MORE INFO
             </a>
           </div>
 
