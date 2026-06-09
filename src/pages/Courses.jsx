@@ -12,7 +12,7 @@ const courses = [
   {
     number: '02',
     type: 'Generative AI / Practical Applications',
-    title: 'Advanced Generative AI | Loku Business',
+    title: 'Advanced Generative AI | Loku බිස්නස්',
     description:
       'This Generative AI Course can be described as a practically oriented program. It provides a comprehensive understanding of creating various applications using Large Language Models and Vision Models. The course is primarily organized to guide you in building complete GenAI applications using different libraries and frameworks. It also covers how the state of art AI models for text, image, audio, and video generation work and how you can utilize them to streamline your tasks.',
     link: 'https://school.lokubusiness.lk/p/advanced-generative-ai1',
