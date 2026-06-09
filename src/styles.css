@@ -101,7 +101,7 @@ a {
   top: 18px;
   z-index: 1000;
 
-  width: min(1900px, calc(100% - 32px));
+  width: min(1750px, calc(100% - 32px));
   margin: 18px auto 0;
   padding: 0.62rem 1.4rem;
 
