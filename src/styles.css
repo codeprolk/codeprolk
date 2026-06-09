@@ -1613,102 +1613,282 @@ a {
   filter: brightness(0) invert(1);
 }
 
-/* CHATBOT */
+/* =========================
+   CHATBOT MOVABLE ICON + PRELOADED CHAT WINDOW
+========================= */
 
 .bot-toggle-button {
-  position: fixed;
-  right: 1.5rem;
-  bottom: 1.5rem;
-  z-index: 1001;
-  background: #4338ca;
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 64px;
-  height: 64px;
-  box-shadow: 0 8px 32px rgba(67, 56, 202, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  cursor: pointer;
-  transition: background 0.2s;
+  position: fixed !important;
+  z-index: 99999 !important;
+
+  right: auto !important;
+  bottom: auto !important;
+
+  width: 68px !important;
+  height: 68px !important;
+
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 50% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  background: transparent !important;
+  cursor: grab !important;
+
+  box-shadow:
+    0 14px 36px rgba(6, 71, 184, 0.32),
+    0 0 34px rgba(56, 189, 248, 0.42) !important;
+
+  touch-action: none !important;
+  user-select: none !important;
+
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    filter 0.22s ease !important;
 }
 
-.bot-toggle-button:hover {
-  background: #3730a3;
+.bot-toggle-button:hover,
+.bot-toggle-button:focus-visible {
+  transform: translateY(-3px) scale(1.04) !important;
+
+  box-shadow:
+    0 18px 46px rgba(6, 71, 184, 0.38),
+    0 0 42px rgba(56, 189, 248, 0.52) !important;
+
+  outline: none !important;
 }
 
-.bot-icon {
-  font-size: 2.1rem;
+.bot-toggle-button:active {
+  cursor: grabbing !important;
+  transform: scale(0.96) !important;
 }
 
+.bot-icon-image {
+  width: 100% !important;
+  height: 100% !important;
+
+  display: block !important;
+  object-fit: contain !important;
+
+  border-radius: 50% !important;
+
+  pointer-events: none !important;
+  user-select: none !important;
+
+  filter:
+    drop-shadow(0 0 10px rgba(56, 189, 248, 0.62))
+    drop-shadow(0 0 22px rgba(6, 71, 184, 0.4)) !important;
+}
+
+/* Chat window stays mounted, so iframe preloads */
 .bot-widget {
-  position: fixed;
-  right: 1.5rem;
-  bottom: 1.5rem;
-  width: min(420px, calc(100vw - 2rem));
-  height: 540px;
-  max-width: 420px;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.22);
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  z-index: 1002;
-  display: flex;
-  flex-direction: column;
+  position: fixed !important;
+  right: 2.4rem !important;
+  bottom: 2.4rem !important;
+  left: auto !important;
+  top: auto !important;
+
+  z-index: 99998 !important;
+
+  width: min(420px, calc(100vw - 2rem)) !important;
+  height: min(560px, calc(100svh - 3rem)) !important;
+  max-width: 420px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  overflow: hidden !important;
+
+  border-radius: 24px !important;
+  border: 1px solid rgba(125, 211, 252, 0.22) !important;
+
+  background: #ffffff !important;
+
+  box-shadow:
+    0 30px 90px rgba(2, 6, 23, 0.38),
+    0 0 34px rgba(56, 189, 248, 0.18) !important;
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    visibility 0.25s ease !important;
+}
+
+.bot-widget-hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(18px) scale(0.96) !important;
+}
+
+.bot-widget-open {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: translateY(0) scale(1) !important;
+}
+
+.bot-widget iframe {
+  width: 100% !important;
+  height: 100% !important;
+
+  display: block !important;
+  flex: 1 1 auto !important;
+
+  border: none !important;
+  background: #ffffff !important;
 }
 
 .bot-close-button {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: #ffffff;
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  color: #1d4ed8;
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: 0.5rem 0.75rem;
-  border-radius: 999px;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-  z-index: 1003;
+  position: absolute !important;
+  top: 0.75rem !important;
+  right: 0.75rem !important;
+  z-index: 100000 !important;
+
+  width: 38px !important;
+  height: 38px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 !important;
+
+  border-radius: 999px !important;
+  border: 1px solid rgba(59, 130, 246, 0.25) !important;
+
+  background: #ffffff !important;
+  color: #1d4ed8 !important;
+
+  font-size: 1.05rem !important;
+  font-weight: 900 !important;
+
+  cursor: pointer !important;
 }
 
 .bot-close-button:hover,
 .bot-close-button:focus-visible {
-  background: #1d4ed8;
-  color: #ffffff;
-  transform: translateY(-1px);
-  outline: none;
+  background: #1d4ed8 !important;
+  color: #ffffff !important;
+  outline: none !important;
 }
 
-.bot-widget iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  display: block;
-  flex: 1 1 auto;
+/* Loading overlay */
+.bot-loading-state {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+
+  display: grid !important;
+  place-items: center !important;
+  gap: 0.9rem !important;
+
+  background:
+    radial-gradient(circle at 50% 38%, rgba(56, 189, 248, 0.16), transparent 32%),
+    #ffffff !important;
+
+  color: #0647b8 !important;
+  text-align: center !important;
+}
+
+.bot-loading-state p {
+  margin: 0 !important;
+
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+}
+
+.bot-loading-orb {
+  width: 58px !important;
+  height: 58px !important;
+
+  border-radius: 50% !important;
+
+  background:
+    radial-gradient(circle at 35% 28%, #ffffff 0%, #7dd3fc 34%, #0647b8 100%) !important;
+
+  box-shadow:
+    0 0 22px rgba(56, 189, 248, 0.5),
+    0 0 44px rgba(6, 71, 184, 0.22) !important;
+
+  animation: botLoadingPulse 1.15s ease-in-out infinite !important;
+}
+
+@keyframes botLoadingPulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.72;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
 }
 
 .bot-error-state {
-  padding: 2rem;
-  display: grid;
-  gap: 1rem;
-  text-align: center;
-  align-items: center;
-  justify-items: center;
-  color: #1f2937;
+  width: 100% !important;
+  height: 100% !important;
+
+  padding: 2rem !important;
+
+  display: grid !important;
+  gap: 1rem !important;
+  place-items: center !important;
+  text-align: center !important;
+
+  color: #1f2937 !important;
+  background: #ffffff !important;
 }
 
-.bot-error-state p {
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.6;
+/* Mobile visibility fix */
+@media (max-width: 720px) {
+  .bot-toggle-button {
+    width: 58px !important;
+    height: 58px !important;
+
+    z-index: 99999 !important;
+  }
+
+  .bot-widget {
+    right: 1rem !important;
+    bottom: 1rem !important;
+
+    width: calc(100vw - 2rem) !important;
+    height: min(520px, calc(100svh - 2rem)) !important;
+
+    border-radius: 20px !important;
+  }
 }
 
-.bot-error-state .button {
-  width: auto;
+@media (max-width: 380px) {
+  .bot-toggle-button {
+    width: 54px !important;
+    height: 54px !important;
+  }
+
+  .bot-widget {
+    right: 1rem !important;
+    bottom: 1rem !important;
+
+    width: calc(100vw - 1.5rem) !important;
+    height: min(500px, calc(100svh - 1.5rem)) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bot-widget,
+  .bot-toggle-button,
+  .bot-loading-orb {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 /* BUTTONS */
