@@ -13,6 +13,7 @@ import Privacy from './pages/Privacy';
 import Courses from './pages/Courses';
 import Services from './pages/Services';
 import JourneyRoadmap from './components/JourneyRoadmap';
+import Contact from './pages/Contact';
 
 import logo from './assests/logo.png';
 import landingImage from './assests/landing-blue.jpg';
@@ -511,6 +512,10 @@ function App() {
             <Link to="/about" onClick={() => setMenuOpen(false)}>
               ABOUT
             </Link>
+
+            <Link to="/contact" onClick={() => setMenuOpen(false)}>
+              CONTACT
+            </Link>
           </nav>
         </header>
 
@@ -523,6 +528,7 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/services" element={<Services />} />
             <Route path="/courses" element={<Courses />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<HomePage />} />
           </Routes>
         </main>
