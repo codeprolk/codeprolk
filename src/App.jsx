@@ -13,10 +13,12 @@ import Privacy from './pages/Privacy';
 import Courses from './pages/Courses';
 import Services from './pages/Services';
 import JourneyRoadmap from './components/JourneyRoadmap';
+import Contact from './pages/Contact';
 
 import logo from './assests/logo.png';
 import landingImage from './assests/landing-blue.jpg';
 import siriSvg from './assests/Siri.svg';
+import blueSiriIcon from './assests/blue-siri.webp';
 
 import facebookIcon from './assests/black-icons/facebook.png';
 import linkedinIcon from './assests/black-icons/linkedin.png';
@@ -222,8 +224,13 @@ function HomePage() {
               <li>Easy Integration & Customization</li>
             </ul>
 
-            <a className="button button-light" href="https://codeprolk.com/contact/">
-              MORE INFO
+            <a
+               className="button button-light"
+               href="https://wa.me/94770874042?text=Hello%20CODEPRO%20LK%2C%20I%20would%20like%20to%20know%20more%20about%20your%20AI-powered%20chatbot%20services."
+               target="_blank"
+               rel="noreferrer"
+             >
+             MORE INFO
             </a>
           </div>
 
@@ -328,12 +335,144 @@ function HomePage() {
 }
 
 function App() {
+  const getBotButtonSize = () => {
+    if (typeof window === 'undefined') return 68;
+    return window.innerWidth <= 720 ? 58 : 68;
+  };
+  
+  const getBotPadding = () => {
+    if (typeof window === 'undefined') return 28;
+  
+    /* More breathing space from the edges */
+    return window.innerWidth <= 720 ? 24 : 34;
+  };
+
+  const getInitialBotPosition = () => {
+    if (typeof window === 'undefined') {
+      return { x: 24, y: 24 };
+    }
+
+    const buttonSize = getBotButtonSize();
+    const padding = getBotPadding();
+
+    return {
+      x: Math.max(padding, window.innerWidth - buttonSize - padding),
+      y: Math.max(padding, window.innerHeight - buttonSize - padding),
+    };
+  };
+
   const [botOpen, setBotOpen] = useState(false);
   const [botLoadError, setBotLoadError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [botFrameLoaded, setBotFrameLoaded] = useState(false);
+  const [botPosition, setBotPosition] = useState(getInitialBotPosition);
+
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const botMovedRef = useRef(false);
 
   const botUrl =
     'https://copilotstudio.microsoft.com/environments/Default-534253fc-dfb6-462f-b5ca-cbe81939f5ee/bots/crad5_WelcometoCODEPROLK/webchat?__version__=2&enableFileAttachment=true';
+
+  useEffect(() => {
+    const keepBotInsideViewport = () => {
+      if (typeof window === 'undefined') return;
+
+      const buttonSize = getBotButtonSize();
+      const padding = getBotPadding();
+
+      setBotPosition((current) => ({
+        x: Math.min(
+          Math.max(padding, current.x),
+          window.innerWidth - buttonSize - padding
+        ),
+        y: Math.min(
+          Math.max(padding, current.y),
+          window.innerHeight - buttonSize - padding
+        ),
+      }));
+    };
+
+    keepBotInsideViewport();
+
+    window.addEventListener('resize', keepBotInsideViewport);
+    window.addEventListener('orientationchange', keepBotInsideViewport);
+
+    return () => {
+      window.removeEventListener('resize', keepBotInsideViewport);
+      window.removeEventListener('orientationchange', keepBotInsideViewport);
+    };
+  }, []);
+
+  const handleBotPointerDown = (event) => {
+    botMovedRef.current = false;
+
+    dragStartRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+
+    dragOffsetRef.current = {
+      x: event.clientX - botPosition.x,
+      y: event.clientY - botPosition.y,
+    };
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleBotPointerMove = (event) => {
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+
+    const movedDistance =
+      Math.abs(event.clientX - dragStartRef.current.x) +
+      Math.abs(event.clientY - dragStartRef.current.y);
+
+    if (movedDistance > 6) {
+      botMovedRef.current = true;
+    }
+
+    const buttonSize = getBotButtonSize();
+    const padding = getBotPadding();
+
+    const nextX = event.clientX - dragOffsetRef.current.x;
+    const nextY = event.clientY - dragOffsetRef.current.y;
+
+    setBotPosition({
+      x: Math.min(
+        Math.max(padding, nextX),
+        window.innerWidth - buttonSize - padding
+      ),
+      y: Math.min(
+        Math.max(padding, nextY),
+        window.innerHeight - buttonSize - padding
+      ),
+    });
+  };
+
+  const handleBotPointerUp = (event) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  const handleBotPointerCancel = (event) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  const handleBotClick = () => {
+    if (botMovedRef.current) {
+      botMovedRef.current = false;
+      return;
+    }
+
+    setBotOpen(true);
+  };
+
+  const handleBotClose = () => {
+    setBotOpen(false);
+  };
 
   return (
     <Router>
@@ -372,6 +511,10 @@ function App() {
             <Link to="/about" onClick={() => setMenuOpen(false)}>
               ABOUT
             </Link>
+
+            <Link to="/contact" onClick={() => setMenuOpen(false)}>
+              CONTACT
+            </Link>
           </nav>
         </header>
 
@@ -384,6 +527,7 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/services" element={<Services />} />
             <Route path="/courses" element={<Courses />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<HomePage />} />
           </Routes>
         </main>
@@ -445,51 +589,67 @@ function App() {
           </nav>
         </footer>
 
-        <button
-          type="button"
-          className="bot-toggle-button"
-          onClick={() => setBotOpen(true)}
-          aria-label="Open chat"
-        >
-          <span className="bot-icon">💬</span>
-        </button>
-
-        {botOpen && (
-          <div className="bot-widget">
-            <button
-              type="button"
-              className="bot-close-button"
-              onClick={() => setBotOpen(false)}
-              aria-label="Close chat"
-            >
-              ✕
-            </button>
-
-            {botLoadError ? (
-              <div className="bot-error-state">
-                <p>Unable to load chat widget inside the page.</p>
-
-                <a
-                  href={botUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="button button-primary"
-                >
-                  Open chat in new tab
-                </a>
-              </div>
-            ) : (
-              <iframe
-                title="CodePRO LK AI Bot"
-                src={botUrl}
-                frameBorder="0"
-                loading="lazy"
-                allow="microphone; camera; clipboard-read; clipboard-write; autoplay; encrypted-media"
-                onError={() => setBotLoadError(true)}
-              />
-            )}
-          </div>
+        {!botOpen && (
+          <button
+            type="button"
+            className="bot-toggle-button"
+            style={{
+              left: `${botPosition.x}px`,
+              top: `${botPosition.y}px`,
+            }}
+            onClick={handleBotClick}
+            onPointerDown={handleBotPointerDown}
+            onPointerMove={handleBotPointerMove}
+            onPointerUp={handleBotPointerUp}
+            onPointerCancel={handleBotPointerCancel}
+            aria-label="Open chat"
+          >
+            <img src={blueSiriIcon} alt="" className="bot-icon-image" />
+          </button>
         )}
+
+        <div className={`bot-widget ${botOpen ? 'bot-widget-open' : 'bot-widget-hidden'}`}>
+          <button
+            type="button"
+            className="bot-close-button"
+            onClick={handleBotClose}
+            aria-label="Close chat"
+          >
+            ✕
+          </button>
+
+          {!botFrameLoaded && !botLoadError && (
+            <div className="bot-loading-state">
+              <div className="bot-loading-orb" aria-hidden="true" />
+              <p>Loading CODEPRO LK AI Bot...</p>
+            </div>
+          )}
+
+          {botLoadError ? (
+            <div className="bot-error-state">
+              <p>Unable to load chat widget inside the page.</p>
+
+              <a
+                href={botUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="button button-primary"
+              >
+                Open chat in new tab
+              </a>
+            </div>
+          ) : (
+            <iframe
+              title="CodePRO LK AI Bot"
+              src={botUrl}
+              frameBorder="0"
+              loading="eager"
+              allow="microphone; camera; clipboard-read; clipboard-write; autoplay; encrypted-media"
+              onLoad={() => setBotFrameLoaded(true)}
+              onError={() => setBotLoadError(true)}
+            />
+          )}
+        </div>
       </div>
     </Router>
   );

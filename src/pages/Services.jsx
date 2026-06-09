@@ -50,10 +50,6 @@ const serviceItems = [
 function Services() {
   return (
     <section className="services-page">
-      <div className="services-page-noise" aria-hidden="true" />
-      <div className="services-page-aurora services-page-aurora-one" aria-hidden="true" />
-      <div className="services-page-aurora services-page-aurora-two" aria-hidden="true" />
-
       <div className="services-page-inner">
         <header className="services-page-header">
           <p className="services-page-tag">CODEPRO LK / SERVICES</p>
@@ -74,7 +70,6 @@ function Services() {
                 index % 2 !== 0 ? 'services-page-card-flipped' : ''
               }`}
               key={service.title}
-              style={{ '--service-delay': `${index * 0.14}s` }}
             >
               <div className="services-page-image-shell">
                 <img src={service.image} alt={service.imageAlt} loading="lazy" />
