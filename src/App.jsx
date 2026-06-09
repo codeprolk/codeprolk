@@ -342,10 +342,8 @@ function App() {
   };
   
   const getBotPadding = () => {
-    if (typeof window === 'undefined') return 28;
-  
-    /* More breathing space from the edges */
-    return window.innerWidth <= 720 ? 24 : 34;
+    if (typeof window === 'undefined') return 56;
+    return window.innerWidth <= 720 ? 38 : 64;
   };
 
   const getInitialBotPosition = () => {
