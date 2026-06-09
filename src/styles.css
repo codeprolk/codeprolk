@@ -1642,8 +1642,8 @@ a {
 /* Chat window stays mounted, so iframe preloads */
 .bot-widget {
   position: fixed !important;
-  right: 2.4rem !important;
-  bottom: 2.4rem !important;
+  right: 3.8em !important;
+  bottom: 3.8rem !important;
   left: auto !important;
   top: auto !important;
 
@@ -1812,8 +1812,8 @@ a {
   }
 
   .bot-widget {
-    right: 1rem !important;
-    bottom: 1rem !important;
+    right: 1.6rem !important;
+    bottom: 1.6rem !important;
 
     width: calc(100vw - 2rem) !important;
     height: min(520px, calc(100svh - 2rem)) !important;
@@ -1829,8 +1829,8 @@ a {
   }
 
   .bot-widget {
-    right: 1rem !important;
-    bottom: 1rem !important;
+    right: 1.6rem !important;
+    bottom: 1.6rem !important;
 
     width: calc(100vw - 1.5rem) !important;
     height: min(500px, calc(100svh - 1.5rem)) !important;
@@ -1995,8 +1995,8 @@ a {
 
 @media (max-width: 720px) {
   .bot-widget {
-    right: 1rem;
-    bottom: 1rem;
+    right: 1.6rem;
+    bottom: 1.6rem;
     width: calc(100vw - 2rem);
     height: 420px;
   }
