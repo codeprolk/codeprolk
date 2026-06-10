@@ -80,7 +80,7 @@ function Terms() {
 
           <div className="terms-date-card">
             <span>Last Updated</span>
-            <strong>October 28, 2024</strong>
+            <strong>August 18, 2025</strong>
             <p>
               These terms may be updated from time to time. Continued use of the
               service means you accept the latest version.
