@@ -1,59 +1,67 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Link,
-} from 'react-router-dom';
+  useNavigate,
+} from "react-router-dom";
 
-import About from './pages/About';
-import Terms from './pages/Terms';
-import Disclaimer from './pages/Disclaimer';
-import Privacy from './pages/Privacy';
-import Courses from './pages/Courses';
-import Services from './pages/Services';
-import JourneyRoadmap from './components/JourneyRoadmap';
-import Contact from './pages/Contact';
+import About from "./pages/About";
+import Terms from "./pages/Terms";
+import Disclaimer from "./pages/Disclaimer";
+import Privacy from "./pages/Privacy";
+import Courses from "./pages/Courses";
+import Services from "./pages/Services";
+import JourneyRoadmap from "./components/JourneyRoadmap";
+import Contact from "./pages/Contact";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import QuizPage from "./pages/Quiz";
+import AdminPage from "./pages/Admin";
+import Leaderboard from "./pages/Leaderboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { getToken, getTokenPayload, logout } from "./utils/auth";
 
-import logo from './assests/logo.png';
-import landingImage from './assests/landing-blue.jpg';
-import siriSvg from './assests/Siri.svg';
-import blueSiriIcon from './assests/blue-siri.webp';
+import logo from "./assests/logo.png";
+import landingImage from "./assests/landing-blue.jpg";
+import siriSvg from "./assests/Siri.svg";
+import blueSiriIcon from "./assests/blue-siri.webp";
 
-import facebookIcon from './assests/black-icons/facebook.png';
-import linkedinIcon from './assests/black-icons/linkedin.png';
-import whatsappIcon from './assests/black-icons/whatsapp.png';
-import youtubeIcon from './assests/black-icons/youtube.png';
-import tiktokIcon from './assests/black-icons/tiktok.png';
+import facebookIcon from "./assests/black-icons/facebook.png";
+import linkedinIcon from "./assests/black-icons/linkedin.png";
+import whatsappIcon from "./assests/black-icons/whatsapp.png";
+import youtubeIcon from "./assests/black-icons/youtube.png";
+import tiktokIcon from "./assests/black-icons/tiktok.png";
 
-import softwareDevelopmentImage from './assests/services/software-development.jpg';
-import dataAnalyticsImage from './assests/services/data-analytics.jpg';
+import softwareDevelopmentImage from "./assests/services/software-development.jpg";
+import dataAnalyticsImage from "./assests/services/data-analytics.jpg";
 
 const services = [
   {
-    title: 'AI/ML Solutions',
+    title: "AI/ML Solutions",
     description:
-      'We design and deploy advanced AI and ML solutions that enable automation, prediction, and optimization across industries.',
+      "We design and deploy advanced AI and ML solutions that enable automation, prediction, and optimization across industries.",
     image:
-      'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80',
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80",
   },
   {
-    title: 'Software Development',
+    title: "Software Development",
     description:
-      'We build robust, user-friendly software products focused on performance, scalability, and intuitive experience.',
+      "We build robust, user-friendly software products focused on performance, scalability, and intuitive experience.",
     image: softwareDevelopmentImage,
   },
   {
-    title: 'Algorithmic Design',
+    title: "Algorithmic Design",
     description:
-      'We create customized algorithms that address complex problems efficiently with optimal performance.',
+      "We create customized algorithms that address complex problems efficiently with optimal performance.",
     image:
-      'https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=900&q=80',
+      "https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=900&q=80",
   },
   {
-    title: 'Data Analytics & Insights',
+    title: "Data Analytics & Insights",
     description:
-      'We help organizations uncover trends through data analysis and visualization to support strategic decisions.',
+      "We help organizations uncover trends through data analysis and visualization to support strategic decisions.",
     image: dataAnalyticsImage,
   },
 ];
@@ -71,9 +79,9 @@ function HomePage() {
   });
 
   const finalStats = [
-    { label: 'Subscribers', target: 55, suffix: 'K+' },
-    { label: 'Uploads', target: 400, suffix: '+' },
-    { label: 'Views', target: 5, suffix: 'M+' },
+    { label: "Subscribers", target: 55, suffix: "K+" },
+    { label: "Uploads", target: 400, suffix: "+" },
+    { label: "Views", target: 5, suffix: "M+" },
   ];
 
   useEffect(() => {
@@ -84,12 +92,12 @@ function HomePage() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          servicesSection.classList.add('services-swipe-visible');
+          servicesSection.classList.add("services-swipe-visible");
         }
       },
       {
         threshold: 0.25,
-      }
+      },
     );
 
     observer.observe(servicesSection);
@@ -111,7 +119,7 @@ function HomePage() {
       },
       {
         threshold: 0.35,
-      }
+      },
     );
 
     observer.observe(statsSection);
@@ -171,7 +179,11 @@ function HomePage() {
           </div>
         </div>
 
-        <a className="scroll-cue" href="#vision" aria-label="Scroll to next section">
+        <a
+          className="scroll-cue"
+          href="#vision"
+          aria-label="Scroll to next section"
+        >
           ↓
         </a>
       </section>
@@ -184,9 +196,15 @@ function HomePage() {
             <div className="vision-title-marquee">
               <div className="vision-title-track">
                 <h2>Transform Your Vision with Next-Gen Tech</h2>
-                <h2 aria-hidden="true">Transform Your Vision with Next-Gen Tech</h2>
-                <h2 aria-hidden="true">Transform Your Vision with Next-Gen Tech</h2>
-                <h2 aria-hidden="true">Transform Your Vision with Next-Gen Tech</h2>
+                <h2 aria-hidden="true">
+                  Transform Your Vision with Next-Gen Tech
+                </h2>
+                <h2 aria-hidden="true">
+                  Transform Your Vision with Next-Gen Tech
+                </h2>
+                <h2 aria-hidden="true">
+                  Transform Your Vision with Next-Gen Tech
+                </h2>
               </div>
             </div>
 
@@ -225,12 +243,12 @@ function HomePage() {
             </ul>
 
             <a
-               className="button button-light"
-               href="https://wa.me/94770874042?text=Hello%20CODEPRO%20LK%2C%20I%20would%20like%20to%20know%20more%20about%20your%20AI-powered%20chatbot%20services."
-               target="_blank"
-               rel="noreferrer"
-             >
-             MORE INFO
+              className="button button-light"
+              href="https://wa.me/94770874042?text=Hello%20CODEPRO%20LK%2C%20I%20would%20like%20to%20know%20more%20about%20your%20AI-powered%20chatbot%20services."
+              target="_blank"
+              rel="noreferrer"
+            >
+              MORE INFO
             </a>
           </div>
 
@@ -334,19 +352,96 @@ function HomePage() {
   );
 }
 
+function SiteHeader({ menuOpen, setMenuOpen }) {
+  const navigate = useNavigate();
+  const token = getToken();
+  const isAdmin = getTokenPayload(token)?.role === "admin";
+
+  const handleLogout = () => {
+    logout();
+    setMenuOpen(false);
+    navigate("/login");
+  };
+
+  return (
+    <header className="site-header">
+      <Link className="brand" to="/" onClick={() => setMenuOpen(false)}>
+        <img src={logo} alt="CODEPRO LK logo" className="brand-logo" />
+        <span>CODEPRO LK</span>
+      </Link>
+
+      <button
+        type="button"
+        className={`nav-toggle ${menuOpen ? "open" : ""}`}
+        onClick={() => setMenuOpen((current) => !current)}
+        aria-label={menuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={menuOpen}
+      >
+        <span className="nav-toggle-bar" />
+        <span className="nav-toggle-bar" />
+        <span className="nav-toggle-bar" />
+      </button>
+
+      <nav className={`site-nav ${menuOpen ? "open" : ""}`}>
+        <Link to="/" onClick={() => setMenuOpen(false)}>
+          HOME
+        </Link>
+        <Link to="/services" onClick={() => setMenuOpen(false)}>
+          SERVICES
+        </Link>
+        <Link to="/courses" onClick={() => setMenuOpen(false)}>
+          COURSES
+        </Link>
+        <Link to="/about" onClick={() => setMenuOpen(false)}>
+          ABOUT
+        </Link>
+        <Link to="/contact" onClick={() => setMenuOpen(false)}>
+          CONTACT
+        </Link>
+        <Link
+          className="leaderboard-link"
+          to="/leaderboard"
+          onClick={() => setMenuOpen(false)}
+        >
+          LEADERBOARD
+        </Link>
+        {token && (
+          <Link to="/quiz" onClick={() => setMenuOpen(false)}>
+            QUIZ
+          </Link>
+        )}
+        {isAdmin && (
+          <Link to="/admin" onClick={() => setMenuOpen(false)}>
+            ADMIN
+          </Link>
+        )}
+        {token ? (
+          <button type="button" onClick={handleLogout}>
+            LOGOUT
+          </button>
+        ) : (
+          <Link to="/login" onClick={() => setMenuOpen(false)}>
+            LOGIN
+          </Link>
+        )}
+      </nav>
+    </header>
+  );
+}
+
 function App() {
   const getBotButtonSize = () => {
-    if (typeof window === 'undefined') return 68;
+    if (typeof window === "undefined") return 68;
     return window.innerWidth <= 720 ? 58 : 68;
   };
-  
+
   const getBotPadding = () => {
-    if (typeof window === 'undefined') return 56;
+    if (typeof window === "undefined") return 56;
     return window.innerWidth <= 720 ? 38 : 64;
   };
 
   const getInitialBotPosition = () => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return { x: 24, y: 24 };
     }
 
@@ -370,11 +465,11 @@ function App() {
   const botMovedRef = useRef(false);
 
   const botUrl =
-    'https://copilotstudio.microsoft.com/environments/Default-534253fc-dfb6-462f-b5ca-cbe81939f5ee/bots/crad5_WelcometoCODEPROLK/webchat?__version__=2&enableFileAttachment=true';
+    "https://copilotstudio.microsoft.com/environments/Default-534253fc-dfb6-462f-b5ca-cbe81939f5ee/bots/crad5_WelcometoCODEPROLK/webchat?__version__=2&enableFileAttachment=true";
 
   useEffect(() => {
     const keepBotInsideViewport = () => {
-      if (typeof window === 'undefined') return;
+      if (typeof window === "undefined") return;
 
       const buttonSize = getBotButtonSize();
       const padding = getBotPadding();
@@ -382,23 +477,23 @@ function App() {
       setBotPosition((current) => ({
         x: Math.min(
           Math.max(padding, current.x),
-          window.innerWidth - buttonSize - padding
+          window.innerWidth - buttonSize - padding,
         ),
         y: Math.min(
           Math.max(padding, current.y),
-          window.innerHeight - buttonSize - padding
+          window.innerHeight - buttonSize - padding,
         ),
       }));
     };
 
     keepBotInsideViewport();
 
-    window.addEventListener('resize', keepBotInsideViewport);
-    window.addEventListener('orientationchange', keepBotInsideViewport);
+    window.addEventListener("resize", keepBotInsideViewport);
+    window.addEventListener("orientationchange", keepBotInsideViewport);
 
     return () => {
-      window.removeEventListener('resize', keepBotInsideViewport);
-      window.removeEventListener('orientationchange', keepBotInsideViewport);
+      window.removeEventListener("resize", keepBotInsideViewport);
+      window.removeEventListener("orientationchange", keepBotInsideViewport);
     };
   }, []);
 
@@ -438,11 +533,11 @@ function App() {
     setBotPosition({
       x: Math.min(
         Math.max(padding, nextX),
-        window.innerWidth - buttonSize - padding
+        window.innerWidth - buttonSize - padding,
       ),
       y: Math.min(
         Math.max(padding, nextY),
-        window.innerHeight - buttonSize - padding
+        window.innerHeight - buttonSize - padding,
       ),
     });
   };
@@ -475,46 +570,7 @@ function App() {
   return (
     <Router>
       <div className="page-shell">
-        <header className="site-header">
-          <Link className="brand" to="/" onClick={() => setMenuOpen(false)}>
-            <img src={logo} alt="CODEPRO LK logo" className="brand-logo" />
-            <span>CODEPRO LK</span>
-          </Link>
-
-          <button
-            type="button"
-            className={`nav-toggle ${menuOpen ? 'open' : ''}`}
-            onClick={() => setMenuOpen((current) => !current)}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}
-          >
-            <span className="nav-toggle-bar" />
-            <span className="nav-toggle-bar" />
-            <span className="nav-toggle-bar" />
-          </button>
-
-          <nav className={`site-nav ${menuOpen ? 'open' : ''}`}>
-            <Link to="/" onClick={() => setMenuOpen(false)}>
-              HOME
-            </Link>
-
-            <Link to="/services" onClick={() => setMenuOpen(false)}>
-              SERVICES
-            </Link>
-
-            <Link to="/courses" onClick={() => setMenuOpen(false)}>
-              COURSES
-            </Link>
-
-            <Link to="/about" onClick={() => setMenuOpen(false)}>
-              ABOUT
-            </Link>
-
-            <Link to="/contact" onClick={() => setMenuOpen(false)}>
-              CONTACT
-            </Link>
-          </nav>
-        </header>
+        <SiteHeader menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
         <main>
           <Routes>
@@ -526,6 +582,25 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route
+              path="/quiz"
+              element={
+                <ProtectedRoute>
+                  <QuizPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<HomePage />} />
           </Routes>
         </main>
@@ -533,13 +608,19 @@ function App() {
         <footer className="site-footer">
           <p className="footer-copy">Copyright © 2026 - CODEPRO LK</p>
 
-          <nav className="footer-legal-links" aria-label="CODEPRO LK legal links">
+          <nav
+            className="footer-legal-links"
+            aria-label="CODEPRO LK legal links"
+          >
             <Link to="/terms">Terms</Link>
             <Link to="/disclaimer">Disclaimer</Link>
             <Link to="/privacy">Privacy</Link>
           </nav>
 
-          <nav className="footer-social-links" aria-label="CODEPRO LK social media links">
+          <nav
+            className="footer-social-links"
+            aria-label="CODEPRO LK social media links"
+          >
             <a
               href="https://www.youtube.com/@codeprolk"
               target="_blank"
@@ -606,7 +687,9 @@ function App() {
           </button>
         )}
 
-        <div className={`bot-widget ${botOpen ? 'bot-widget-open' : 'bot-widget-hidden'}`}>
+        <div
+          className={`bot-widget ${botOpen ? "bot-widget-open" : "bot-widget-hidden"}`}
+        >
           <button
             type="button"
             className="bot-close-button"

@@ -1,0 +1,224 @@
+from fastapi import FastAPI, Depends, HTTPException, status, Header
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from datetime import datetime, date, timedelta
+import os
+
+import models
+import schemas
+import auth
+from database import engine, get_db, migrate_users_table
+
+models.Base.metadata.create_all(bind=engine)
+migrate_users_table()
+
+app = FastAPI()
+
+origins = [os.getenv('FRONTEND_URL', 'http://localhost:5173')]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+def get_current_user(token: str = Depends(lambda: None), db: Session = Depends(get_db)):
+    # Dependency placeholder; token will be read from Authorization header in endpoints
+    return None
+
+
+@app.post('/api/auth/register')
+def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.User).filter(
+        (models.User.email == user.email) |
+        (models.User.username == user.username)).first()
+    if existing:
+        if existing.email == user.email:
+            raise HTTPException(
+                status_code=400, detail='Email already registered')
+        raise HTTPException(
+            status_code=400, detail='Username already registered')
+
+    hashed = auth.get_password_hash(user.password)
+    db_user = models.User(
+        username=user.username, email=user.email, hashed_password=hashed, role='user')
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return {"id": db_user.id, "username": db_user.username, "email": db_user.email}
+
+
+@app.post('/api/auth/login')
+def login(data: dict, db: Session = Depends(get_db)):
+    email = data.get('email')
+    password = data.get('password')
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user or not auth.verify_password(password, user.hashed_password):
+        raise HTTPException(status_code=401, detail='Invalid credentials')
+
+    token = auth.create_access_token(
+        {"sub": user.email, "user_id": user.id, "role": user.role})
+    return {"access_token": token, "token_type": "bearer", "role": user.role}
+
+
+def get_user_from_header(authorization: str = Header(None), db: Session = Depends(get_db)):
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail='Not authenticated')
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != 'bearer':
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid auth header')
+    token = parts[1]
+    payload = auth.decode_token(token)
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid token')
+    user = db.query(models.User).filter(
+        models.User.id == payload.get('user_id')).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail='User not found')
+    return user
+
+
+@app.get('/api/quiz/today')
+def get_today_quiz(user: models.User = Depends(get_user_from_header), db: Session = Depends(get_db)):
+    today = date.today()
+    quiz = db.query(models.Quiz).filter(models.Quiz.date ==
+                                        today).order_by(models.Quiz.id.desc()).first()
+    if not quiz:
+        return {"quiz": None}
+    if quiz.expiry < datetime.utcnow():
+        return {"quiz": None, "expired": True}
+    submitted = db.query(models.Submission).filter(
+        models.Submission.user_id == user.id,
+        models.Submission.quiz_id == quiz.id,
+    ).first()
+    if submitted:
+        return {"quiz": None, "submitted": True}
+    return {"quiz": {"id": quiz.id, "question": quiz.question, "options": quiz.options, "date": str(quiz.date), "expiry": quiz.expiry.isoformat()}}
+
+
+@app.post('/api/quiz/submit')
+def submit_answer(sub: schemas.SubmitAnswer, authorization: str = Header(None), db: Session = Depends(get_db)):
+    raise_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED, detail='Not authenticated')
+    if not authorization:
+        raise raise_exception
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != 'bearer':
+        raise raise_exception
+    token = parts[1]
+    payload = auth.decode_token(token)
+    if not payload:
+        raise raise_exception
+    user = db.query(models.User).filter(
+        models.User.id == payload.get('user_id')).first()
+    if not user:
+        raise raise_exception
+
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == sub.quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail='Quiz not found')
+
+    # Check expiry
+    if quiz.expiry < datetime.utcnow():
+        raise HTTPException(status_code=400, detail='Quiz expired')
+
+    # Check if user already submitted
+    existing = db.query(models.Submission).filter(
+        models.Submission.user_id == user.id, models.Submission.quiz_id == quiz.id).first()
+    if existing:
+        raise HTTPException(status_code=400, detail='Already submitted')
+
+    is_correct = (sub.selected_index == quiz.correct_index)
+    submission = models.Submission(
+        user_id=user.id, quiz_id=quiz.id, selected_index=sub.selected_index, is_correct=is_correct)
+    db.add(submission)
+    db.commit()
+    return {"ok": True, "is_correct": is_correct}
+
+
+@app.post('/api/admin/quiz')
+def create_quiz(q: schemas.QuizCreate, authorization: str = Header(None), db: Session = Depends(get_db)):
+    if not authorization:
+        raise HTTPException(status_code=403, detail='Forbidden')
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != 'bearer':
+        raise HTTPException(status_code=403, detail='Forbidden')
+    token = parts[1]
+    payload = auth.decode_token(token)
+    if not payload or payload.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail='Forbidden')
+
+    quiz = models.Quiz(question=q.question, options=q.options,
+                       correct_index=q.correct_index, date=q.date, expiry=q.expiry)
+    db.add(quiz)
+    db.commit()
+    db.refresh(quiz)
+    return {"id": quiz.id}
+
+
+@app.get('/api/admin/quizzes')
+def admin_quizzes(month: str = None, db: Session = Depends(get_db)):
+    # Return all quizzes or filter by month
+    quizzes = db.query(models.Quiz).order_by(models.Quiz.date.desc()).all()
+    result = []
+    for q in quizzes:
+        result.append({"id": q.id, "question": q.question,
+                      "date": str(q.date), "expiry": q.expiry.isoformat()})
+    return {"quizzes": result}
+
+
+@app.get('/api/admin/dashboard')
+def admin_dashboard(db: Session = Depends(get_db)):
+    # basic stats: today quiz, expired quizzes, submissions
+    today = date.today()
+    today_quiz = db.query(models.Quiz).filter(
+        models.Quiz.date == today).first()
+    expired = db.query(models.Quiz).filter(
+        models.Quiz.expiry < datetime.utcnow()).count()
+    submissions = db.query(models.Submission).count()
+    return {"today_quiz": bool(today_quiz), "expired_count": expired, "submissions": submissions}
+
+
+@app.get('/api/admin/leaderboard')
+@app.get('/api/leaderboard')
+@app.get('/api/admin/leaderboard')
+def leaderboard(month: str = None, db: Session = Depends(get_db)):
+    if month:
+        try:
+            month_start = datetime.strptime(month, '%Y-%m')
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail='Month must use YYYY-MM format')
+        month_end = (month_start.replace(day=28) +
+                     timedelta(days=4)).replace(day=1)
+    else:
+        current = datetime.utcnow()
+        month_start = current.replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0)
+        month_end = (month_start.replace(day=28) +
+                     timedelta(days=4)).replace(day=1)
+
+    users = db.query(models.User).all()
+    result = []
+    for u in users:
+        submissions = db.query(models.Submission).filter(
+            models.Submission.user_id == u.id,
+            models.Submission.submitted_at >= month_start,
+            models.Submission.submitted_at < month_end,
+        ).all()
+        correct = sum(submission.is_correct for submission in submissions)
+        attempts = len(submissions)
+        result.append(
+            {"username": u.username, "email": u.email, "correct": correct, "attempts": attempts})
+    # sort by correct desc
+    result.sort(key=lambda x: x['correct'], reverse=True)
+    for i, r in enumerate(result, start=1):
+        r['rank'] = i
+    return {"leaderboard": result}
