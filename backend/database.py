@@ -26,6 +26,15 @@ def migrate_users_table():
             "ON users (username)"
         ))
 
+        connection.execute(text(
+            "ALTER TABLE quizzes ADD COLUMN IF NOT EXISTS is_active BOOLEAN "
+            "NOT NULL DEFAULT TRUE"
+        ))
+        connection.execute(text(
+            "UPDATE quizzes SET is_active = FALSE WHERE id <> "
+            "(SELECT id FROM quizzes ORDER BY id DESC LIMIT 1)"
+        ))
+
 
 def get_db():
     db = SessionLocal()

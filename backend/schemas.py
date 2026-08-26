@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import List, Optional
+from typing import List
 from datetime import datetime, date
 
 
@@ -22,7 +22,7 @@ class UserOut(BaseModel):
 class QuizCreate(BaseModel):
     question: str
     options: List[str] = Field(..., min_items=4, max_items=4)
-    correct_index: int
+    correct_index: int = Field(..., ge=0, le=3)
     date: date
     expiry: datetime
 

@@ -21,10 +21,11 @@ class Quiz(Base):
     __tablename__ = 'quizzes'
     id = Column(Integer, primary_key=True, index=True)
     question = Column(Text, nullable=False)
-    options = Column(JSONB, nullable=False)  # list of strings
+    options = Column(JSONB, nullable=False)
     correct_index = Column(Integer, nullable=False)
     date = Column(Date, nullable=False, index=True)
     expiry = Column(DateTime, nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     submissions = relationship('Submission', back_populates='quiz')

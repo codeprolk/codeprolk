@@ -85,11 +85,26 @@ def get_user_from_header(authorization: str = Header(None), db: Session = Depend
     return user
 
 
+def get_admin_user(user: models.User = Depends(get_user_from_header)):
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail='Forbidden')
+    return user
+
+
+def deactivate_expired_quizzes(db: Session):
+    db.query(models.Quiz).filter(
+        models.Quiz.is_active == True,
+        models.Quiz.expiry < datetime.utcnow(),
+    ).update({models.Quiz.is_active: False}, synchronize_session=False)
+    db.commit()
+
+
 @app.get('/api/quiz/today')
 def get_today_quiz(user: models.User = Depends(get_user_from_header), db: Session = Depends(get_db)):
+    deactivate_expired_quizzes(db)
     today = date.today()
     quiz = db.query(models.Quiz).filter(models.Quiz.date ==
-                                        today).order_by(models.Quiz.id.desc()).first()
+                                        today, models.Quiz.is_active == True).order_by(models.Quiz.id.desc()).first()
     if not quiz:
         return {"quiz": None}
     if quiz.expiry < datetime.utcnow():
@@ -144,19 +159,11 @@ def submit_answer(sub: schemas.SubmitAnswer, authorization: str = Header(None), 
 
 
 @app.post('/api/admin/quiz')
-def create_quiz(q: schemas.QuizCreate, authorization: str = Header(None), db: Session = Depends(get_db)):
-    if not authorization:
-        raise HTTPException(status_code=403, detail='Forbidden')
-    parts = authorization.split()
-    if len(parts) != 2 or parts[0].lower() != 'bearer':
-        raise HTTPException(status_code=403, detail='Forbidden')
-    token = parts[1]
-    payload = auth.decode_token(token)
-    if not payload or payload.get('role') != 'admin':
-        raise HTTPException(status_code=403, detail='Forbidden')
-
+def create_quiz(q: schemas.QuizCreate, _: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    db.query(models.Quiz).update({models.Quiz.is_active: False})
     quiz = models.Quiz(question=q.question, options=q.options,
-                       correct_index=q.correct_index, date=q.date, expiry=q.expiry)
+                       correct_index=q.correct_index, date=q.date, expiry=q.expiry,
+                       is_active=True)
     db.add(quiz)
     db.commit()
     db.refresh(quiz)
@@ -164,18 +171,102 @@ def create_quiz(q: schemas.QuizCreate, authorization: str = Header(None), db: Se
 
 
 @app.get('/api/admin/quizzes')
-def admin_quizzes(month: str = None, db: Session = Depends(get_db)):
-    # Return all quizzes or filter by month
-    quizzes = db.query(models.Quiz).order_by(models.Quiz.date.desc()).all()
+def admin_quizzes(_: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    deactivate_expired_quizzes(db)
+    quizzes = db.query(models.Quiz).filter(
+        models.Quiz.is_active == True
+    ).order_by(models.Quiz.date.desc()).all()
     result = []
     for q in quizzes:
         result.append({"id": q.id, "question": q.question,
-                      "date": str(q.date), "expiry": q.expiry.isoformat()})
+                      "options": q.options, "correct_index": q.correct_index,
+                       "date": str(q.date), "expiry": q.expiry.isoformat(),
+                       "is_active": q.is_active})
     return {"quizzes": result}
 
 
+@app.put('/api/admin/quiz/{quiz_id}')
+def update_quiz(quiz_id: int, q: schemas.QuizCreate, _: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail='Quiz not found')
+    db.query(models.Quiz).filter(models.Quiz.id != quiz_id).update(
+        {models.Quiz.is_active: False})
+    quiz.question = q.question
+    quiz.options = q.options
+    quiz.correct_index = q.correct_index
+    quiz.date = q.date
+    quiz.expiry = q.expiry
+    quiz.is_active = True
+    db.commit()
+    return {"id": quiz.id}
+
+
+@app.get('/api/admin/users')
+def admin_users(search: str = '', _: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    query = db.query(models.User).order_by(models.User.id)
+    if search:
+        term = f'%{search}%'
+        query = query.filter((models.User.username.ilike(term))
+                             | (models.User.email.ilike(term)))
+    return {"users": [{"id": user.id, "username": user.username, "email": user.email, "role": user.role} for user in query.all()]}
+
+
+@app.delete('/api/admin/users/{user_id}')
+def delete_user(user_id: int, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    if user_id == admin.id:
+        raise HTTPException(
+            status_code=400, detail='You cannot remove your own admin account')
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail='User not found')
+    if user.role == 'admin' or user.id == 2:
+        raise HTTPException(
+            status_code=400, detail='Admin accounts cannot be removed')
+    db.query(models.Submission).filter(models.Submission.user_id ==
+                                       user_id).delete(synchronize_session=False)
+    db.delete(user)
+    db.commit()
+    return {"ok": True}
+
+
+@app.post('/api/admin/users/{user_id}/make-admin')
+def make_admin(user_id: int, admin: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    if admin.email != 'codeprolkyt@gmail.com':
+        raise HTTPException(
+            status_code=403, detail='Only the primary admin can grant admin access')
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail='User not found')
+    user.role = 'admin'
+    db.commit()
+    return {"ok": True, "id": user.id, "role": user.role}
+
+
+@app.get('/api/admin/stats')
+def admin_stats(_: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    month_start = datetime.utcnow().replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0)
+    month_end = (month_start.replace(day=28) +
+                 timedelta(days=4)).replace(day=1)
+    submissions = db.query(models.Submission).filter(
+        models.Submission.submitted_at >= month_start,
+        models.Submission.submitted_at < month_end,
+    ).all()
+    days = {}
+    current_day = month_start.date()
+    while current_day < month_end.date():
+        days[str(current_day)] = {"attempts": 0, "correct": 0}
+        current_day += timedelta(days=1)
+    for submission in submissions:
+        day = str(submission.submitted_at.date())
+        days[day]["attempts"] += 1
+        days[day]["correct"] += int(submission.is_correct)
+    return {"month": month_start.strftime('%Y-%m'), "days": [{"date": day, **values} for day, values in days.items()]}
+
+
 @app.get('/api/admin/dashboard')
-def admin_dashboard(db: Session = Depends(get_db)):
+def admin_dashboard(_: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     # basic stats: today quiz, expired quizzes, submissions
     today = date.today()
     today_quiz = db.query(models.Quiz).filter(

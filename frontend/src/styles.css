@@ -368,6 +368,7 @@ a {
 .auth-page textarea,
 .admin-page input,
 .admin-page textarea,
+.admin-page select,
 .leaderboard-page input[type="month"] {
   width: 100%;
   padding: 0.85rem 1rem;
@@ -383,6 +384,7 @@ a {
 .auth-page textarea:focus,
 .admin-page input:focus,
 .admin-page textarea:focus,
+.admin-page select:focus,
 .leaderboard-page input[type="month"]:focus {
   background: rgba(3, 13, 38, 0.82);
   border-color: #67e8f9;
@@ -660,6 +662,112 @@ a {
   gap: 0.55rem;
 }
 
+.admin-section {
+  position: relative;
+  z-index: 1;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(147, 197, 253, 0.2);
+}
+
+.admin-section h3 {
+  margin: 0 0 1rem;
+  color: #ffffff;
+  font-family: 'PP Neue Montreal Title', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+}
+
+.admin-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid rgba(147, 197, 253, 0.12);
+}
+
+.admin-list-row span {
+  min-width: 0;
+  color: #eaf2ff;
+  overflow-wrap: anywhere;
+}
+
+.admin-list-row small {
+  display: block;
+  margin-top: 0.2rem;
+  color: #9db9df;
+}
+
+.admin-list-row button {
+  flex: 0 0 auto;
+  margin-top: 0;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.78rem;
+}
+
+.admin-list-row button:disabled {
+  color: #8da4c7;
+  background: rgba(3, 13, 38, 0.5);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.admin-cancel-button {
+  color: #c6daf7 !important;
+  background: rgba(3, 13, 38, 0.6) !important;
+  border: 1px solid rgba(147, 197, 253, 0.3) !important;
+}
+
+.admin-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.admin-pagination button {
+  min-width: 2.25rem;
+  margin-top: 0;
+  padding: 0.55rem 0.7rem;
+  color: #c6daf7;
+  background: rgba(3, 13, 38, 0.65);
+  border: 1px solid rgba(147, 197, 253, 0.28);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.admin-pagination button.active,
+.admin-pagination button:hover,
+.admin-pagination button:focus-visible {
+  color: #031331;
+  background: #67e8f9;
+  border-color: #67e8f9;
+  outline: none;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.65rem;
+}
+
+.admin-stats-grid > div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.8rem;
+  color: #c6daf7;
+  background: rgba(3, 13, 38, 0.5);
+  border: 1px solid rgba(147, 197, 253, 0.17);
+  border-radius: 0.65rem;
+  font-size: 0.78rem;
+}
+
+.admin-stats-grid strong {
+  color: #67e8f9;
+  font-size: 1rem;
+}
+
 @media (max-width: 620px) {
   .auth-page,
   .quiz-page,
@@ -695,6 +803,10 @@ a {
   .leaderboard-page th,
   .leaderboard-page td {
     padding: 0.8rem;
+  }
+
+  .admin-list-row {
+    align-items: flex-start;
   }
 }
 
