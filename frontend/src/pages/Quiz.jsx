@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getToken } from "../utils/auth";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
@@ -40,12 +41,48 @@ export default function QuizPage() {
       setMessage(data.detail || "Error");
       return;
     }
-    setMessage(data.is_correct ? "Correct!" : "Incorrect");
+    setQuiz(null);
+    setSelected(null);
+    setUnavailableReason("submitted");
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (unavailableReason === "submitted") return <p>No attempts available</p>;
-  if (!quiz) return <p>No quiz available today or it has expired.</p>;
+  if (loading) {
+    return (
+      <div className="quiz-page quiz-status-page">
+        <p className="quiz-status">Loading today&apos;s quiz...</p>
+      </div>
+    );
+  }
+
+  if (unavailableReason === "submitted") {
+    return (
+      <div className="quiz-page quiz-status-page">
+        <span className="quiz-status-mark" aria-hidden="true">
+          ✓
+        </span>
+        <h2>No attempts available</h2>
+        <p>You have already submitted today&apos;s quiz.</p>
+        <Link className="quiz-status-link" to="/leaderboard">
+          View leaderboard
+        </Link>
+      </div>
+    );
+  }
+
+  if (!quiz) {
+    return (
+      <div className="quiz-page quiz-status-page">
+        <span className="quiz-status-mark" aria-hidden="true">
+          —
+        </span>
+        <h2>No quiz available at the moment</h2>
+        <p>Please wait</p>
+        <Link className="quiz-status-link" to="/leaderboard">
+          View leaderboard
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="quiz-page">

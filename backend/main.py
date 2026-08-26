@@ -188,8 +188,9 @@ def admin_dashboard(db: Session = Depends(get_db)):
 
 @app.get('/api/admin/leaderboard')
 @app.get('/api/leaderboard')
-@app.get('/api/admin/leaderboard')
-def leaderboard(month: str = None, db: Session = Depends(get_db)):
+def leaderboard(month: str = None, page: int = 1, db: Session = Depends(get_db)):
+    if page < 1:
+        raise HTTPException(status_code=400, detail='Page must be at least 1')
     if month:
         try:
             month_start = datetime.strptime(month, '%Y-%m')
@@ -215,10 +216,24 @@ def leaderboard(month: str = None, db: Session = Depends(get_db)):
         ).all()
         correct = sum(submission.is_correct for submission in submissions)
         attempts = len(submissions)
+        if attempts == 0:
+            continue
         result.append(
             {"username": u.username, "email": u.email, "correct": correct, "attempts": attempts})
     # sort by correct desc
     result.sort(key=lambda x: x['correct'], reverse=True)
     for i, r in enumerate(result, start=1):
         r['rank'] = i
-    return {"leaderboard": result}
+    page_size = 10
+    total_entries = len(result)
+    total_pages = max(1, (total_entries + page_size - 1) // page_size)
+    if page > total_pages:
+        page = total_pages
+    start = (page - 1) * page_size
+    return {
+        "leaderboard": result[start:start + page_size],
+        "page": page,
+        "page_size": page_size,
+        "total_entries": total_entries,
+        "total_pages": total_pages,
+    }

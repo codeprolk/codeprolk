@@ -8,11 +8,13 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [registered, setRegistered] = useState(false);
   const navigate = useNavigate();
 
   const submit = async (e) => {
     e.preventDefault();
     setError(null);
+    setRegistered(false);
     const res = await fetch(`${BACKEND}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -28,8 +30,25 @@ export default function Register() {
       setError(String(detail || "Registration failed"));
       return;
     }
-    navigate("/login");
+    setRegistered(true);
   };
+
+  if (registered) {
+    return (
+      <div className="auth-page auth-success-page">
+        <span className="auth-success-mark" aria-hidden="true">
+          ✓
+        </span>
+        <h2>Registration successful</h2>
+        <p>
+          Your account <strong>{username}</strong> is ready. You can now log in.
+        </p>
+        <button type="button" onClick={() => navigate("/login")}>
+          Go to login
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-page">
