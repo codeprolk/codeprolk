@@ -16,7 +16,7 @@ migrate_users_table()
 app = FastAPI()
 
 origins = [os.getenv('FRONTEND_URL', 'http://localhost:5173'),
-           "www.codeprolk.com"]
+           "www.codeprolk.com", "https://codeprolk.com", "https://www.codeprolk.com", "http://codeprolk.com", "http://www.codeprolk.com",]
 
 app.add_middleware(
     CORSMiddleware,

@@ -129,7 +129,7 @@ export default function AdminPage() {
       expiry,
     };
     const res = await fetch(
-      '/api/admin/quiz${editingQuizId ? /${editingQuizId} : ""}',
+      `/api/admin/quiz${editingQuizId ? `/${editingQuizId}` : ""}`,
       {
         method: editingQuizId ? "PUT" : "POST",
         headers: {
