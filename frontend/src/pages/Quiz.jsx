@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getToken } from "../utils/auth";
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+// const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 export default function QuizPage() {
   const [quiz, setQuiz] = useState(null);
@@ -12,7 +12,7 @@ export default function QuizPage() {
   const [unavailableReason, setUnavailableReason] = useState(null);
 
   useEffect(() => {
-    fetch(`${BACKEND}/api/quiz/today`, {
+    fetch("/api/quiz/today", {
       headers: { Authorization: `Bearer ${getToken()}` },
     })
       .then((r) => r.json())
@@ -28,7 +28,7 @@ export default function QuizPage() {
   const submit = async () => {
     setMessage(null);
     const token = getToken();
-    const res = await fetch(`${BACKEND}/api/quiz/submit`, {
+    const res = await fetch("/api/quiz/submit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

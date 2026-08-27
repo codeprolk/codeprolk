@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getToken, getTokenPayload } from "../utils/auth";
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+// const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 function toDateInputValue(date) {
   const year = date.getFullYear();
@@ -39,9 +39,9 @@ export default function AdminPage() {
 
   const loadAdminData = async () => {
     const [quizResponse, userResponse, statsResponse] = await Promise.all([
-      fetch(`${BACKEND}/api/admin/quizzes`, { headers }),
-      fetch(`${BACKEND}/api/admin/users`, { headers }),
-      fetch(`${BACKEND}/api/admin/stats`, { headers }),
+      fetch("/api/admin/quizzes", { headers }),
+      fetch("/api/admin/users", { headers }),
+      fetch("/api/admin/stats", { headers }),
     ]);
     const [quizData, userData, statsData] = await Promise.all([
       quizResponse.json(),
@@ -61,7 +61,7 @@ export default function AdminPage() {
     setUserSearch(event.target.value);
     setUserPage(1);
     const response = await fetch(
-      `${BACKEND}/api/admin/users?search=${encodeURIComponent(event.target.value)}`,
+      "/api/admin/users?search=${encodeURIComponent(event.target.value)}",
       { headers },
     );
     const data = await response.json();
@@ -70,7 +70,7 @@ export default function AdminPage() {
 
   const deleteUser = async (userId) => {
     if (!window.confirm("Remove this user?")) return;
-    const response = await fetch(`${BACKEND}/api/admin/users/${userId}`, {
+    const response = await fetch("/api/admin/users/${userId}", {
       method: "DELETE",
       headers,
     });
@@ -84,13 +84,10 @@ export default function AdminPage() {
   };
 
   const makeAdmin = async (userId) => {
-    const response = await fetch(
-      `${BACKEND}/api/admin/users/${userId}/make-admin`,
-      {
-        method: "POST",
-        headers,
-      },
-    );
+    const response = await fetch("/api/admin/users/${userId}/make-admin", {
+      method: "POST",
+      headers,
+    });
     const data = await response.json();
     if (!response.ok) {
       setMessage(data.detail || "Unable to grant admin access");
@@ -132,7 +129,7 @@ export default function AdminPage() {
       expiry,
     };
     const res = await fetch(
-      `${BACKEND}/api/admin/quiz${editingQuizId ? `/${editingQuizId}` : ""}`,
+      '/api/admin/quiz${editingQuizId ? /${editingQuizId} : ""}',
       {
         method: editingQuizId ? "PUT" : "POST",
         headers: {

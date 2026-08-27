@@ -7,14 +7,16 @@ import os
 import models
 import schemas
 import auth
-from database import engine, get_db, migrate_users_table
+from database import engine, get_db, migrate_users_table, Base
+from seed import create_default_admin
 
 models.Base.metadata.create_all(bind=engine)
 migrate_users_table()
 
 app = FastAPI()
 
-origins = [os.getenv('FRONTEND_URL', 'http://localhost:5173')]
+origins = [os.getenv('FRONTEND_URL', 'http://localhost:5173'),
+           "www.codeprolk.com"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,6 +25,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+Base.metadata.create_all(bind=engine)
+
+
+@app.on_event("startup")
+def startup_event():
+    create_default_admin()
 
 
 def get_current_user(token: str = Depends(lambda: None), db: Session = Depends(get_db)):

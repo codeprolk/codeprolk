@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+// const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 function currentMonth() {
   return new Date().toISOString().slice(0, 7);
@@ -18,7 +18,7 @@ export default function Leaderboard() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`${BACKEND}/api/leaderboard?month=${month}&page=${page}`)
+    fetch("/api/leaderboard?month=${month}&page=${page}")
       .then(async (response) => {
         const data = await response.json();
         if (!response.ok)

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+// const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -15,7 +15,7 @@ export default function Register() {
     e.preventDefault();
     setError(null);
     setRegistered(false);
-    const res = await fetch(`${BACKEND}/api/auth/register`, {
+    const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password }),

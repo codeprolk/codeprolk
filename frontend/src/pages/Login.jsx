@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { setToken } from "../utils/auth";
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+// const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,7 +13,7 @@ export default function Login() {
   const submit = async (e) => {
     e.preventDefault();
     setError(null);
-    const res = await fetch(`${BACKEND}/api/auth/login`, {
+    const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
