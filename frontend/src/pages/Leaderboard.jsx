@@ -18,7 +18,7 @@ export default function Leaderboard() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch("/api/leaderboard?month=${month}&page=${page}")
+    fetch(`/api/leaderboard?month=${month}&page=${page}`)
       .then(async (response) => {
         const data = await response.json();
         if (!response.ok)
