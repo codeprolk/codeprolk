@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Link,
+  NavLink,
   useNavigate,
 } from "react-router-dom";
 
@@ -19,6 +20,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import QuizPage from "./pages/Quiz";
 import AdminPage from "./pages/Admin";
+import Blog from "./pages/Blog";
+import AdminBlog from "./pages/AdminBlog";
 import Leaderboard from "./pages/Leaderboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { getToken, getTokenPayload, logout } from "./utils/auth";
@@ -383,46 +386,47 @@ function SiteHeader({ menuOpen, setMenuOpen }) {
       </button>
 
       <nav className={`site-nav ${menuOpen ? "open" : ""}`}>
-        <Link to="/" onClick={() => setMenuOpen(false)}>
+        <NavLink to="/" end onClick={() => setMenuOpen(false)}>
           HOME
-        </Link>
-        <Link to="/services" onClick={() => setMenuOpen(false)}>
+        </NavLink>
+        <NavLink to="/services" onClick={() => setMenuOpen(false)}>
           SERVICES
-        </Link>
-        <Link to="/courses" onClick={() => setMenuOpen(false)}>
+        </NavLink>
+        <NavLink to="/blog" onClick={() => setMenuOpen(false)}>BLOG</NavLink>
+        <NavLink to="/courses" onClick={() => setMenuOpen(false)}>
           COURSES
-        </Link>
-        <Link to="/about" onClick={() => setMenuOpen(false)}>
+        </NavLink>
+        <NavLink to="/about" onClick={() => setMenuOpen(false)}>
           ABOUT
-        </Link>
-        <Link to="/contact" onClick={() => setMenuOpen(false)}>
+        </NavLink>
+        <NavLink to="/contact" onClick={() => setMenuOpen(false)}>
           CONTACT
-        </Link>
-        <Link
+        </NavLink>
+        <NavLink
           className="leaderboard-link"
           to="/leaderboard"
           onClick={() => setMenuOpen(false)}
         >
           LEADERBOARD
-        </Link>
+        </NavLink>
         {token && (
-          <Link to="/quiz" onClick={() => setMenuOpen(false)}>
+          <NavLink to="/quiz" onClick={() => setMenuOpen(false)}>
             QUIZ
-          </Link>
+          </NavLink>
         )}
         {isAdmin && (
-          <Link to="/admin" onClick={() => setMenuOpen(false)}>
+          <NavLink to="/admin" onClick={() => setMenuOpen(false)}>
             ADMIN
-          </Link>
+          </NavLink>
         )}
         {token ? (
           <button type="button" onClick={handleLogout}>
             LOGOUT
           </button>
         ) : (
-          <Link to="/login" onClick={() => setMenuOpen(false)}>
+          <NavLink to="/login" onClick={() => setMenuOpen(false)}>
             LOGIN
-          </Link>
+          </NavLink>
         )}
       </nav>
     </header>
@@ -580,6 +584,7 @@ function App() {
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/blog" element={<Blog />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
@@ -597,7 +602,10 @@ function App() {
               path="/admin"
               element={
                 <ProtectedRoute requireAdmin>
+                  <>
+                  <AdminBlog />
                   <AdminPage />
+                  </>
                 </ProtectedRoute>
               }
             />
