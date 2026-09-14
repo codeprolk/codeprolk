@@ -2,15 +2,26 @@ import React, { useRef, useEffect, useState } from "react";
 import { getToken, getTokenPayload } from "../utils/auth";
 
 function captionParts(caption) {
-  const lines = caption.trim().split(/\r?\n/);
+  const lines = caption.normalize("NFKC").trim().split(/\r?\n/);
   return { heading: lines[0], body: lines.slice(1).join("\n").trim() };
+}
+
+function StyledText({ text }) {
+  const emojiPattern = /(\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?(?:\p{Emoji_Modifier})?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?(?:\p{Emoji_Modifier})?)*)/gu;
+  const emojiOnlyPattern = /^\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?(?:\p{Emoji_Modifier})?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?(?:\p{Emoji_Modifier})?)*$/u;
+
+  return text.split(emojiPattern).map((part, index) =>
+    emojiOnlyPattern.test(part)
+      ? <span className="cp-blog-emoji" key={index} aria-hidden="true">{part}</span>
+      : <React.Fragment key={index}>{part}</React.Fragment>
+  );
 }
 
 function CaptionText({ text }) {
   return text.split(/(https?:\/\/[^\s]+)/g).map((part, index) =>
     /^https?:\/\//.test(part)
       ? <a key={index} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
-      : <React.Fragment key={index}>{part}</React.Fragment>
+      : <StyledText key={index} text={part} />
   );
 }
 
@@ -273,6 +284,9 @@ export default function Blog() {
                   className={`cp-blog-post ${expandedPostId === post.id ? "cp-blog-post-expanded" : ""}`}
                   key={post.id}
                 >
+                  <div className="cp-blog-post-backdrop" aria-hidden="true">
+                    <img src={post.image_url} alt="" loading={index === 0 ? "eager" : "lazy"} />
+                  </div>
                   <div className="cp-blog-index">
                     <span>Post</span>
                     <strong>{String(index + 1).padStart(2, "0")}</strong>
@@ -326,17 +340,22 @@ export default function Blog() {
                       </div>
                     ) : (
                       <>
-                        <h2>{captionParts(post.caption).heading}</h2>
-                        <p className={`cp-blog-caption ${expandedPostId === post.id ? "expanded" : ""}`}>
+                        <h2><StyledText text={captionParts(post.caption).heading} /></h2>
+                        <p
+                          id={`blog-post-body-${post.id}`}
+                          className={`cp-blog-caption ${expandedPostId === post.id ? "expanded" : ""}`}
+                        >
                           <CaptionText text={captionParts(post.caption).body} />
                         </p>
                         {captionParts(post.caption).body && (
                           <button
                             className="cp-blog-read-more"
                             type="button"
+                            aria-expanded={expandedPostId === post.id}
+                            aria-controls={`blog-post-body-${post.id}`}
                             onClick={() => setExpandedPostId(expandedPostId === post.id ? null : post.id)}
                           >
-                            {expandedPostId === post.id ? "Show less" : "Read post"}
+                            <span>{expandedPostId === post.id ? "Show less" : "Read post"}</span>
                           </button>
                         )}
                       </>

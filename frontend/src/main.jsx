@@ -5,6 +5,7 @@ import { loadSlim } from '@tsparticles/slim';
 
 import App from './App.jsx';
 import './styles.css';
+import './blog.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
