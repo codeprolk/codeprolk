@@ -2,15 +2,26 @@ import React, { useRef, useEffect, useState } from "react";
 import { getToken, getTokenPayload } from "../utils/auth";
 
 function captionParts(caption) {
-  const lines = caption.trim().split(/\r?\n/);
+  const lines = caption.normalize("NFKC").trim().split(/\r?\n/);
   return { heading: lines[0], body: lines.slice(1).join("\n").trim() };
+}
+
+function StyledText({ text }) {
+  const emojiPattern = /(\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?(?:\p{Emoji_Modifier})?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?(?:\p{Emoji_Modifier})?)*)/gu;
+  const emojiOnlyPattern = /^\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?(?:\p{Emoji_Modifier})?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?(?:\p{Emoji_Modifier})?)*$/u;
+
+  return text.split(emojiPattern).map((part, index) =>
+    emojiOnlyPattern.test(part)
+      ? <span className="cp-blog-emoji" key={index} aria-hidden="true">{part}</span>
+      : <React.Fragment key={index}>{part}</React.Fragment>
+  );
 }
 
 function CaptionText({ text }) {
   return text.split(/(https?:\/\/[^\s]+)/g).map((part, index) =>
     /^https?:\/\//.test(part)
       ? <a key={index} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
-      : <React.Fragment key={index}>{part}</React.Fragment>
+      : <StyledText key={index} text={part} />
   );
 }
 
@@ -42,14 +53,15 @@ export default function Blog() {
   const [busyPostId, setBusyPostId] = useState(null);
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [assetBusy, setAssetBusy] = useState("");
+  const [assetPreviews, setAssetPreviews] = useState({});
   const heroInputRef = useRef(null);
   const closingInputRef = useRef(null);
   const token = getToken();
   const isAdmin = getTokenPayload(token)?.role === "admin";
   const heroPost = data.posts[0];
   const heroTitle = heroPost ? captionParts(heroPost.caption).heading : "CodePRO LK Blog";
-  const heroImage = assets.hero?.image_url;
-  const closingImage = assets.closing?.image_url;
+  const heroImage = assetPreviews.hero || assets.hero?.image_url;
+  const closingImage = assetPreviews.closing || assets.closing?.image_url;
 
   const loadPosts = (signal) => {
     setLoading(true);
@@ -79,6 +91,12 @@ export default function Blog() {
     loadPosts(controller.signal);
     return () => controller.abort();
   }, []);
+
+  useEffect(() => (
+    () => {
+      Object.values(assetPreviews).forEach((url) => URL.revokeObjectURL(url));
+    }
+  ), [assetPreviews]);
 
   const beginEdit = (post) => {
     setEditingPostId(post.id);
@@ -161,6 +179,17 @@ export default function Blog() {
       return;
     }
 
+    const previewUrl = URL.createObjectURL(file);
+    setAssetPreviews((current) => {
+      if (current[key]) {
+        URL.revokeObjectURL(current[key]);
+      }
+
+      return {
+        ...current,
+        [key]: previewUrl,
+      };
+    });
     setAssetBusy(key);
     setError("");
     setMessage("");
@@ -184,6 +213,15 @@ export default function Blog() {
       setAssets((current) => ({ ...current, [key]: body }));
       setMessage(key === "hero" ? "Top blog image updated." : "Bottom blog image updated.");
     } catch (e) {
+      setAssetPreviews((current) => {
+        if (current[key]) {
+          URL.revokeObjectURL(current[key]);
+        }
+
+        const copy = { ...current };
+        delete copy[key];
+        return copy;
+      });
       setError(e.message || "Unable to update blog image.");
     } finally {
       setAssetBusy("");
@@ -246,6 +284,9 @@ export default function Blog() {
                   className={`cp-blog-post ${expandedPostId === post.id ? "cp-blog-post-expanded" : ""}`}
                   key={post.id}
                 >
+                  <div className="cp-blog-post-backdrop" aria-hidden="true">
+                    <img src={post.image_url} alt="" loading={index === 0 ? "eager" : "lazy"} />
+                  </div>
                   <div className="cp-blog-index">
                     <span>Post</span>
                     <strong>{String(index + 1).padStart(2, "0")}</strong>
@@ -299,17 +340,22 @@ export default function Blog() {
                       </div>
                     ) : (
                       <>
-                        <h2>{captionParts(post.caption).heading}</h2>
-                        <p className={`cp-blog-caption ${expandedPostId === post.id ? "expanded" : ""}`}>
+                        <h2><StyledText text={captionParts(post.caption).heading} /></h2>
+                        <p
+                          id={`blog-post-body-${post.id}`}
+                          className={`cp-blog-caption ${expandedPostId === post.id ? "expanded" : ""}`}
+                        >
                           <CaptionText text={captionParts(post.caption).body} />
                         </p>
                         {captionParts(post.caption).body && (
                           <button
                             className="cp-blog-read-more"
                             type="button"
+                            aria-expanded={expandedPostId === post.id}
+                            aria-controls={`blog-post-body-${post.id}`}
                             onClick={() => setExpandedPostId(expandedPostId === post.id ? null : post.id)}
                           >
-                            {expandedPostId === post.id ? "Show less" : "Read post"}
+                            <span>{expandedPostId === post.id ? "Show less" : "Read post"}</span>
                           </button>
                         )}
                       </>
