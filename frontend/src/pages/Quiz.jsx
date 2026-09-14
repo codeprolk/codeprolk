@@ -143,6 +143,9 @@ export default function QuizPage() {
     getTokenPayload(
       getToken(),
     )?.role === "admin";
+  const commentsUnlocked =
+    submitted ||
+    isAdmin;
 
   const lockedPreviewComments = [
     {
@@ -463,7 +466,7 @@ export default function QuizPage() {
 
 
   useEffect(() => {
-    if (!quiz?.id || !submitted) {
+    if (!quiz?.id || !commentsUnlocked) {
       return undefined;
     }
 
@@ -479,7 +482,7 @@ export default function QuizPage() {
       );
   }, [
     quiz?.id,
-    submitted,
+    commentsUnlocked,
     loadComments,
   ]);
 
@@ -503,7 +506,7 @@ export default function QuizPage() {
               poolLength,
           );
         },
-        submitted
+        commentsUnlocked
           ? 5500
           : 5500,
       );
@@ -514,7 +517,7 @@ export default function QuizPage() {
       );
   }, [
     comments.length,
-    submitted,
+    commentsUnlocked,
   ]);
 
   const addEmoji =
@@ -530,7 +533,7 @@ export default function QuizPage() {
     async (event) => {
       event.preventDefault();
 
-      if (!submitted) {
+      if (!commentsUnlocked) {
         setCommentMessage(
           "Take the quiz first to unlock comments.",
         );
@@ -863,7 +866,7 @@ export default function QuizPage() {
   const visibleLiveComments =
     liveComments.length
       ? liveComments
-      : submitted
+      : commentsUnlocked
         ? []
         : [
             ...lockedPreviewComments.slice(
@@ -879,6 +882,7 @@ export default function QuizPage() {
     <aside
       className={`quiz-live-panel ${
         submitted
+          || isAdmin
           ? "quiz-live-panel-open"
           : "quiz-live-panel-locked"
       }`}
@@ -896,12 +900,13 @@ export default function QuizPage() {
         </div>
         <span className="quiz-live-pill">
           {submitted
+            || isAdmin
             ? "Open"
             : "Locked"}
         </span>
       </div>
 
-      {!submitted && (
+      {!commentsUnlocked && (
         <button
           type="button"
           className="quiz-live-lock"
@@ -984,7 +989,7 @@ export default function QuizPage() {
         )}
       </div>
 
-      {!submitted ? (
+      {!commentsUnlocked ? (
         <p className="quiz-live-hint">
           Preview stays locked until your quiz attempt is submitted.
         </p>

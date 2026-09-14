@@ -664,7 +664,10 @@ def get_quiz_comments(
             detail="Quiz not found",
         )
 
-    can_comment = user_has_quiz_submission(db, user.id, quiz_id)
+    can_comment = (
+        user.role == "admin"
+        or user_has_quiz_submission(db, user.id, quiz_id)
+    )
 
     comments = (
         db.query(models.QuizComment)
@@ -700,7 +703,7 @@ def create_quiz_comment(
             detail="Quiz not found",
         )
 
-    if not user_has_quiz_submission(db, user.id, quiz_id):
+    if user.role != "admin" and not user_has_quiz_submission(db, user.id, quiz_id):
         raise HTTPException(
             status_code=403,
             detail="Take the quiz first to unlock comments.",

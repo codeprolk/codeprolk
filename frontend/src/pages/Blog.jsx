@@ -42,14 +42,15 @@ export default function Blog() {
   const [busyPostId, setBusyPostId] = useState(null);
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [assetBusy, setAssetBusy] = useState("");
+  const [assetPreviews, setAssetPreviews] = useState({});
   const heroInputRef = useRef(null);
   const closingInputRef = useRef(null);
   const token = getToken();
   const isAdmin = getTokenPayload(token)?.role === "admin";
   const heroPost = data.posts[0];
   const heroTitle = heroPost ? captionParts(heroPost.caption).heading : "CodePRO LK Blog";
-  const heroImage = assets.hero?.image_url;
-  const closingImage = assets.closing?.image_url;
+  const heroImage = assetPreviews.hero || assets.hero?.image_url;
+  const closingImage = assetPreviews.closing || assets.closing?.image_url;
 
   const loadPosts = (signal) => {
     setLoading(true);
@@ -79,6 +80,12 @@ export default function Blog() {
     loadPosts(controller.signal);
     return () => controller.abort();
   }, []);
+
+  useEffect(() => (
+    () => {
+      Object.values(assetPreviews).forEach((url) => URL.revokeObjectURL(url));
+    }
+  ), [assetPreviews]);
 
   const beginEdit = (post) => {
     setEditingPostId(post.id);
@@ -161,6 +168,17 @@ export default function Blog() {
       return;
     }
 
+    const previewUrl = URL.createObjectURL(file);
+    setAssetPreviews((current) => {
+      if (current[key]) {
+        URL.revokeObjectURL(current[key]);
+      }
+
+      return {
+        ...current,
+        [key]: previewUrl,
+      };
+    });
     setAssetBusy(key);
     setError("");
     setMessage("");
@@ -184,6 +202,15 @@ export default function Blog() {
       setAssets((current) => ({ ...current, [key]: body }));
       setMessage(key === "hero" ? "Top blog image updated." : "Bottom blog image updated.");
     } catch (e) {
+      setAssetPreviews((current) => {
+        if (current[key]) {
+          URL.revokeObjectURL(current[key]);
+        }
+
+        const copy = { ...current };
+        delete copy[key];
+        return copy;
+      });
       setError(e.message || "Unable to update blog image.");
     } finally {
       setAssetBusy("");
