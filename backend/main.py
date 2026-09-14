@@ -1095,18 +1095,28 @@ def delete_quiz_comment(
 
 @app.get("/api/admin/stats")
 def admin_stats(
+    month: str | None = None,
     _: models.User = Depends(get_admin_user),
     db: Session = Depends(get_db),
 ):
     now = local_naive_now()
 
-    month_start = now.replace(
-        day=1,
-        hour=0,
-        minute=0,
-        second=0,
-        microsecond=0,
-    )
+    if month:
+        try:
+            month_start = datetime.strptime(month, "%Y-%m")
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail="Month must use YYYY-MM format.",
+            )
+    else:
+        month_start = now.replace(
+            day=1,
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
 
     month_end = (
         month_start.replace(day=28)
