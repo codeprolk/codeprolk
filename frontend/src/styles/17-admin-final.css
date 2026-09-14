@@ -1,0 +1,6 @@
+/* Final admin width alignment after blog-specific rules. */
+.admin-page,
+.cp-blog-publisher {
+  width: min(1120px, calc(100% - 2rem)) !important;
+  max-width: 1120px !important;
+}
