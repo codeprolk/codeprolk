@@ -19,6 +19,7 @@ function readableDate(dateString) {
 }
 
 function MonthlyInsights({ days, month, onMonthChange }) {
+  const [activeDayIndex, setActiveDayIndex] = useState(null);
   const width = 920;
   const height = 330;
   const padding = { top: 28, right: 28, bottom: 48, left: 48 };
@@ -37,6 +38,15 @@ function MonthlyInsights({ days, month, onMonthChange }) {
     year: "numeric",
   });
   const gridValues = Array.from({ length: 5 }, (_, index) => Math.round((roundedMax / 4) * index));
+  const activeDay = activeDayIndex === null ? null : days[activeDayIndex];
+  const tooltipWidth = 196;
+  const tooltipHeight = 116;
+  const tooltipX = activeDayIndex === null
+    ? 0
+    : Math.min(width - padding.right - tooltipWidth, Math.max(padding.left, x(activeDayIndex) - tooltipWidth / 2));
+  const tooltipY = activeDayIndex === null
+    ? 0
+    : Math.max(8, Math.min(y(activeDay.attempts), y(activeDay.correct)) - tooltipHeight - 16);
 
   return (
     <div className="admin-insights">
@@ -70,6 +80,7 @@ function MonthlyInsights({ days, month, onMonthChange }) {
             viewBox={`0 0 ${width} ${height}`}
             role="img"
             aria-label={`Quiz attempts and correct answers for ${monthLabel}`}
+            onMouseLeave={() => setActiveDayIndex(null)}
           >
             {gridValues.map((value) => (
               <g key={value}>
@@ -92,14 +103,48 @@ function MonthlyInsights({ days, month, onMonthChange }) {
 
             {days.map((day, index) => (
               <g key={day.date}>
-                <circle cx={x(index)} cy={y(day.attempts)} r="5" className="admin-chart-point attempts" tabIndex="0">
-                  <title>{`${readableDate(day.date)}: ${day.attempts} attempts`}</title>
-                </circle>
-                <circle cx={x(index)} cy={y(day.correct)} r="5" className="admin-chart-point correct" tabIndex="0">
-                  <title>{`${readableDate(day.date)}: ${day.correct} correct`}</title>
-                </circle>
+                <rect
+                  x={x(index) - Math.max(8, chartWidth / Math.max(days.length - 1, 1) / 2)}
+                  y={padding.top}
+                  width={Math.max(16, chartWidth / Math.max(days.length - 1, 1))}
+                  height={chartHeight}
+                  className="admin-chart-day-target"
+                  tabIndex="0"
+                  role="button"
+                  aria-label={`${readableDate(day.date)}: ${day.attempts} attempts, ${day.correct} correct, ${Math.max(0, day.attempts - day.correct)} incorrect`}
+                  onMouseEnter={() => setActiveDayIndex(index)}
+                  onFocus={() => setActiveDayIndex(index)}
+                  onClick={() => setActiveDayIndex(index)}
+                />
+                <circle cx={x(index)} cy={y(day.attempts)} r="5" className={`admin-chart-point attempts ${activeDayIndex === index ? "active" : ""}`} />
+                <circle cx={x(index)} cy={y(day.correct)} r="5" className={`admin-chart-point correct ${activeDayIndex === index ? "active" : ""}`} />
               </g>
             ))}
+
+            {activeDay && (
+              <g className="admin-chart-tooltip" aria-hidden="true" pointerEvents="none">
+                <line
+                  x1={x(activeDayIndex)}
+                  x2={x(activeDayIndex)}
+                  y1={padding.top}
+                  y2={padding.top + chartHeight}
+                  className="admin-chart-guide"
+                />
+                <rect x={tooltipX} y={tooltipY} width={tooltipWidth} height={tooltipHeight} rx="5" className="admin-chart-tooltip-box" />
+                <text x={tooltipX + 16} y={tooltipY + 24} className="admin-chart-tooltip-date">
+                  {readableDate(activeDay.date)}
+                </text>
+                <circle cx={tooltipX + 18} cy={tooltipY + 49} r="4" className="admin-chart-tooltip-dot attempts" />
+                <text x={tooltipX + 30} y={tooltipY + 53} className="admin-chart-tooltip-label">Quiz attempts</text>
+                <text x={tooltipX + tooltipWidth - 16} y={tooltipY + 53} textAnchor="end" className="admin-chart-tooltip-value">{activeDay.attempts}</text>
+                <circle cx={tooltipX + 18} cy={tooltipY + 75} r="4" className="admin-chart-tooltip-dot correct" />
+                <text x={tooltipX + 30} y={tooltipY + 79} className="admin-chart-tooltip-label">Correct</text>
+                <text x={tooltipX + tooltipWidth - 16} y={tooltipY + 79} textAnchor="end" className="admin-chart-tooltip-value">{activeDay.correct}</text>
+                <circle cx={tooltipX + 18} cy={tooltipY + 101} r="4" className="admin-chart-tooltip-dot incorrect" />
+                <text x={tooltipX + 30} y={tooltipY + 105} className="admin-chart-tooltip-label">Incorrect</text>
+                <text x={tooltipX + tooltipWidth - 16} y={tooltipY + 105} textAnchor="end" className="admin-chart-tooltip-value">{Math.max(0, activeDay.attempts - activeDay.correct)}</text>
+              </g>
+            )}
           </svg>
         </div>
       </div>

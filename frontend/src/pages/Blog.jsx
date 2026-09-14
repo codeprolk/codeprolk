@@ -327,13 +327,19 @@ export default function Blog() {
                         />
                         <div>
                           <button
+                            className="cp-blog-editor-save"
                             type="button"
                             onClick={() => saveCaption(post.id)}
                             disabled={busyPostId === post.id}
                           >
                             {busyPostId === post.id ? "Saving..." : "Save"}
                           </button>
-                          <button type="button" onClick={cancelEdit} disabled={busyPostId === post.id}>
+                          <button
+                            className="cp-blog-editor-cancel"
+                            type="button"
+                            onClick={cancelEdit}
+                            disabled={busyPostId === post.id}
+                          >
                             Cancel
                           </button>
                         </div>

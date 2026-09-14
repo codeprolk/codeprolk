@@ -195,6 +195,7 @@
 }
 
 .admin-chart-point {
+  pointer-events: none;
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
   transition: r .18s ease;
@@ -210,10 +211,68 @@
   stroke: #42d392;
 }
 
-.admin-chart-point:hover,
-.admin-chart-point:focus {
+.admin-chart-point.active {
   r: 7;
+}
+
+.admin-chart-day-target {
+  fill: transparent;
+  cursor: crosshair;
   outline: none;
+}
+
+.admin-chart-day-target:focus-visible {
+  fill: rgba(125, 211, 252, .045);
+}
+
+.admin-chart-guide {
+  stroke: rgba(203, 213, 225, .38);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  vector-effect: non-scaling-stroke;
+}
+
+.admin-chart-tooltip-box {
+  fill: rgba(3, 11, 25, .97);
+  stroke: rgba(125, 211, 252, .32);
+  stroke-width: 1;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .42));
+}
+
+.admin-chart-tooltip-date,
+.admin-chart-tooltip-label,
+.admin-chart-tooltip-value {
+  font-family: 'PP Neue Montreal Text', Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-chart-tooltip-date {
+  fill: #f8fbff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-chart-tooltip-label {
+  fill: #9fb2ca;
+  font-size: 11px;
+}
+
+.admin-chart-tooltip-value {
+  fill: #f8fbff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-chart-tooltip-dot.attempts {
+  fill: #59b8ff;
+}
+
+.admin-chart-tooltip-dot.correct {
+  fill: #42d392;
+}
+
+.admin-chart-tooltip-dot.incorrect {
+  fill: #fb7185;
 }
 
 @media (max-width: 700px) {
