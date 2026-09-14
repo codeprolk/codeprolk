@@ -4,3 +4,309 @@
   width: min(1120px, calc(100% - 2rem)) !important;
   max-width: 1120px !important;
 }
+
+/* Monthly quiz analytics */
+.admin-insights-section {
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(11, 25, 46, .98), rgba(4, 12, 27, .98));
+  border-color: rgba(148, 181, 217, .18);
+}
+
+.admin-insights {
+  color: #eef5ff;
+}
+
+.admin-insights-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: clamp(1.4rem, 3vw, 2.25rem);
+  border-bottom: 1px solid rgba(148, 181, 217, .14);
+}
+
+.admin-insights-header h3 {
+  margin: .2rem 0 .45rem;
+  color: #f8fbff;
+  font-family: 'PP Neue Montreal Title', Arial, sans-serif;
+  font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+  font-weight: 300;
+  line-height: 1;
+}
+
+.admin-insights-header p:last-child {
+  margin: 0;
+  color: #9fb2ca;
+  font-size: .94rem;
+}
+
+.admin-insights-kicker {
+  margin: 0;
+  color: #67e8f9;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.admin-month-control {
+  display: grid;
+  flex: 0 0 12rem;
+  gap: .45rem;
+  margin: 0;
+}
+
+.admin-month-control span {
+  color: #9fb2ca;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.admin-page .admin-month-control input {
+  width: 100%;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: .65rem .8rem;
+  color: #eef5ff;
+  color-scheme: dark;
+  background: rgba(2, 8, 23, .74);
+  border: 1px solid rgba(125, 211, 252, .25);
+  border-radius: 5px;
+}
+
+.admin-insights-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-bottom: 1px solid rgba(148, 181, 217, .14);
+}
+
+.admin-insights-summary > div {
+  min-width: 0;
+  padding: 1.35rem clamp(1rem, 3vw, 2rem);
+  border-right: 1px solid rgba(148, 181, 217, .12);
+}
+
+.admin-insights-summary > div:last-child {
+  border-right: 0;
+}
+
+.admin-insights-summary span {
+  display: block;
+  margin-bottom: .35rem;
+  color: #91a6c0;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.admin-insights-summary strong {
+  display: block;
+  color: #f8fbff;
+  font-family: 'PP Neue Montreal Title', Arial, sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.65rem);
+  font-weight: 400;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-chart-shell {
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.admin-chart-legend {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: .75rem;
+  color: #b6c5d8;
+  font-size: .78rem;
+}
+
+.admin-chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+}
+
+.admin-chart-legend i {
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.admin-chart-legend .attempts {
+  color: #59b8ff;
+  background: #59b8ff;
+}
+
+.admin-chart-legend .correct {
+  color: #42d392;
+  background: #42d392;
+}
+
+.admin-chart-scroll {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-color: rgba(125, 211, 252, .28) transparent;
+}
+
+.admin-insights-chart {
+  display: block;
+  width: 100%;
+  min-width: 680px;
+  height: auto;
+  overflow: visible;
+}
+
+.admin-chart-gridline {
+  stroke: rgba(148, 181, 217, .14);
+  stroke-width: 1;
+  stroke-dasharray: 3 7;
+}
+
+.admin-chart-axis-label {
+  fill: #7187a3;
+  font-family: 'PP Neue Montreal Text', Arial, sans-serif;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-chart-line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.admin-chart-line.attempts {
+  stroke: #59b8ff;
+  filter: drop-shadow(0 0 6px rgba(89, 184, 255, .35));
+}
+
+.admin-chart-line.correct {
+  stroke: #42d392;
+  filter: drop-shadow(0 0 6px rgba(66, 211, 146, .3));
+}
+
+.admin-chart-point {
+  pointer-events: none;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  transition: r .18s ease;
+}
+
+.admin-chart-point.attempts {
+  fill: #0b1e37;
+  stroke: #59b8ff;
+}
+
+.admin-chart-point.correct {
+  fill: #0b1e37;
+  stroke: #42d392;
+}
+
+.admin-chart-point.active {
+  r: 7;
+}
+
+.admin-chart-day-target {
+  fill: transparent;
+  cursor: crosshair;
+  outline: none;
+}
+
+.admin-chart-day-target:focus-visible {
+  fill: rgba(125, 211, 252, .045);
+}
+
+.admin-chart-guide {
+  stroke: rgba(203, 213, 225, .38);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  vector-effect: non-scaling-stroke;
+}
+
+.admin-chart-tooltip-box {
+  fill: rgba(3, 11, 25, .97);
+  stroke: rgba(125, 211, 252, .32);
+  stroke-width: 1;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .42));
+}
+
+.admin-chart-tooltip-date,
+.admin-chart-tooltip-label,
+.admin-chart-tooltip-value {
+  font-family: 'PP Neue Montreal Text', Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-chart-tooltip-date {
+  fill: #f8fbff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-chart-tooltip-label {
+  fill: #9fb2ca;
+  font-size: 11px;
+}
+
+.admin-chart-tooltip-value {
+  fill: #f8fbff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-chart-tooltip-dot.attempts {
+  fill: #59b8ff;
+}
+
+.admin-chart-tooltip-dot.correct {
+  fill: #42d392;
+}
+
+.admin-chart-tooltip-dot.incorrect {
+  fill: #fb7185;
+}
+
+@media (max-width: 700px) {
+  .admin-insights-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .admin-month-control {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .admin-insights-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-insights-summary > div {
+    border-right: 0;
+    border-bottom: 1px solid rgba(148, 181, 217, .12);
+  }
+
+  .admin-insights-summary > div:last-child {
+    border-bottom: 0;
+  }
+
+  .admin-chart-legend {
+    justify-content: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-chart-point {
+    transition: none;
+  }
+}
