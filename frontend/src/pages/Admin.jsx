@@ -162,6 +162,9 @@ export default function AdminPage() {
   const [stats, setStats] = useState([]);
   const [statsMonth, setStatsMonth] = useState(today.slice(0, 7));
   const [question, setQuestion] = useState("");
+  const [quizType, setQuizType] = useState("multiple_choice");
+  const [wordSearchItems, setWordSearchItems] = useState(Array.from({ length: 5 }, () => ({ word: "", clue: "" })));
+  const [durationSeconds, setDurationSeconds] = useState(180);
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correct, setCorrect] = useState(0);
   const [explanation, setExplanation] = useState("");
@@ -170,6 +173,13 @@ export default function AdminPage() {
   const [savingQuiz, setSavingQuiz] = useState(false);
   const [loading, setLoading] = useState(true);
   const [deletingQuizId, setDeletingQuizId] = useState(null);
+
+  const longestWordLength = Math.max(0, ...wordSearchItems.map((item) => item.word.length));
+  const totalWordLetters = wordSearchItems.reduce((total, item) => total + item.word.length, 0);
+  const automaticGridSize = Math.max(
+    10,
+    Math.min(20, Math.max(longestWordLength, Math.ceil(Math.sqrt(totalWordLetters * 3)))),
+  );
 
   const token = getToken();
   const headers = { Authorization: `Bearer ${token}` };
@@ -229,6 +239,9 @@ export default function AdminPage() {
   const resetQuizForm = () => {
     setEditingQuizId(null);
     setQuestion("");
+    setQuizType("multiple_choice");
+    setWordSearchItems(Array.from({ length: 5 }, () => ({ word: "", clue: "" })));
+    setDurationSeconds(180);
     setOptions(["", "", "", ""]);
     setCorrect(0);
     setExplanation("");
@@ -243,6 +256,9 @@ export default function AdminPage() {
 
     setEditingQuizId(quiz.id);
     setQuestion(quiz.question);
+    setQuizType(quiz.quiz_type || "multiple_choice");
+    setWordSearchItems(quiz.word_search_items?.length ? quiz.word_search_items : Array.from({ length: 5 }, () => ({ word: "", clue: "" })));
+    setDurationSeconds(quiz.duration_seconds || 180);
     setOptions(Array.isArray(quiz.options) ? [...quiz.options] : ["", "", "", ""]);
     setCorrect(quiz.correct_index ?? 0);
     setExplanation(quiz.explanation || "");
@@ -330,8 +346,13 @@ export default function AdminPage() {
       return;
     }
 
-    if (cleanedOptions.some((option) => !option)) {
+    if (quizType === "multiple_choice" && cleanedOptions.some((option) => !option)) {
       setMessage("Please complete all four answer options.");
+      return;
+    }
+
+    if (quizType === "word_search" && wordSearchItems.some((item) => !item.word.trim() || !item.clue.trim())) {
+      setMessage(`Please complete all ${wordSearchItems.length} words and clues.`);
       return;
     }
 
@@ -344,11 +365,14 @@ export default function AdminPage() {
 
     try {
       const payload = {
+        quiz_type: quizType,
         question: cleanedQuestion,
-        options: cleanedOptions,
+        options: quizType === "multiple_choice" ? cleanedOptions : [],
         correct_index: Number(correct),
         explanation: explanation.trim(),
         date,
+        word_search_items: quizType === "word_search" ? wordSearchItems : null,
+        duration_seconds: Number(durationSeconds),
       };
 
       const response = await fetch(
@@ -490,6 +514,13 @@ export default function AdminPage() {
             Choose today or any future date. The quiz will be available on that date automatically.
           </small>
 
+          <label htmlFor="quiz-type">Quiz Format</label>
+          <select id="quiz-type" value={quizType} onChange={(event) => setQuizType(event.target.value)}>
+            <option value="multiple_choice">Multiple choice</option>
+            <option value="word_search">Word search challenge</option>
+          </select>
+          <small>Most days can remain multiple choice. Select word search only for special challenge days.</small>
+
           <label htmlFor="quiz-question">Question</label>
           <textarea
             id="quiz-question"
@@ -498,7 +529,7 @@ export default function AdminPage() {
             onChange={(event) => setQuestion(event.target.value)}
           />
 
-          {options.map((option, index) => (
+          {quizType === "multiple_choice" && options.map((option, index) => (
             <div key={index}>
               <label htmlFor={`quiz-option-${index}`}>Option {index + 1}</label>
               <input
@@ -514,7 +545,7 @@ export default function AdminPage() {
             </div>
           ))}
 
-          <label htmlFor="correct-option">Correct Option</label>
+          {quizType === "multiple_choice" && <><label htmlFor="correct-option">Correct Option</label>
           <select
             id="correct-option"
             value={correct}
@@ -525,9 +556,49 @@ export default function AdminPage() {
                 Option {index + 1}: {option || "Empty"}
               </option>
             ))}
-          </select>
+          </select></>}
 
-          <label htmlFor="quiz-explanation">Answer Explanation</label>
+          {quizType === "word_search" && (
+            <fieldset className="admin-word-search-fields">
+              <legend>Hidden words and clues</legend>
+              <label htmlFor="word-search-count">Number of hidden words</label>
+              <select
+                id="word-search-count"
+                value={wordSearchItems.length}
+                onChange={(event) => {
+                  const count = Number(event.target.value);
+                  setWordSearchItems((current) => Array.from(
+                    { length: count },
+                    (_, index) => current[index] || { word: "", clue: "" },
+                  ));
+                }}
+              >
+                {Array.from({ length: 8 }, (_, index) => index + 3).map((count) => (
+                  <option value={count} key={count}>{count} words</option>
+                ))}
+              </select>
+              <p className="admin-word-search-grid-note">
+                Automatic grid: <strong>{automaticGridSize} × {automaticGridSize}</strong>
+                <span> Adjusts to word length and puzzle density.</span>
+              </p>
+              {wordSearchItems.map((item, index) => (
+                <div className="admin-word-search-row" key={index}>
+                  <label htmlFor={`word-search-word-${index}`}>Word {index + 1}</label>
+                  <input id={`word-search-word-${index}`} value={item.word} maxLength={15} placeholder="e.g. XGBOOST" onChange={(event) => setWordSearchItems((current) => current.map((entry, itemIndex) => itemIndex === index ? { ...entry, word: event.target.value.toUpperCase().replace(/[^A-Z]/g, "") } : entry))} />
+                  <label htmlFor={`word-search-clue-${index}`}>Clue {index + 1}</label>
+                  <input id={`word-search-clue-${index}`} value={item.clue} maxLength={180} placeholder="A clue shown only when this word is active" onChange={(event) => setWordSearchItems((current) => current.map((entry, itemIndex) => itemIndex === index ? { ...entry, clue: event.target.value } : entry))} />
+                </div>
+              ))}
+              <label htmlFor="word-search-duration">Time limit</label>
+              <select id="word-search-duration" value={durationSeconds} onChange={(event) => setDurationSeconds(Number(event.target.value))}>
+                <option value={120}>2 minutes</option>
+                <option value={180}>3 minutes</option>
+                <option value={300}>5 minutes</option>
+              </select>
+            </fieldset>
+          )}
+
+          {quizType === "multiple_choice" && <><label htmlFor="quiz-explanation">Answer Explanation</label>
           <textarea
             id="quiz-explanation"
             className="admin-quiz-explanation"
@@ -539,7 +610,7 @@ export default function AdminPage() {
           />
           <small>
             Optional. Participants will see this explanation after submitting their answer.
-          </small>
+          </small></>}
 
           <p>
             This quiz will become available automatically on{" "}

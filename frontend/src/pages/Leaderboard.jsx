@@ -50,13 +50,13 @@ export default function Leaderboard() {
         <>
           <div className="ranking-table-scroll">
             <table>
-              <thead><tr><th scope="col">Rank</th><th scope="col">Username</th><th scope="col">Correct</th><th scope="col">Attempts</th></tr></thead>
+              <thead><tr><th scope="col">Rank</th><th scope="col">Username</th><th scope="col">Points</th><th scope="col">Attempts</th></tr></thead>
               <tbody>
                 {entries.map((entry) => (
                   <tr key={entry.username} className={`rank-${entry.rank}`}>
                     <td><span className="rank-badge">{entry.rank}</span></td>
                     <td className="rank-username">{entry.username}</td>
-                    <td>{entry.correct}</td><td>{entry.attempts}</td>
+                    <td><strong>{entry.correct}</strong></td><td>{entry.attempts}</td>
                   </tr>
                 ))}
               </tbody>

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import List
+from typing import List, Optional, Literal
 from datetime import date
 
 
@@ -35,19 +35,16 @@ class UserOut(BaseModel):
 
 
 class QuizCreate(BaseModel):
+    quiz_type: Literal["multiple_choice", "word_search"] = "multiple_choice"
     question: str = Field(
         ...,
         min_length=1,
     )
 
-    options: List[str] = Field(
-        ...,
-        min_items=4,
-        max_items=4,
-    )
+    options: List[str] = Field(default_factory=list, max_items=4)
 
     correct_index: int = Field(
-        ...,
+        default=0,
         ge=0,
         le=3,
     )
@@ -58,6 +55,13 @@ class QuizCreate(BaseModel):
     )
 
     date: date
+    word_search_items: Optional[List[dict]] = None
+    duration_seconds: int = Field(default=180, ge=60, le=900)
+
+
+class WordSearchSelection(BaseModel):
+    quiz_id: int
+    cells: List[List[int]] = Field(..., min_items=2, max_items=30)
 
 
 class QuizOut(BaseModel):

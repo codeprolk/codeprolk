@@ -20,6 +20,7 @@ import {
   getToken,
   getTokenPayload,
 } from "../utils/auth";
+import WordSearchQuiz from "../components/WordSearchQuiz";
 
 
 export default function QuizPage() {
@@ -1325,6 +1326,24 @@ export default function QuizPage() {
               </Link>
             </>
           )}
+        </div>
+      </section>
+    );
+  }
+
+  if (quiz.quiz_type === "word_search") {
+    return (
+      <section className="challenge-surface">
+        <div className="quiz-live-layout">
+          {streakPanel}
+          <WordSearchQuiz
+            quiz={quiz}
+            onComplete={async () => {
+              await loadQuiz({ showLoading: false });
+              await loadStreak();
+            }}
+          />
+          {commentPanel}
         </div>
       </section>
     );

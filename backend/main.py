@@ -9,6 +9,9 @@ import hashlib
 import os
 import secrets
 import smtplib
+import random
+import string
+import math
 
 import models
 from blog import make_blog_router
@@ -71,6 +74,97 @@ def local_naive_now():
     safely be compared with the existing PostgreSQL timestamp columns.
     """
     return sri_lanka_now().replace(tzinfo=None)
+
+
+def word_search_layout(quiz, user_id, stage=0):
+    items = (quiz.word_search_config or {}).get("items", [])
+    words = ["".join(ch for ch in item["word"].upper() if ch.isalpha()) for item in items]
+    longest_word = max((len(word) for word in words), default=8)
+    letter_density_size = math.ceil(math.sqrt(sum(len(word) for word in words) * 3))
+    size = max(10, min(20, max(longest_word, letter_density_size)))
+    seed = hashlib.sha256(f"{quiz.id}:{user_id}:{stage}:{os.getenv('SECRET_KEY', 'codeprolk')}".encode()).digest()
+    rng = random.Random(seed)
+    grid = [[rng.choice(string.ascii_uppercase) for _ in range(size)] for _ in range(size)]
+    placements = []
+    directions = [(0,1),(1,0),(1,1),(1,-1),(0,-1),(-1,0),(-1,-1),(-1,1)]
+    for item in items:
+        word = "".join(ch for ch in item["word"].upper() if ch.isalpha())
+        placed = None
+        for _ in range(500):
+            dr, dc = rng.choice(directions)
+            row, col = rng.randrange(size), rng.randrange(size)
+            end_row, end_col = row + dr*(len(word)-1), col + dc*(len(word)-1)
+            if not (0 <= end_row < size and 0 <= end_col < size):
+                continue
+            cells = [(row + dr*i, col + dc*i) for i in range(len(word))]
+            if all(grid[r][c] == word[i] or not any((r,c) in p["cells"] for p in placements) for i,(r,c) in enumerate(cells)):
+                placed = cells
+                for i,(r,c) in enumerate(cells): grid[r][c] = word[i]
+                break
+        if not placed:
+            raise HTTPException(status_code=500, detail="Unable to generate word search.")
+        placements.append({"word": word, "clue": item.get("clue", "Find the hidden term."), "cells": placed})
+    return grid, placements
+
+
+def word_search_payload(quiz, user, db):
+    progress = db.query(models.WordSearchProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        grid, placements = word_search_layout(quiz, user.id, 0)
+        return {
+            "grid": grid,
+            "found_count": 0,
+            "total_words": len(placements),
+            "found_words": [],
+            "found_paths": [],
+            "clue": placements[0]["clue"] if placements else None,
+            "remaining_seconds": quiz.duration_seconds,
+            "started": False,
+            "finished": False,
+            "score": 0,
+            "max_score": len(placements) * 2,
+            "time_bonus": 0,
+            "completion_reason": None,
+        }
+    found = list(progress.found_words or [])
+    grid, placements = word_search_layout(quiz, user.id, len(found))
+    elapsed = int((datetime.utcnow() - progress.started_at).total_seconds())
+    remaining = max(0, quiz.duration_seconds - elapsed)
+    completed_all = len(found) == len(placements)
+    timed_out = remaining == 0 and not completed_all
+    finished = bool(progress.completed_at) or timed_out or completed_all
+    submission = db.query(models.Submission).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if finished and not submission:
+        if not progress.completed_at:
+            progress.completed_at = datetime.utcnow()
+        time_bonus = min(len(placements), remaining // 30) if completed_all else 0
+        submission = models.Submission(
+            user_id=user.id,
+            quiz_id=quiz.id,
+            selected_index=-1,
+            is_correct=completed_all,
+            score=len(found) + time_bonus,
+            max_score=len(placements) * 2,
+        )
+        db.add(submission)
+        db.commit()
+    time_bonus = max(0, (submission.score - len(found))) if submission else 0
+    current = next((p for p in placements if p["word"] not in found), None)
+    return {
+        "grid": grid,
+        "found_count": len(found),
+        "total_words": len(placements),
+        "found_words": found if finished else [],
+        "found_paths": [placement["cells"] for placement in placements if placement["word"] in found],
+        "clue": current["clue"] if current and not finished else None,
+        "remaining_seconds": remaining,
+        "started": True,
+        "finished": finished,
+        "score": submission.score if submission else len(found),
+        "max_score": len(placements) * 2,
+        "time_bonus": time_bonus,
+        "completion_reason": "completed" if completed_all else "timeout" if timed_out else None,
+    }
 
 
 def sri_lanka_timestamp(value: datetime):
@@ -498,7 +592,11 @@ def get_today_quiz(
         "options": quiz.options,
         "date": str(quiz.date),
         "expiry": quiz.expiry.isoformat(),
+        "quiz_type": quiz.quiz_type,
     }
+
+    if quiz.quiz_type == "word_search":
+        quiz_data["word_search"] = word_search_payload(quiz, user, db)
 
     submission = (
         db.query(models.Submission)
@@ -683,6 +781,8 @@ def submit_answer(
         quiz_id=quiz.id,
         selected_index=sub.selected_index,
         is_correct=is_correct,
+        score=int(is_correct),
+        max_score=1,
     )
 
     db.add(submission)
@@ -694,6 +794,53 @@ def submit_answer(
         "correct_index": quiz.correct_index,
         "explanation": quiz.explanation or "",
     }
+
+
+@app.post("/api/quiz/word-search/select")
+def select_word_search(
+    selection: schemas.WordSearchSelection,
+    user: models.User = Depends(get_user_from_header),
+    db: Session = Depends(get_db),
+):
+    quiz = db.query(models.Quiz).filter_by(id=selection.quiz_id, quiz_type="word_search").first()
+    if not quiz or quiz.date != sri_lanka_today() or quiz.expiry < local_naive_now():
+        raise HTTPException(status_code=400, detail="This word search is not available.")
+    progress = db.query(models.WordSearchProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        progress = models.WordSearchProgress(user_id=user.id, quiz_id=quiz.id, found_words=[])
+        db.add(progress)
+        db.commit()
+        db.refresh(progress)
+    if progress.completed_at or (datetime.utcnow() - progress.started_at).total_seconds() >= quiz.duration_seconds:
+        return word_search_payload(quiz, user, db)
+    found = list(progress.found_words or [])
+    _, placements = word_search_layout(quiz, user.id, len(found))
+    selected = [tuple(cell) for cell in selection.cells]
+    match = next((p for p in placements if p["word"] not in found and (selected == p["cells"] or selected == list(reversed(p["cells"])))), None)
+    if match:
+        found.append(match["word"]); progress.found_words = found
+        if len(found) == len(placements): progress.completed_at = datetime.utcnow()
+        db.commit()
+    payload = word_search_payload(quiz, user, db)
+    payload["correct_selection"] = bool(match)
+    return payload
+
+
+@app.post("/api/quiz/{quiz_id}/word-search/start")
+def start_word_search(
+    quiz_id: int,
+    user: models.User = Depends(get_user_from_header),
+    db: Session = Depends(get_db),
+):
+    quiz = db.query(models.Quiz).filter_by(id=quiz_id, quiz_type="word_search").first()
+    if not quiz or quiz.date != sri_lanka_today() or quiz.expiry < local_naive_now():
+        raise HTTPException(status_code=400, detail="This word search is not available.")
+    progress = db.query(models.WordSearchProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        progress = models.WordSearchProgress(user_id=user.id, quiz_id=quiz.id, found_words=[])
+        db.add(progress)
+        db.commit()
+    return word_search_payload(quiz, user, db)
 
 
 def user_has_quiz_submission(
@@ -835,6 +982,14 @@ def create_quiz(
             detail="You cannot schedule a quiz for a past date.",
         )
 
+    if q.quiz_type == "multiple_choice" and (len(q.options) != 4 or any(not option.strip() for option in q.options)):
+        raise HTTPException(status_code=400, detail="Multiple-choice quizzes require four options.")
+    if q.quiz_type == "word_search":
+        items = q.word_search_items or []
+        words = ["".join(ch for ch in str(item.get("word", "")).upper() if ch.isalpha()) for item in items]
+        if not 3 <= len(words) <= 10 or any(len(word) < 3 or len(word) > 15 for word in words) or len(set(words)) != len(words):
+            raise HTTPException(status_code=400, detail="Word searches require 3–10 unique words of 3–15 letters.")
+
     # Keep exactly one active quiz per calendar date.
     existing = (
         db.query(models.Quiz)
@@ -862,6 +1017,9 @@ def create_quiz(
         date=q.date,
         expiry=quiz_expiry_for_date(q.date),
         is_active=True,
+        quiz_type=q.quiz_type,
+        word_search_config={"items": [{"word": words[index], "clue": str((q.word_search_items or [])[index].get("clue", "")).strip() or "Find the hidden term."} for index in range(len(words))]} if q.quiz_type == "word_search" else None,
+        duration_seconds=q.duration_seconds,
     )
 
     db.add(quiz)
@@ -912,6 +1070,9 @@ def admin_quizzes(
                 "expiry": q.expiry.isoformat(),
                 "is_active": q.is_active,
                 "status": quiz_status,
+                "quiz_type": q.quiz_type,
+                "word_search_items": (q.word_search_config or {}).get("items", []),
+                "duration_seconds": q.duration_seconds,
             }
         )
 
@@ -971,6 +1132,13 @@ def update_quiz(
 
     previous_correct_index = quiz.correct_index
 
+    if q.quiz_type == "multiple_choice" and (len(q.options) != 4 or any(not option.strip() for option in q.options)):
+        raise HTTPException(status_code=400, detail="Multiple-choice quizzes require four options.")
+    items = q.word_search_items or []
+    words = ["".join(ch for ch in str(item.get("word", "")).upper() if ch.isalpha()) for item in items]
+    if q.quiz_type == "word_search" and (not 3 <= len(words) <= 10 or any(len(word) < 3 or len(word) > 15 for word in words) or len(set(words)) != len(words)):
+        raise HTTPException(status_code=400, detail="Word searches require 3–10 unique words of 3–15 letters.")
+
     quiz.question = q.question
     quiz.options = q.options
     quiz.correct_index = q.correct_index
@@ -978,6 +1146,9 @@ def update_quiz(
     quiz.date = q.date
     quiz.expiry = quiz_expiry_for_date(q.date)
     quiz.is_active = True
+    quiz.quiz_type = q.quiz_type
+    quiz.word_search_config = {"items": [{"word": words[index], "clue": str(items[index].get("clue", "")).strip() or "Find the hidden term."} for index in range(len(words))]} if q.quiz_type == "word_search" else None
+    quiz.duration_seconds = q.duration_seconds
 
     if previous_correct_index != q.correct_index:
         submissions = db.query(models.Submission).filter(
@@ -988,6 +1159,8 @@ def update_quiz(
             submission.is_correct = (
                 submission.selected_index == q.correct_index
             )
+            submission.score = int(submission.is_correct)
+            submission.max_score = 1
 
     db.commit()
     db.refresh(quiz)
@@ -1357,13 +1530,14 @@ def leaderboard(
         if attempts == 0:
             continue
 
-        correct_submissions = [
+        scoring_submissions = [
             submission
             for submission in submissions
-            if submission.is_correct
+            if submission.score > 0
         ]
 
-        correct = len(correct_submissions)
+        correct = sum(submission.score for submission in submissions)
+        available_points = sum(submission.max_score for submission in submissions)
 
         # Preserve the corrected ranking rule:
         # when monthly scores are equal, the user who reached
@@ -1372,9 +1546,9 @@ def leaderboard(
             max(
                 submission.submitted_at
                 for submission
-                in correct_submissions
+                in scoring_submissions
             )
-            if correct_submissions
+            if scoring_submissions
             else min(
                 submission.submitted_at
                 for submission
@@ -1387,6 +1561,7 @@ def leaderboard(
                 "username": u.username,
                 "email": u.email,
                 "correct": correct,
+                "available_points": available_points,
                 "attempts": attempts,
                 "_score_reached_at": score_reached_at,
                 "_user_id": u.id,

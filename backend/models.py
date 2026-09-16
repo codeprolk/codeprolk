@@ -28,6 +28,9 @@ class Quiz(Base):
     options = Column(JSONB, nullable=False)
     correct_index = Column(Integer, nullable=False)
     explanation = Column(Text, nullable=False, default='')
+    quiz_type = Column(String(30), nullable=False, default='multiple_choice')
+    word_search_config = Column(JSONB, nullable=True)
+    duration_seconds = Column(Integer, nullable=False, default=180)
     date = Column(Date, nullable=False, index=True)
     expiry = Column(DateTime, nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
@@ -44,10 +47,22 @@ class Submission(Base):
     quiz_id = Column(Integer, ForeignKey('quizzes.id'), nullable=False)
     selected_index = Column(Integer, nullable=False)
     is_correct = Column(Boolean, nullable=False)
+    score = Column(Integer, nullable=False, default=0)
+    max_score = Column(Integer, nullable=False, default=1)
     submitted_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship('User', back_populates='submissions')
     quiz = relationship('Quiz', back_populates='submissions')
+
+
+class WordSearchProgress(Base):
+    __tablename__ = 'word_search_progress'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    quiz_id = Column(Integer, ForeignKey('quizzes.id', ondelete='CASCADE'), nullable=False, index=True)
+    found_words = Column(JSONB, nullable=False, default=list)
+    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    completed_at = Column(DateTime, nullable=True)
 
 
 class QuizComment(Base):
