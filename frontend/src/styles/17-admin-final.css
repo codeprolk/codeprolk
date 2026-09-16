@@ -11,6 +11,25 @@
   resize: vertical;
 }
 
+.admin-word-search-grid-note {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin: -.15rem 0 .9rem;
+  padding: .75rem .85rem;
+  color: #9fb2ca;
+  background: rgba(2, 8, 23, .48);
+  border-left: 2px solid #59b8ff;
+  font-size: .8rem;
+}
+
+.admin-word-search-grid-note strong {
+  color: #eef8ff;
+  font-size: .95rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .admin-insights-section {
   padding: 0;
   overflow: hidden;
@@ -314,4 +333,29 @@
   .admin-chart-point {
     transition: none;
   }
+}
+.admin-word-search-fields {
+  display: grid;
+  gap: 1rem;
+  margin: 1.25rem 0;
+  padding: 1.1rem;
+  border: 1px solid rgba(125, 211, 252, .18);
+  border-radius: .65rem;
+}
+
+.admin-word-search-fields legend {
+  padding: 0 .5rem;
+  color: #dcecff;
+  font-weight: 700;
+}
+
+.admin-word-search-row {
+  display: grid;
+  grid-template-columns: auto minmax(8rem, .8fr) auto minmax(12rem, 1.4fr);
+  align-items: center;
+  gap: .65rem;
+}
+
+@media (max-width: 720px) {
+  .admin-word-search-row { grid-template-columns: 1fr; gap: .35rem; }
 }
