@@ -52,6 +52,11 @@ class QuizCreate(BaseModel):
         le=3,
     )
 
+    explanation: str = Field(
+        default="",
+        max_length=4000,
+    )
+
     date: date
 
 

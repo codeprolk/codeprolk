@@ -27,6 +27,7 @@ class Quiz(Base):
     question = Column(Text, nullable=False)
     options = Column(JSONB, nullable=False)
     correct_index = Column(Integer, nullable=False)
+    explanation = Column(Text, nullable=False, default='')
     date = Column(Date, nullable=False, index=True)
     expiry = Column(DateTime, nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)

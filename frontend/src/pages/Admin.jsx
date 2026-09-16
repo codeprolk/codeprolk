@@ -164,6 +164,7 @@ export default function AdminPage() {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correct, setCorrect] = useState(0);
+  const [explanation, setExplanation] = useState("");
   const [date, setDate] = useState(today);
   const [message, setMessage] = useState(null);
   const [savingQuiz, setSavingQuiz] = useState(false);
@@ -230,6 +231,7 @@ export default function AdminPage() {
     setQuestion("");
     setOptions(["", "", "", ""]);
     setCorrect(0);
+    setExplanation("");
     setDate(today);
   };
 
@@ -243,6 +245,7 @@ export default function AdminPage() {
     setQuestion(quiz.question);
     setOptions(Array.isArray(quiz.options) ? [...quiz.options] : ["", "", "", ""]);
     setCorrect(quiz.correct_index ?? 0);
+    setExplanation(quiz.explanation || "");
     setDate(quiz.date);
     setMessage(`Editing quiz scheduled for ${readableDate(quiz.date)}.`);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -344,6 +347,7 @@ export default function AdminPage() {
         question: cleanedQuestion,
         options: cleanedOptions,
         correct_index: Number(correct),
+        explanation: explanation.trim(),
         date,
       };
 
@@ -522,6 +526,20 @@ export default function AdminPage() {
               </option>
             ))}
           </select>
+
+          <label htmlFor="quiz-explanation">Answer Explanation</label>
+          <textarea
+            id="quiz-explanation"
+            className="admin-quiz-explanation"
+            value={explanation}
+            maxLength={4000}
+            rows={5}
+            placeholder="Explain why the selected answer is correct. This appears only after a participant submits the quiz."
+            onChange={(event) => setExplanation(event.target.value)}
+          />
+          <small>
+            Optional. Participants will see this explanation after submitting their answer.
+          </small>
 
           <p>
             This quiz will become available automatically on{" "}
