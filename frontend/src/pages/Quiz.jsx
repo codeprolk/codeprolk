@@ -11,6 +11,12 @@ import {
 } from "react-router-dom";
 
 import {
+  CalendarCheck2,
+  Flame,
+  Trophy,
+} from "lucide-react";
+
+import {
   getToken,
   getTokenPayload,
 } from "../utils/auth";
@@ -114,6 +120,16 @@ export default function QuizPage() {
     animate,
     setAnimate,
   ] = useState(false);
+
+  const [
+    streak,
+    setStreak,
+  ] = useState(null);
+
+  const [
+    streakLoading,
+    setStreakLoading,
+  ] = useState(true);
 
   const lock =
     useRef(false);
@@ -405,6 +421,42 @@ export default function QuizPage() {
     );
 
 
+  const loadStreak =
+    useCallback(
+      async () => {
+        setStreakLoading(true);
+
+        try {
+          const response =
+            await fetch(
+              "/api/quiz/streak",
+              {
+                headers: {
+                  Authorization:
+                    `Bearer ${getToken()}`,
+                },
+                cache:
+                  "no-store",
+              },
+            );
+
+          if (!response.ok) {
+            throw new Error();
+          }
+
+          setStreak(
+            await response.json(),
+          );
+        } catch {
+          setStreak(null);
+        } finally {
+          setStreakLoading(false);
+        }
+      },
+      [],
+    );
+
+
   const loadComments =
     useCallback(
       async () => {
@@ -687,11 +739,13 @@ export default function QuizPage() {
    */
   useEffect(() => {
     loadQuiz();
+    loadStreak();
 
     // location.pathname is intentional:
     // when React returns to /quiz, we ask the backend again.
   }, [
     loadQuiz,
+    loadStreak,
     location.pathname,
   ]);
 
@@ -855,6 +909,7 @@ export default function QuizPage() {
 
         setSubmitted(true);
         setAnimate(true);
+        await loadStreak();
       } catch {
         setMessage(
           "Could not confirm your submission. Refresh to check whether your attempt was recorded before trying again.",
@@ -866,6 +921,104 @@ export default function QuizPage() {
         setSubmitting(false);
       }
     };
+
+
+  const streakPanel = (
+    <aside
+      className={`quiz-streak-panel ${
+        streak?.participated_today
+          ? "quiz-streak-complete"
+          : ""
+      }`}
+      aria-labelledby="quiz-streak-title"
+    >
+      <header className="quiz-streak-header">
+        <div className="quiz-streak-mark" aria-hidden="true">
+          <Flame strokeWidth={1.7} />
+        </div>
+        <div>
+          <p>Personal momentum</p>
+          <h3 id="quiz-streak-title">
+            Your learning streak
+          </h3>
+        </div>
+        <div className="quiz-streak-count">
+          <strong>{streak?.current_streak ?? 0}</strong>
+          <span>{streak?.current_streak === 1 ? "day" : "days"}</span>
+        </div>
+      </header>
+
+      {streakLoading ? (
+        <div className="quiz-streak-loading" aria-label="Loading streak" />
+      ) : streak ? (
+        <>
+          <div className="quiz-streak-timeline">
+            <span className="quiz-streak-rail" aria-hidden="true" />
+            {streak.timeline.map((day, index) => (
+              <div
+                className={`quiz-streak-day ${
+                  day.participated ? "is-complete" : ""
+                } ${day.is_today ? "is-today" : ""}`}
+                key={day.date}
+                style={{ "--streak-index": index }}
+                title={`${day.label}, ${day.date}: ${
+                  day.participated ? "quiz completed" : "not completed"
+                }`}
+              >
+                <span className="quiz-streak-day-label">{day.label}</span>
+                <span className="quiz-streak-node">
+                  {day.participated ? "✓" : day.day}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="quiz-streak-footer">
+            <div className="quiz-streak-progress-copy">
+              <span>
+                {streak.participated_today
+                  ? "Today's momentum secured"
+                  : "Complete today's quiz to keep it going"}
+              </span>
+              <strong>
+                {streak.days_to_milestone} to {streak.next_milestone}-day milestone
+              </strong>
+            </div>
+            <div className="quiz-streak-progress" aria-hidden="true">
+              <span
+                style={{
+                  width: `${Math.min(
+                    (streak.current_streak / streak.next_milestone) * 100,
+                    100,
+                  )}%`,
+                }}
+              />
+            </div>
+            <dl className="quiz-streak-stats">
+              <div>
+                <dt>
+                  <Trophy aria-hidden="true" />
+                  Personal best
+                </dt>
+                <dd>{streak.longest_streak} days</dd>
+              </div>
+              <div>
+                <dt>
+                  <CalendarCheck2 aria-hidden="true" />
+                  Total quiz days
+                </dt>
+                <dd>{streak.total_participation_days}</dd>
+              </div>
+            </dl>
+          </div>
+        </>
+      ) : (
+        <p className="quiz-streak-unavailable">
+          Streak details are temporarily unavailable.
+        </p>
+      )}
+    </aside>
+  );
 
 
   const liveComments =
@@ -1148,6 +1301,7 @@ export default function QuizPage() {
   ) {
     return (
       <section className="challenge-surface">
+        {streakPanel}
         <div className="quiz-page quiz-status-page">
           <h2>
             {loading
@@ -1180,7 +1334,7 @@ export default function QuizPage() {
   return (
     <section className="challenge-surface">
       <div className="quiz-live-layout">
-        {commentPanel}
+        {streakPanel}
 
         <div
           className={`quiz-page quiz-review ${
@@ -1465,6 +1619,8 @@ export default function QuizPage() {
           </p>
         )}
         </div>
+
+        {commentPanel}
       </div>
     </section>
   );

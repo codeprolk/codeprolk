@@ -538,6 +538,83 @@ def get_today_quiz(
     }
 
 
+@app.get("/api/quiz/streak")
+def get_quiz_streak(
+    user: models.User = Depends(get_user_from_header),
+    db: Session = Depends(get_db),
+):
+    today = sri_lanka_today()
+    participation_dates = {
+        row[0]
+        for row in (
+            db.query(models.Quiz.date)
+            .join(
+                models.Submission,
+                models.Submission.quiz_id == models.Quiz.id,
+            )
+            .filter(models.Submission.user_id == user.id)
+            .all()
+        )
+        if row[0] is not None
+    }
+
+    longest_streak = 0
+    running_streak = 0
+    previous_date = None
+
+    for participation_date in sorted(participation_dates):
+        if (
+            previous_date is not None
+            and participation_date == previous_date + timedelta(days=1)
+        ):
+            running_streak += 1
+        else:
+            running_streak = 1
+
+        longest_streak = max(longest_streak, running_streak)
+        previous_date = participation_date
+
+    # A streak remains alive until the end of the current day. This avoids
+    # showing zero before a member has had a chance to take today's quiz.
+    streak_anchor = (
+        today
+        if today in participation_dates
+        else today - timedelta(days=1)
+    )
+    current_streak = 0
+
+    while streak_anchor in participation_dates:
+        current_streak += 1
+        streak_anchor -= timedelta(days=1)
+
+    milestones = (3, 7, 14, 30, 60, 100)
+    next_milestone = next(
+        (milestone for milestone in milestones if milestone > current_streak),
+        current_streak + 25,
+    )
+
+    timeline = []
+    for days_ago in range(6, -1, -1):
+        timeline_date = today - timedelta(days=days_ago)
+        timeline.append({
+            "date": timeline_date.isoformat(),
+            "label": timeline_date.strftime("%a"),
+            "day": timeline_date.day,
+            "participated": timeline_date in participation_dates,
+            "is_today": timeline_date == today,
+        })
+
+    return {
+        "current_streak": current_streak,
+        "longest_streak": longest_streak,
+        "total_participation_days": len(participation_dates),
+        "participated_today": today in participation_dates,
+        "next_milestone": next_milestone,
+        "days_to_milestone": max(next_milestone - current_streak, 0),
+        "timeline": timeline,
+    }
+
+
 @app.post("/api/quiz/submit")
 def submit_answer(
     sub: schemas.SubmitAnswer,

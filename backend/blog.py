@@ -73,9 +73,11 @@ def post_json(post):
 
 
 def asset_json(asset):
+    version = int(asset.updated_at.replace(tzinfo=timezone.utc).timestamp())
+
     return {
         "key": asset.key,
-        "image_url": f"/api/blog/assets/{asset.key}/image",
+        "image_url": f"/api/blog/assets/{asset.key}/image?v={version}",
         "updated_at": asset.updated_at.replace(tzinfo=timezone.utc).isoformat(),
     }
 
@@ -242,7 +244,7 @@ def make_blog_router(require_admin):
             media_type=asset.image_type,
             headers={
                 "X-Content-Type-Options": "nosniff",
-                "Cache-Control": "public, max-age=3600",
+                "Cache-Control": "no-store, max-age=0",
             },
         )
 

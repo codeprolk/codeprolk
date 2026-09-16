@@ -375,7 +375,7 @@ export default function Blog() {
       </div>
       <footer
         className={`cp-blog-closing ${!closingImage ? "cp-blog-closing-empty" : ""}`}
-        style={closingImage ? { backgroundImage: `linear-gradient(180deg, rgba(2,6,23,.72), rgba(2,6,23,.84)), url(${closingImage})` } : undefined}
+        style={closingImage ? { backgroundImage: `linear-gradient(180deg, rgba(2,6,23,.28), rgba(2,6,23,.72)), url(${closingImage})` } : undefined}
       >
         {isAdmin && (
           <>
