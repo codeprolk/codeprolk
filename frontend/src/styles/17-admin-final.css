@@ -6,6 +6,11 @@
 }
 
 /* Monthly quiz analytics */
+.admin-page .admin-quiz-explanation {
+  min-height: 8rem;
+  resize: vertical;
+}
+
 .admin-insights-section {
   padding: 0;
   overflow: hidden;

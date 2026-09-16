@@ -505,6 +505,49 @@
 .quiz-review-incorrect .quiz-review-summary > strong { color: #fecaca; }
 .quiz-review-summary p { color: #c6d2e3; line-height: 1.65; }
 .quiz-review .quiz-review-locked { font-size: .9rem; margin: 1rem 0 1.5rem; }
+.quiz-answer-explanation {
+  position: relative;
+  margin: 1.35rem 0 1.5rem;
+  padding: 1.35rem 1.45rem 1.4rem;
+  overflow: hidden;
+  background: rgba(8, 25, 47, .72);
+  border: 1px solid rgba(103, 232, 249, .24);
+  border-left: 3px solid #67e8f9;
+  border-radius: 6px;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .04), 0 16px 36px rgba(0, 0, 0, .2);
+}
+.quiz-answer-explanation::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(103, 232, 249, .75), transparent);
+}
+.quiz-answer-explanation > span {
+  display: block;
+  margin-bottom: .35rem;
+  color: #67e8f9;
+  font-size: .67rem;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.quiz-answer-explanation h3 {
+  margin: 0 0 .65rem;
+  color: #f8fbff;
+  font-family: 'PP Neue Montreal Title', Arial, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.quiz-review-summary .quiz-answer-explanation p {
+  margin: 0;
+  color: #d5e1ef;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
 .quiz-review .quiz-status-link { display: inline-block; }
 .quiz-review-confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
 .quiz-review-confetti i { position: absolute; top: -20px; left: var(--x); width: 8px; height: 14px; background: var(--color); border-radius: 2px; opacity: 0; animation: quizReviewFall 2.5s ease-out var(--delay) both; }
@@ -1072,6 +1115,11 @@
   font-size: clamp(2.8rem, 7vw, 4.7rem);
   letter-spacing: 0;
 }
+.challenge-surface .quiz-live-layout .quiz-review > h2::before,
+.challenge-surface .quiz-live-layout .quiz-review > h2::after {
+  width: 100%;
+  max-width: none;
+}
 .quiz-review .quiz-review-question {
   padding: 1rem 1.05rem;
   color: #edf6ff;
@@ -1100,6 +1148,42 @@
   border: 1px solid rgba(148,163,184,.14);
   border-radius: .95rem;
 }
+
+/* Keep quiz typography consistent with the rest of the CodePRO LK site. */
+.challenge-surface .quiz-live-layout .quiz-review > h2,
+.quiz-review .quiz-review-summary > strong,
+.quiz-review .quiz-answer-explanation h3,
+.quiz-live-panel h3 {
+  font-family: 'PP Neue Montreal Title', Arial, sans-serif;
+  letter-spacing: 0;
+}
+
+.quiz-review .quiz-review-question,
+.quiz-review .quiz-review-option-text,
+.quiz-review .quiz-review-summary > p,
+.quiz-review .quiz-answer-explanation p,
+.quiz-live-lock,
+.quiz-comment-meta strong,
+.quiz-comment-bubble p,
+.quiz-live-hint,
+.quiz-comment-message,
+.quiz-comments-empty,
+.quiz-comment-form label,
+.quiz-comment-form textarea,
+.quiz-anonymous-toggle {
+  font-family: 'PP Neue Montreal Text', Arial, sans-serif;
+  letter-spacing: 0;
+}
+
+.quiz-comment-meta strong,
+.quiz-comment-bubble p,
+.quiz-live-hint,
+.quiz-comment-message,
+.quiz-comments-empty,
+.quiz-comment-form textarea {
+  font-weight: 600;
+}
+
 .quiz-live-panel {
   margin-top: 1.25rem;
   border-radius: 1.1rem;
@@ -1273,4 +1357,3 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
-

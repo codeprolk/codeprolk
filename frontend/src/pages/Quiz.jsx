@@ -51,6 +51,11 @@ export default function QuizPage() {
   ] = useState(null);
 
   const [
+    explanation,
+    setExplanation,
+  ] = useState("");
+
+  const [
     message,
     setMessage,
   ] = useState(null);
@@ -335,6 +340,8 @@ export default function QuizPage() {
             null,
           );
 
+          setExplanation("");
+
           setAnimate(false);
           setComments([]);
           setCommentBody("");
@@ -363,6 +370,12 @@ export default function QuizPage() {
               data.submission
                 .correct_index ??
                 null,
+            );
+
+            setExplanation(
+              data.submission
+                .explanation ||
+                "",
             );
           }
 
@@ -833,6 +846,11 @@ export default function QuizPage() {
         setCorrectIndex(
           data.correct_index ??
             null,
+        );
+
+        setExplanation(
+          data.explanation ||
+            "",
         );
 
         setSubmitted(true);
@@ -1393,12 +1411,20 @@ export default function QuizPage() {
             <p>
               {result ===
               "correct"
-                ? "Excellent work! Stay tuned to our WhatsApp channel for the answer and a short explanation."
+                ? "Excellent work! You selected the correct answer."
                 : result ===
                     "incorrect"
-                  ? "Keep learning! Stay tuned to our WhatsApp channel to see the correct answer and understand why."
-                  : "Stay tuned to our WhatsApp channel for the answer and explanation."}
+                  ? "Keep learning. Review the correct answer and explanation below."
+                  : "Your answer has been recorded."}
             </p>
+
+            {explanation && (
+              <div className="quiz-answer-explanation">
+                <span>Answer insight</span>
+                <h3>Why this is correct</h3>
+                <p>{explanation}</p>
+              </div>
+            )}
 
             <p className="quiz-review-locked">
               No attempts

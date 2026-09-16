@@ -46,6 +46,10 @@ def migrate_users_table():
             "NOT NULL DEFAULT TRUE"
         ))
         connection.execute(text(
+            "ALTER TABLE quizzes ADD COLUMN IF NOT EXISTS explanation TEXT "
+            "NOT NULL DEFAULT ''"
+        ))
+        connection.execute(text(
             "UPDATE quizzes SET is_active = TRUE WHERE date >= CURRENT_DATE"
         ))
         connection.execute(text(

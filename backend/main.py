@@ -520,6 +520,7 @@ def get_today_quiz(
                 "selected_index": submission.selected_index,
                 "is_correct": submission.is_correct,
                 "correct_index": quiz.correct_index,
+                "explanation": quiz.explanation or "",
             },
         }
 
@@ -614,6 +615,7 @@ def submit_answer(
         "ok": True,
         "is_correct": is_correct,
         "correct_index": quiz.correct_index,
+        "explanation": quiz.explanation or "",
     }
 
 
@@ -779,6 +781,7 @@ def create_quiz(
         question=q.question,
         options=q.options,
         correct_index=q.correct_index,
+        explanation=q.explanation.strip(),
         date=q.date,
         expiry=quiz_expiry_for_date(q.date),
         is_active=True,
@@ -827,6 +830,7 @@ def admin_quizzes(
                 "question": q.question,
                 "options": q.options,
                 "correct_index": q.correct_index,
+                "explanation": q.explanation or "",
                 "date": str(q.date),
                 "expiry": q.expiry.isoformat(),
                 "is_active": q.is_active,
@@ -893,6 +897,7 @@ def update_quiz(
     quiz.question = q.question
     quiz.options = q.options
     quiz.correct_index = q.correct_index
+    quiz.explanation = q.explanation.strip()
     quiz.date = q.date
     quiz.expiry = quiz_expiry_for_date(q.date)
     quiz.is_active = True
