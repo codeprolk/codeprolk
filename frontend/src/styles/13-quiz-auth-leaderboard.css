@@ -1115,6 +1115,11 @@
   font-size: clamp(2.8rem, 7vw, 4.7rem);
   letter-spacing: 0;
 }
+.challenge-surface .quiz-live-layout .quiz-review > h2::before,
+.challenge-surface .quiz-live-layout .quiz-review > h2::after {
+  width: 100%;
+  max-width: none;
+}
 .quiz-review .quiz-review-question {
   padding: 1rem 1.05rem;
   color: #edf6ff;
