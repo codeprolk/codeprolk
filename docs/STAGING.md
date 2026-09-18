@@ -41,12 +41,9 @@ openssl rand -base64 48
 The first value can be used for `POSTGRES_PASSWORD`; update the password in
 both `POSTGRES_PASSWORD` and `DATABASE_URL`. Use the second for `JWT_SECRET`.
 
-Install the Nginx site and create the shared staging password:
+Install the Nginx site:
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y apache2-utils
-sudo htpasswd -c /etc/nginx/.htpasswd-codeprolk-staging codeprolk-review
 sudo cp deploy/nginx/staging.codeprolk.com.conf /etc/nginx/sites-available/staging.codeprolk.com
 sudo ln -s /etc/nginx/sites-available/staging.codeprolk.com /etc/nginx/sites-enabled/staging.codeprolk.com
 sudo nginx -t
@@ -67,8 +64,8 @@ After the HTTP site responds, issue the TLS certificate:
 sudo certbot --nginx -d staging.codeprolk.com
 ```
 
-Open `https://staging.codeprolk.com` and enter the Nginx review credentials,
-then sign in with the staging admin account configured in `.env.staging`.
+Open `https://staging.codeprolk.com` and sign in with the staging admin account
+configured in `.env.staging`.
 
 ## Routine staging updates
 
