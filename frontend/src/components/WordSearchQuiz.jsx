@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { CircleHelp, Clock3, Search, ShieldCheck } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { CircleHelp, Clock3, Play, Search, ShieldCheck } from "lucide-react";
 import { getToken, getTokenPayload } from "../utils/auth";
 
 function pathBetween(start, end) {
@@ -19,7 +19,6 @@ export default function WordSearchQuiz({ quiz, onComplete }) {
   const [hover, setHover] = useState(null);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const startRequest = useRef(null);
   const path = start && hover ? pathBetween(start, hover) : [];
   const selected = new Set(path.map(([row, col]) => `${row}-${col}`));
   const found = new Set((game.found_paths || []).flat().map(([row, col]) => `${row}-${col}`));
@@ -34,20 +33,19 @@ export default function WordSearchQuiz({ quiz, onComplete }) {
     if (game.started && game.remaining_seconds === 0 && !game.finished) onComplete();
   }, [game.started, game.remaining_seconds, game.finished, onComplete]);
 
-  const beginTimer = () => {
-    if (game.started || startRequest.current) return;
-    setGame((current) => ({ ...current, started: true }));
-    startRequest.current = fetch(`/api/quiz/${quiz.id}/word-search/start`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${getToken()}` },
-    }).then(async (response) => {
+  const beginChallenge = async () => {
+    if (game.started || busy) return;
+    setBusy(true); setMessage("");
+    try {
+      const response = await fetch(`/api/quiz/${quiz.id}/word-search/start`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || "Unable to start the challenge.");
-      return data;
-    }).catch((error) => {
-      setMessage(error.message);
-      throw error;
-    });
+      setGame(data);
+    } catch (error) { setMessage(error.message); }
+    finally { setBusy(false); }
   };
 
   const submitPath = async (end) => {
@@ -56,7 +54,6 @@ export default function WordSearchQuiz({ quiz, onComplete }) {
     if (cells.length < 3 || busy) return;
     setBusy(true); setMessage("");
     try {
-      if (startRequest.current) await startRequest.current;
       const response = await fetch("/api/quiz/word-search/select", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` }, body: JSON.stringify({ quiz_id: quiz.id, cells }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || "Unable to check that word.");
@@ -94,6 +91,19 @@ export default function WordSearchQuiz({ quiz, onComplete }) {
       ? `All words found${game.time_bonus ? ` with a ${game.time_bonus}-point speed bonus.` : "."}`
       : "";
 
+  if (!game.started) return (
+    <section className="word-search-quiz word-search-intro">
+      <span className="word-search-intro-icon"><Search /></span>
+      <p className="word-search-intro-kicker">WORD CHALLENGE</p>
+      <h2>{quiz.question}</h2>
+      <p>The puzzle and first clue stay sealed until you begin. Once opened, the countdown runs continuously.</p>
+      <div className="word-search-intro-meta"><span>{game.total_words} hidden words</span><i /><span>{game.remaining_seconds}s</span><i /><span>{game.max_score} pts</span></div>
+      <details className="word-search-guide"><summary><CircleHelp /> How to play</summary><ul><li>Drag horizontally, vertically, or diagonally.</li><li>Words may run forwards or backwards.</li><li>The grid changes after every discovery.</li><li>The timer starts when you press the button below.</li></ul></details>
+      <button type="button" className="word-search-start" onClick={beginChallenge} disabled={busy}><Play /> {busy ? "Preparing…" : "Start Word Challenge"}</button>
+      {message && <p role="alert">{message}</p>}
+    </section>
+  );
+
   return (
     <section className="word-search-quiz" onContextMenu={(event) => event.preventDefault()}>
       <header className="word-search-head">
@@ -109,7 +119,7 @@ export default function WordSearchQuiz({ quiz, onComplete }) {
         <ul>
           <li>Drag across a word in a straight horizontal, vertical, or diagonal line.</li>
           <li>Words may run forwards or backwards. Follow the current clue.</li>
-          <li>The timer starts only when you begin your first drag across the grid.</li>
+          <li>The timer starts when you press Start Word Challenge.</li>
           <li>After a discovery, the grid changes while every found word stays highlighted.</li>
           <li>Each word earns 1 point. Find them all to earn 1 bonus point per full 30 seconds remaining, capped at the number of words.</li>
         </ul>
@@ -135,7 +145,6 @@ export default function WordSearchQuiz({ quiz, onComplete }) {
             disabled={game.finished || busy}
             onPointerDown={(event) => {
               event.preventDefault();
-              beginTimer();
               setStart([rowIndex, colIndex]);
               setHover([rowIndex, colIndex]);
             }}

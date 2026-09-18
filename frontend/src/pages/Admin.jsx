@@ -39,21 +39,104 @@ function resizeChoices(choices, size) {
   return Array.from({ length: size }, (_, index) => choices[index] || "");
 }
 
-function MonthlyInsights({ days, month, onMonthChange }) {
+const OPTIMAL_TEMPLATES = {
+  machine_learning: [
+    { value: "learning_curve", label: "Learning curve / overfitting", title: "Catch overfitting", prompt: "Select where validation performance stops improving.", target_x: 65 },
+    { value: "roc_threshold", label: "ROC operating point", title: "Choose the threshold", prompt: "Select the threshold with the strongest overall model utility.", target_x: 55 },
+    { value: "precision_recall", label: "Precision–recall balance", title: "Balance precision and recall", prompt: "Select where precision and recall reach their best balance.", target_x: 50 },
+    { value: "bias_variance", label: "Bias–variance minimum", title: "Minimize total error", prompt: "Select the model complexity with the lowest combined error.", target_x: 52 },
+  ],
+  optimization: [
+    { value: "elbow_curve", label: "Elbow / diminishing returns", title: "Find the elbow", prompt: "Select where added complexity begins producing only small gains.", target_x: 45 },
+    { value: "convergence", label: "Convergence plateau", title: "Detect convergence", prompt: "Select where training loss has effectively stabilized.", target_x: 60 },
+    { value: "saturation", label: "Performance saturation", title: "Find saturation", prompt: "Select where additional resources stop producing meaningful gains.", target_x: 58 },
+    { value: "regularization", label: "Regularization sweet spot", title: "Tune regularization", prompt: "Select the regularization strength with the best validation score.", target_x: 48 },
+  ],
+  mathematics: [
+    { value: "linear_intersection", label: "Linear intersection (y = mx + c)", title: "Find the intersection", prompt: "Select where the two linear functions intersect.", target_x: 60 },
+    { value: "quadratic_vertex", label: "Quadratic vertex", title: "Locate the vertex", prompt: "Select the minimum point of the quadratic curve.", target_x: 50 },
+    { value: "piecewise_transition", label: "Piecewise transition", title: "Find the transition", prompt: "Select where the function changes its rate of growth.", target_x: 55 },
+    { value: "break_even", label: "Break-even point", title: "Find break-even", prompt: "Select where cost and return become equal.", target_x: 62 },
+  ],
+};
+
+function categoryForTemplate(type) {
+  return Object.entries(OPTIMAL_TEMPLATES).find(([, templates]) => templates.some((template) => template.value === type))?.[0] || "machine_learning";
+}
+
+function emptyOptimalPointRound(index) {
+  const defaults = [OPTIMAL_TEMPLATES.machine_learning[0], OPTIMAL_TEMPLATES.optimization[0], OPTIMAL_TEMPLATES.mathematics[0]];
+  const preset = defaults[index % defaults.length];
+  return { title: preset.title, prompt: preset.prompt, chart_type: preset.value, chart_category: categoryForTemplate(preset.value), target_x: preset.target_x, tolerance: 8, curve_strength: 1, noise: 1.2, explanation: "" };
+}
+
+function emptyOptimalPointRounds() {
+  return Array.from({ length: 3 }, (_, index) => emptyOptimalPointRound(index));
+}
+
+function optimalPreviewSeries(round) {
+  const target = Number(round.target_x || 50);
+  const strength = Number(round.curve_strength || 1);
+  const primary = [];
+  const secondary = [];
+  for (let x = 0; x <= 100; x += 5) {
+    let y;
+    if (round.chart_type === "elbow_curve") y = 18 + 72 * Math.exp(-x / Math.max(8, target / (2.8 * strength))) + Math.max(0, x - target) * 0.055;
+    else if (round.chart_type === "roc_threshold") y = 18 + 67 * Math.exp(-((x - target) ** 2) / (620 / strength));
+    else if (round.chart_type === "linear_intersection") {
+      const slope = 0.38 * strength;
+      y = 25 + slope * x;
+      secondary.push({ x, y: Math.max(5, Math.min(95, 25 + slope * target * 2 - slope * x)) });
+    } else if (["precision_recall", "break_even"].includes(round.chart_type)) {
+      const slope = (round.chart_type === "break_even" ? 0.5 : 0.52) * strength;
+      y = (round.chart_type === "break_even" ? 12 : 24) + slope * x;
+      const secondarySlope = round.chart_type === "break_even" ? 0.12 : -slope;
+      const secondaryY = round.chart_type === "break_even" ? 12 + slope * target + secondarySlope * (x - target) : 24 + slope * target * 2 - slope * x;
+      secondary.push({ x, y: Math.max(5, Math.min(95, secondaryY)) });
+    } else if (round.chart_type === "bias_variance") y = 20 + ((x - target) ** 2) / (95 / strength);
+    else if (["regularization", "quadratic_vertex"].includes(round.chart_type)) {
+      const direction = round.chart_type === "regularization" ? -1 : 1;
+      y = (direction < 0 ? 82 : 18) + direction * ((x - target) ** 2) / (92 / strength);
+    } else if (round.chart_type === "convergence") y = 18 + 70 * Math.exp(-x / Math.max(8, target / (2.5 * strength)));
+    else if (round.chart_type === "saturation") y = 18 + 68 * (1 - Math.exp(-x / Math.max(8, target / (2.5 * strength))));
+    else if (round.chart_type === "piecewise_transition") y = 18 + 0.68 * Math.min(x, target) + 0.13 * Math.max(0, x - target);
+    else y = 25 + 58 * (1 - Math.exp(-x / (24 / strength))) - Math.max(0, x - target) * (0.48 * strength);
+    primary.push({ x, y: Math.max(5, Math.min(95, y)) });
+  }
+  return { primary, secondary };
+}
+
+function OptimalPointAdminPreview({ round }) {
+  const { primary, secondary } = optimalPreviewSeries(round);
+  const line = (points) => points.map((point) => `${point.x},${100 - point.y}`).join(" ");
+  return <div className="admin-optimal-preview">
+    <header><span>LIVE ROUND PREVIEW</span><strong>{round.chart_type.replaceAll("_", " ")}</strong></header>
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`Preview of ${round.title}`}>
+      {[20,40,60,80].map((value) => <g key={value}><line x1="0" x2="100" y1={value} y2={value} /><line y1="0" y2="100" x1={value} x2={value} /></g>)}
+      <polyline points={line(primary)} />
+      {secondary.length > 0 && <polyline className="secondary" points={line(secondary)} />}
+      <line className="target-guide" x1={round.target_x} x2={round.target_x} y1="0" y2="100" />
+    </svg>
+    <footer><span>0</span><span>Approximate optimum: {round.target_x}%</span><span>100</span></footer>
+  </div>;
+}
+
+function MonthlyInsights({ days, month, uniqueParticipants, onMonthChange }) {
   const [activeDayIndex, setActiveDayIndex] = useState(null);
   const width = 920;
   const height = 330;
   const padding = { top: 28, right: 28, bottom: 48, left: 48 };
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
-  const maxValue = Math.max(1, ...days.flatMap((day) => [day.attempts, day.correct]));
+  const maxValue = Math.max(1, ...days.flatMap((day) => [day.participants, day.correct]));
   const roundedMax = Math.max(5, Math.ceil(maxValue / 5) * 5);
   const x = (index) => padding.left + (days.length <= 1 ? 0 : (index / (days.length - 1)) * chartWidth);
   const y = (value) => padding.top + chartHeight - (value / roundedMax) * chartHeight;
   const points = (key) => days.map((day, index) => `${x(index)},${y(day[key])}`).join(" ");
-  const totalAttempts = days.reduce((sum, day) => sum + day.attempts, 0);
   const totalCorrect = days.reduce((sum, day) => sum + day.correct, 0);
-  const accuracy = totalAttempts ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+  const earnedPoints = days.reduce((sum, day) => sum + day.earned_points, 0);
+  const availablePoints = days.reduce((sum, day) => sum + day.available_points, 0);
+  const scoreRate = availablePoints ? Math.round((earnedPoints / availablePoints) * 100) : 0;
   const monthLabel = new Date(`${month}-01T00:00:00`).toLocaleDateString(undefined, {
     month: "long",
     year: "numeric",
@@ -61,13 +144,13 @@ function MonthlyInsights({ days, month, onMonthChange }) {
   const gridValues = Array.from({ length: 5 }, (_, index) => Math.round((roundedMax / 4) * index));
   const activeDay = activeDayIndex === null ? null : days[activeDayIndex];
   const tooltipWidth = 196;
-  const tooltipHeight = 116;
+  const tooltipHeight = 90;
   const tooltipX = activeDayIndex === null
     ? 0
     : Math.min(width - padding.right - tooltipWidth, Math.max(padding.left, x(activeDayIndex) - tooltipWidth / 2));
   const tooltipY = activeDayIndex === null
     ? 0
-    : Math.max(8, Math.min(y(activeDay.attempts), y(activeDay.correct)) - tooltipHeight - 16);
+    : Math.max(8, Math.min(y(activeDay.participants), y(activeDay.correct)) - tooltipHeight - 16);
 
   return (
     <div className="admin-insights">
@@ -75,7 +158,7 @@ function MonthlyInsights({ days, month, onMonthChange }) {
         <div>
           <p className="admin-insights-kicker">QUIZ PERFORMANCE</p>
           <h3>Monthly Insights</h3>
-          <p>Daily participation and correct answers for {monthLabel}.</p>
+          <p>Unique participation and correct completions for {monthLabel}.</p>
         </div>
         <label className="admin-month-control">
           <span>Reporting month</span>
@@ -84,15 +167,15 @@ function MonthlyInsights({ days, month, onMonthChange }) {
       </header>
 
       <div className="admin-insights-summary" aria-label={`${monthLabel} summary`}>
-        <div><span>Participants</span><strong>{totalAttempts}</strong></div>
-        <div><span>Correct answers</span><strong>{totalCorrect}</strong></div>
-        <div><span>Accuracy</span><strong>{accuracy}%</strong></div>
+        <div><span>Unique participants</span><strong>{uniqueParticipants}</strong></div>
+        <div><span>Correct completions</span><strong>{totalCorrect}</strong></div>
+        <div><span>Average score</span><strong>{scoreRate}%</strong></div>
       </div>
 
       <div className="admin-chart-shell">
         <div className="admin-chart-legend" aria-hidden="true">
-          <span><i className="attempts" />Quiz attempts</span>
-          <span><i className="correct" />Correct answers</span>
+          <span><i className="attempts" />Unique participants</span>
+          <span><i className="correct" />Correct completions</span>
         </div>
 
         <div className="admin-chart-scroll">
@@ -100,7 +183,7 @@ function MonthlyInsights({ days, month, onMonthChange }) {
             className="admin-insights-chart"
             viewBox={`0 0 ${width} ${height}`}
             role="img"
-            aria-label={`Quiz attempts and correct answers for ${monthLabel}`}
+            aria-label={`Unique participants and correct completions for ${monthLabel}`}
             onMouseLeave={() => setActiveDayIndex(null)}
           >
             {gridValues.map((value) => (
@@ -119,7 +202,7 @@ function MonthlyInsights({ days, month, onMonthChange }) {
               ) : null;
             })}
 
-            <polyline points={points("attempts")} className="admin-chart-line attempts" />
+            <polyline points={points("participants")} className="admin-chart-line attempts" />
             <polyline points={points("correct")} className="admin-chart-line correct" />
 
             {days.map((day, index) => (
@@ -132,12 +215,12 @@ function MonthlyInsights({ days, month, onMonthChange }) {
                   className="admin-chart-day-target"
                   tabIndex="0"
                   role="button"
-                  aria-label={`${readableDate(day.date)}: ${day.attempts} attempts, ${day.correct} correct, ${Math.max(0, day.attempts - day.correct)} incorrect`}
+                  aria-label={`${readableDate(day.date)}: ${day.participants} unique participants, ${day.correct} correct, ${day.score_rate}% average score`}
                   onMouseEnter={() => setActiveDayIndex(index)}
                   onFocus={() => setActiveDayIndex(index)}
                   onClick={() => setActiveDayIndex(index)}
                 />
-                <circle cx={x(index)} cy={y(day.attempts)} r="5" className={`admin-chart-point attempts ${activeDayIndex === index ? "active" : ""}`} />
+                <circle cx={x(index)} cy={y(day.participants)} r="5" className={`admin-chart-point attempts ${activeDayIndex === index ? "active" : ""}`} />
                 <circle cx={x(index)} cy={y(day.correct)} r="5" className={`admin-chart-point correct ${activeDayIndex === index ? "active" : ""}`} />
               </g>
             ))}
@@ -156,14 +239,11 @@ function MonthlyInsights({ days, month, onMonthChange }) {
                   {readableDate(activeDay.date)}
                 </text>
                 <circle cx={tooltipX + 18} cy={tooltipY + 49} r="4" className="admin-chart-tooltip-dot attempts" />
-                <text x={tooltipX + 30} y={tooltipY + 53} className="admin-chart-tooltip-label">Quiz attempts</text>
-                <text x={tooltipX + tooltipWidth - 16} y={tooltipY + 53} textAnchor="end" className="admin-chart-tooltip-value">{activeDay.attempts}</text>
+                <text x={tooltipX + 30} y={tooltipY + 53} className="admin-chart-tooltip-label">Unique participants</text>
+                <text x={tooltipX + tooltipWidth - 16} y={tooltipY + 53} textAnchor="end" className="admin-chart-tooltip-value">{activeDay.participants}</text>
                 <circle cx={tooltipX + 18} cy={tooltipY + 75} r="4" className="admin-chart-tooltip-dot correct" />
                 <text x={tooltipX + 30} y={tooltipY + 79} className="admin-chart-tooltip-label">Correct</text>
                 <text x={tooltipX + tooltipWidth - 16} y={tooltipY + 79} textAnchor="end" className="admin-chart-tooltip-value">{activeDay.correct}</text>
-                <circle cx={tooltipX + 18} cy={tooltipY + 101} r="4" className="admin-chart-tooltip-dot incorrect" />
-                <text x={tooltipX + 30} y={tooltipY + 105} className="admin-chart-tooltip-label">Incorrect</text>
-                <text x={tooltipX + tooltipWidth - 16} y={tooltipY + 105} textAnchor="end" className="admin-chart-tooltip-value">{Math.max(0, activeDay.attempts - activeDay.correct)}</text>
               </g>
             )}
           </svg>
@@ -181,11 +261,14 @@ export default function AdminPage() {
   const [userSearch, setUserSearch] = useState("");
   const [userPage, setUserPage] = useState(1);
   const [stats, setStats] = useState([]);
+  const [statsUniqueParticipants, setStatsUniqueParticipants] = useState(0);
   const [statsMonth, setStatsMonth] = useState(today.slice(0, 7));
   const [question, setQuestion] = useState("");
   const [quizType, setQuizType] = useState("multiple_choice");
   const [wordSearchItems, setWordSearchItems] = useState(Array.from({ length: 5 }, () => ({ word: "", clue: "" })));
   const [bugHuntRounds, setBugHuntRounds] = useState(emptyBugHuntRounds);
+  const [optimalPointRounds, setOptimalPointRounds] = useState(emptyOptimalPointRounds);
+  const [activeOptimalPointRound, setActiveOptimalPointRound] = useState(0);
   const [activeBugHuntRound, setActiveBugHuntRound] = useState(0);
   const [durationSeconds, setDurationSeconds] = useState(180);
   const [options, setOptions] = useState(["", "", "", ""]);
@@ -211,6 +294,11 @@ export default function AdminPage() {
       (_, index) => current[index] || emptyBugHuntRound(index),
     ));
     setActiveBugHuntRound((current) => Math.min(current, count - 1));
+  };
+
+  const setOptimalPointRoundCount = (count) => {
+    setOptimalPointRounds((current) => Array.from({ length: count }, (_, index) => current[index] || emptyOptimalPointRound(index)));
+    setActiveOptimalPointRound((current) => Math.min(current, count - 1));
   };
 
   const token = getToken();
@@ -239,6 +327,7 @@ export default function AdminPage() {
       setQuizzes(quizData.quizzes || []);
       setUsers(userData.users || []);
       setStats(statsData.days || []);
+      setStatsUniqueParticipants(statsData.unique_participants || 0);
     } catch (error) {
       setMessage(error.message || "Unable to load the admin dashboard.");
     } finally {
@@ -258,6 +347,7 @@ export default function AdminPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || "Unable to load statistics.");
       setStats(data.days || []);
+      setStatsUniqueParticipants(data.unique_participants || 0);
     } catch (error) {
       setMessage(error.message || "Unable to load statistics.");
     }
@@ -274,6 +364,8 @@ export default function AdminPage() {
     setQuizType("multiple_choice");
     setWordSearchItems(Array.from({ length: 5 }, () => ({ word: "", clue: "" })));
     setBugHuntRounds(emptyBugHuntRounds());
+    setOptimalPointRounds(emptyOptimalPointRounds());
+    setActiveOptimalPointRound(0);
     setActiveBugHuntRound(0);
     setDurationSeconds(180);
     setOptions(["", "", "", ""]);
@@ -297,6 +389,8 @@ export default function AdminPage() {
       ...round,
       code_text: (round.code_lines || []).join("\n"),
     })) : emptyBugHuntRounds());
+    setOptimalPointRounds(quiz.optimal_point_rounds?.length ? quiz.optimal_point_rounds.map((round) => ({ ...round, chart_category: categoryForTemplate(round.chart_type), curve_strength: round.curve_strength ?? 1, noise: round.noise ?? 1.2 })) : emptyOptimalPointRounds());
+    setActiveOptimalPointRound(0);
     setActiveBugHuntRound(0);
     setDurationSeconds(quiz.duration_seconds || 180);
     setOptions(Array.isArray(quiz.options) ? [...quiz.options] : ["", "", "", ""]);
@@ -376,6 +470,13 @@ export default function AdminPage() {
       return;
     }
 
+    const incompleteOptimalRound = quizType === "optimal_point" ? optimalPointRounds.findIndex((round) => !round.title.trim() || !round.prompt.trim()) : -1;
+    if (incompleteOptimalRound !== -1) {
+      setActiveOptimalPointRound(incompleteOptimalRound);
+      setMessage(`Complete the title and instruction for Round ${incompleteOptimalRound + 1}.`);
+      return;
+    }
+
     if (date < today) {
       setMessage("You cannot schedule a quiz for a past date.");
       return;
@@ -397,6 +498,7 @@ export default function AdminPage() {
           code_lines: round.code_text.split("\n").filter((line) => line.trim()),
           code_text: undefined,
         })) : null,
+        optimal_point_rounds: quizType === "optimal_point" ? optimalPointRounds : null,
         duration_seconds: Number(durationSeconds),
       };
 
@@ -550,12 +652,19 @@ export default function AdminPage() {
           </small>
 
           <label htmlFor="quiz-type">Quiz Format</label>
-          <select id="quiz-type" value={quizType} onChange={(event) => setQuizType(event.target.value)}>
+          <select id="quiz-type" value={quizType} onChange={(event) => {
+            const nextType = event.target.value;
+            setQuizType(nextType);
+            if (nextType === "optimal_point") setDurationSeconds(90);
+            if (nextType === "bug_hunt") setDurationSeconds(90);
+            if (nextType === "word_search") setDurationSeconds(180);
+          }}>
             <option value="multiple_choice">Multiple choice</option>
             <option value="word_search">Word search challenge</option>
             <option value="bug_hunt">Bug Hunt challenge</option>
+            <option value="optimal_point">Find the Optimal Point</option>
           </select>
-          <small>Most days can remain multiple choice. Use Word Search or Bug Hunt for special challenge days.</small>
+          <small>Most days can remain multiple choice. Use the interactive formats for special challenge days.</small>
 
           <label htmlFor="quiz-question">Question</label>
           <textarea
@@ -729,6 +838,71 @@ export default function AdminPage() {
             </fieldset>
           )}
 
+          {quizType === "optimal_point" && (
+            <fieldset className="admin-bug-hunt-fields admin-optimal-fields">
+              <legend>Optimal Point rounds</legend>
+              <p className="admin-word-search-grid-note">Players inspect a generated model signal and click its optimal operating point. Each participant receives a subtly different curve.</p>
+              <div className="admin-bug-config-row">
+                <label htmlFor="optimal-round-count">Number of rounds</label>
+                <select id="optimal-round-count" value={optimalPointRounds.length} onChange={(event) => setOptimalPointRoundCount(Number(event.target.value))}>
+                  {[1,2,3,4,5].map((count) => <option value={count} key={count}>{count} round{count === 1 ? "" : "s"}</option>)}
+                </select>
+              </div>
+              <div className="admin-bug-round-selector" role="tablist" aria-label="Select an Optimal Point round">
+                {optimalPointRounds.map((round, index) => <button type="button" role="tab" aria-selected={activeOptimalPointRound === index} className={activeOptimalPointRound === index ? "is-active" : ""} onClick={() => setActiveOptimalPointRound(index)} key={index}><span>Round {index + 1}</span><small>{round.title && round.prompt ? "Ready" : "Needs details"}</small></button>)}
+              </div>
+              {optimalPointRounds.map((round, roundIndex) => {
+                if (roundIndex !== activeOptimalPointRound) return null;
+                const updateRound = (changes) => setOptimalPointRounds((current) => current.map((item, index) => index === roundIndex ? { ...item, ...changes } : item));
+                return <section className="admin-bug-hunt-round" role="tabpanel" key={roundIndex}>
+                  <header className="admin-bug-round-heading"><div><span>ROUND {roundIndex + 1} OF {optimalPointRounds.length}</span><h4>{round.title || `Round ${roundIndex + 1}`}</h4></div><strong>{roundIndex + 1}/{optimalPointRounds.length}</strong></header>
+                  <div className="admin-optimal-template-picker">
+                    <div className="admin-optimal-template-heading">
+                      <span>STEP 1</span>
+                      <div><strong>Choose a template family</strong><small>Select a category first, then choose one of its four graph templates.</small></div>
+                    </div>
+                    <div className="admin-optimal-category-tabs" role="tablist" aria-label={`Template category for round ${roundIndex + 1}`}>
+                      {[
+                        ["machine_learning", "Machine Learning"],
+                        ["optimization", "Optimization"],
+                        ["mathematics", "Mathematics"],
+                      ].map(([category, label]) => {
+                        const selectedCategory = round.chart_category || categoryForTemplate(round.chart_type);
+                        return <button type="button" role="tab" aria-selected={selectedCategory === category} className={selectedCategory === category ? "is-active" : ""} key={category} onClick={() => {
+                          const template = OPTIMAL_TEMPLATES[category][0];
+                          updateRound({ chart_category: category, chart_type: template.value, title: template.title, prompt: template.prompt, target_x: template.target_x });
+                        }}>{label}</button>;
+                      })}
+                    </div>
+                    <label htmlFor={`optimal-type-${roundIndex}`}>Available graph templates</label>
+                    <select id={`optimal-type-${roundIndex}`} value={round.chart_type} onChange={(event) => {
+                      const template = OPTIMAL_TEMPLATES[round.chart_category || categoryForTemplate(round.chart_type)].find((item) => item.value === event.target.value);
+                      updateRound({ chart_type: template.value, title: template.title, prompt: template.prompt, target_x: template.target_x });
+                    }}>{OPTIMAL_TEMPLATES[round.chart_category || categoryForTemplate(round.chart_type)].map((template) => <option value={template.value} key={template.value}>{template.label}</option>)}</select>
+                  </div>
+                  <label htmlFor={`optimal-title-${roundIndex}`}>Round title</label>
+                  <input id={`optimal-title-${roundIndex}`} value={round.title} maxLength={100} onChange={(event) => updateRound({ title: event.target.value })} />
+                  <label htmlFor={`optimal-prompt-${roundIndex}`}>Player instruction</label>
+                  <textarea id={`optimal-prompt-${roundIndex}`} rows={2} value={round.prompt} maxLength={240} onChange={(event) => updateRound({ prompt: event.target.value })} />
+                  <div className="admin-bug-options">
+                    <div><label htmlFor={`optimal-target-${roundIndex}`}>Optimum X position (%)</label><input id={`optimal-target-${roundIndex}`} type="number" min="15" max="85" value={round.target_x} onChange={(event) => updateRound({ target_x: Math.max(15, Math.min(85, Number(event.target.value))) })} /><small>Exact horizontal location, from 15 to 85.</small></div>
+                  </div>
+                  <OptimalPointAdminPreview round={round} />
+                  <div className="admin-optimal-parameters">
+                    <label htmlFor={`optimal-strength-${roundIndex}`}>Curve strength <input id={`optimal-strength-${roundIndex}`} type="number" min="0.5" max="2" step="0.1" value={round.curve_strength ?? 1} onChange={(event) => updateRound({ curve_strength: Number(event.target.value) })} /></label>
+                    <label htmlFor={`optimal-noise-${roundIndex}`}>Participant variation <input id={`optimal-noise-${roundIndex}`} type="number" min="0" max="5" step="0.2" value={round.noise ?? 1.2} onChange={(event) => updateRound({ noise: Number(event.target.value) })} /></label>
+                  </div>
+                  <label htmlFor={`optimal-tolerance-${roundIndex}`}>Full-score tolerance</label>
+                  <select id={`optimal-tolerance-${roundIndex}`} value={round.tolerance} onChange={(event) => updateRound({ tolerance: Number(event.target.value) })}><option value="5">Precise</option><option value="8">Balanced</option><option value="12">Beginner friendly</option></select>
+                  <label htmlFor={`optimal-explanation-${roundIndex}`}>Explanation shown after completion</label>
+                  <textarea id={`optimal-explanation-${roundIndex}`} rows={3} value={round.explanation} maxLength={600} onChange={(event) => updateRound({ explanation: event.target.value })} />
+                </section>;
+              })}
+              <label htmlFor="optimal-duration">Total time limit</label>
+              <select id="optimal-duration" value={durationSeconds} onChange={(event) => setDurationSeconds(Number(event.target.value))}><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="120">2 minutes</option></select>
+            </fieldset>
+          )}
+
           {quizType === "multiple_choice" && <><label htmlFor="quiz-explanation">Answer Explanation</label>
           <textarea
             id="quiz-explanation"
@@ -857,7 +1031,7 @@ export default function AdminPage() {
       </section>
 
       <section className="admin-section admin-insights-section">
-        <MonthlyInsights days={stats} month={statsMonth} onMonthChange={changeStatsMonth} />
+        <MonthlyInsights days={stats} month={statsMonth} uniqueParticipants={statsUniqueParticipants} onMonthChange={changeStatsMonth} />
       </section>
     </div>
   );
