@@ -7,7 +7,7 @@ export default defineConfig({
   envDir: "..",
   server: {
     host: "0.0.0.0",
-    allowedHosts: ["codeprolk.com", "www.codeprolk.com"],
+    allowedHosts: ["codeprolk.com", "www.codeprolk.com", "staging.codeprolk.com"],
     proxy: {
       "/api": {
         target: process.env.VITE_BACKEND_URL || "http://localhost:8000",
