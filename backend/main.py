@@ -110,14 +110,14 @@ def word_search_layout(quiz, user_id, stage=0):
 def word_search_payload(quiz, user, db):
     progress = db.query(models.WordSearchProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
     if not progress:
-        grid, placements = word_search_layout(quiz, user.id, 0)
+        _, placements = word_search_layout(quiz, user.id, 0)
         return {
-            "grid": grid,
+            "grid": [],
             "found_count": 0,
             "total_words": len(placements),
             "found_words": [],
             "found_paths": [],
-            "clue": placements[0]["clue"] if placements else None,
+            "clue": None,
             "remaining_seconds": quiz.duration_seconds,
             "started": False,
             "finished": False,
@@ -165,6 +165,250 @@ def word_search_payload(quiz, user, db):
         "time_bonus": time_bonus,
         "completion_reason": "completed" if completed_all else "timeout" if timed_out else None,
     }
+
+
+def bug_hunt_round_data(quiz, user_id, round_index):
+    rounds = (quiz.bug_hunt_config or {}).get("rounds", [])
+    if round_index < 0 or round_index >= len(rounds):
+        return None
+    source = rounds[round_index]
+    seed = hashlib.sha256(
+        f"bug-hunt:{quiz.id}:{user_id}:{round_index}:{os.getenv('SECRET_KEY', 'codeprolk')}".encode()
+    ).digest()
+    rng = random.Random(seed)
+    diagnosis_order = list(range(len(source["diagnoses"])))
+    fix_order = list(range(len(source["fixes"])))
+    rng.shuffle(diagnosis_order)
+    rng.shuffle(fix_order)
+    return {
+        "title": source.get("title", f"Round {round_index + 1}"),
+        "code_lines": source["code_lines"],
+        "diagnoses": [source["diagnoses"][index] for index in diagnosis_order],
+        "fixes": [source["fixes"][index] for index in fix_order],
+        "correct_line": int(source["buggy_line"]),
+        "correct_diagnosis": diagnosis_order.index(int(source["correct_diagnosis"])),
+        "correct_fix": fix_order.index(int(source["correct_fix"])),
+        "explanation": source.get("explanation", ""),
+    }
+
+
+def bug_hunt_payload(quiz, user, db):
+    rounds = (quiz.bug_hunt_config or {}).get("rounds", [])
+    progress = db.query(models.BugHuntProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        return {
+            "started": False,
+            "finished": False,
+            "round_number": 0,
+            "total_rounds": len(rounds),
+            "remaining_seconds": quiz.duration_seconds,
+            "score": 0,
+            "max_score": len(rounds) * 3 + 1,
+            "round": None,
+            "results": [],
+            "completion_reason": None,
+        }
+
+    elapsed = int((datetime.utcnow() - progress.started_at).total_seconds())
+    remaining = max(0, quiz.duration_seconds - elapsed)
+    answers = list(progress.answers or [])
+    completed_all = progress.current_round >= len(rounds)
+    timed_out = remaining == 0 and not completed_all
+    finished = completed_all or timed_out or bool(progress.completed_at)
+    base_score = sum(int(answer.get("points", 0)) for answer in answers)
+    perfect = completed_all and base_score == len(rounds) * 3
+    speed_bonus = 1 if perfect and remaining > 0 else 0
+    submission = db.query(models.Submission).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+
+    if finished and not submission:
+        if not progress.completed_at:
+            progress.completed_at = datetime.utcnow()
+        submission = models.Submission(
+            user_id=user.id,
+            quiz_id=quiz.id,
+            selected_index=-1,
+            is_correct=perfect,
+            score=base_score + speed_bonus,
+            max_score=len(rounds) * 3 + 1,
+        )
+        db.add(submission)
+        db.commit()
+
+    current = None if finished else bug_hunt_round_data(quiz, user.id, progress.current_round)
+    if current:
+        current = {key: value for key, value in current.items() if not key.startswith("correct_") and key != "explanation"}
+
+    return {
+        "started": True,
+        "finished": finished,
+        "round_number": min(progress.current_round + 1, len(rounds)),
+        "total_rounds": len(rounds),
+        "remaining_seconds": remaining,
+        "score": submission.score if submission else base_score,
+        "max_score": len(rounds) * 3 + 1,
+        "round": current,
+        "results": answers if finished else [],
+        "speed_bonus": speed_bonus if finished else 0,
+        "completion_reason": "completed" if completed_all else "timeout" if timed_out else None,
+    }
+
+
+def validate_bug_hunt_rounds(raw_rounds):
+    rounds = raw_rounds or []
+    if not 1 <= len(rounds) <= 5:
+        raise HTTPException(status_code=400, detail="Bug Hunt requires between one and five rounds.")
+    cleaned = []
+    for number, item in enumerate(rounds, start=1):
+        lines = [str(line).rstrip() for line in item.get("code_lines", []) if str(line).strip()]
+        diagnoses = [str(option).strip() for option in item.get("diagnoses", [])]
+        fixes = [str(option).strip() for option in item.get("fixes", [])]
+        buggy_line = int(item.get("buggy_line", -1))
+        correct_diagnosis = int(item.get("correct_diagnosis", -1))
+        correct_fix = int(item.get("correct_fix", -1))
+        if not 3 <= len(lines) <= 12 or not 3 <= len(diagnoses) <= 5 or not 3 <= len(fixes) <= 5:
+            raise HTTPException(status_code=400, detail=f"Bug Hunt round {number} requires 3–12 code lines and 3–5 diagnosis and repair choices.")
+        if not all(diagnoses) or not all(fixes) or not 0 <= buggy_line < len(lines) or not 0 <= correct_diagnosis < len(diagnoses) or not 0 <= correct_fix < len(fixes):
+            raise HTTPException(status_code=400, detail=f"Bug Hunt round {number} has incomplete or invalid answers.")
+        cleaned.append({
+            "title": str(item.get("title", f"Round {number}")).strip() or f"Round {number}",
+            "code_lines": lines,
+            "buggy_line": buggy_line,
+            "diagnoses": diagnoses,
+            "correct_diagnosis": correct_diagnosis,
+            "fixes": fixes,
+            "correct_fix": correct_fix,
+            "explanation": str(item.get("explanation", "")).strip(),
+        })
+    return cleaned
+
+
+OPTIMAL_POINT_TYPES = {
+    "learning_curve", "roc_threshold", "precision_recall", "bias_variance",
+    "elbow_curve", "convergence", "saturation", "regularization",
+    "linear_intersection", "quadratic_vertex", "piecewise_transition", "break_even",
+}
+
+
+def validate_optimal_point_rounds(raw_rounds):
+    rounds = raw_rounds or []
+    if not 1 <= len(rounds) <= 5:
+        raise HTTPException(status_code=400, detail="Optimal Point requires between one and five rounds.")
+    cleaned = []
+    for number, item in enumerate(rounds, start=1):
+        chart_type = str(item.get("chart_type", "learning_curve"))
+        target_x = float(item.get("target_x", 65))
+        tolerance = float(item.get("tolerance", 8))
+        curve_strength = float(item.get("curve_strength", 1))
+        noise = float(item.get("noise", 1.2))
+        if chart_type not in OPTIMAL_POINT_TYPES or not 15 <= target_x <= 85 or not 3 <= tolerance <= 15 or not .5 <= curve_strength <= 2 or not 0 <= noise <= 5:
+            raise HTTPException(status_code=400, detail=f"Optimal Point round {number} has invalid chart settings.")
+        cleaned.append({
+            "title": str(item.get("title", f"Round {number}")).strip() or f"Round {number}",
+            "prompt": str(item.get("prompt", "Select the optimal point.")).strip() or "Select the optimal point.",
+            "chart_type": chart_type,
+            "target_x": target_x,
+            "tolerance": tolerance,
+            "curve_strength": curve_strength,
+            "noise": noise,
+            "explanation": str(item.get("explanation", "")).strip(),
+        })
+    return cleaned
+
+
+def optimal_point_round_data(quiz, user_id, round_index):
+    rounds = (quiz.optimal_point_config or {}).get("rounds", [])
+    if round_index < 0 or round_index >= len(rounds):
+        return None
+    source = rounds[round_index]
+    seed = hashlib.sha256(f"optimal:{quiz.id}:{user_id}:{round_index}:{os.getenv('SECRET_KEY', 'codeprolk')}".encode()).digest()
+    rng = random.Random(seed)
+    target_x = max(15, min(85, float(source.get("target_x", 65)) + rng.uniform(-3.5, 3.5)))
+    chart_type = source.get("chart_type", "learning_curve")
+    strength = float(source.get("curve_strength", 1))
+    noise = float(source.get("noise", 1.2))
+    points = []
+    secondary_points = []
+    for x in range(0, 101, 5):
+        if chart_type == "elbow_curve":
+            y = 18 + 72 * math.exp(-x / max(8, target_x / (2.8 * strength))) + max(0, x - target_x) * .055
+        elif chart_type == "roc_threshold":
+            y = 18 + 67 * math.exp(-((x - target_x) ** 2) / (620 / strength))
+        elif chart_type == "linear_intersection":
+            slope = .38 * strength
+            y = 25 + slope * x
+            secondary_y = 25 + slope * target_x * 2 - slope * x
+            secondary_points.append({"x": x, "y": round(max(5, min(95, secondary_y)), 2)})
+        elif chart_type == "break_even":
+            slope = .5 * strength
+            y = 12 + slope * x
+            secondary_y = 12 + slope * target_x + .12 * (x - target_x)
+            secondary_points.append({"x": x, "y": round(max(5, min(95, secondary_y)), 2)})
+        elif chart_type == "precision_recall":
+            slope = .52 * strength
+            y = 24 + slope * x
+            secondary_y = 24 + slope * target_x * 2 - slope * x
+            secondary_points.append({"x": x, "y": round(max(5, min(95, secondary_y)), 2)})
+        elif chart_type == "bias_variance":
+            y = 20 + ((x - target_x) ** 2) / (95 / strength)
+        elif chart_type in {"regularization", "quadratic_vertex"}:
+            direction = -1 if chart_type == "regularization" else 1
+            y = (82 if direction < 0 else 18) + direction * ((x - target_x) ** 2) / (92 / strength)
+        elif chart_type == "convergence":
+            y = 18 + 70 * math.exp(-x / max(8, target_x / (2.5 * strength)))
+        elif chart_type == "saturation":
+            y = 18 + 68 * (1 - math.exp(-x / max(8, target_x / (2.5 * strength))))
+        elif chart_type == "piecewise_transition":
+            y = 18 + .68 * min(x, target_x) + .13 * max(0, x - target_x)
+        else:
+            y = 25 + 58 * (1 - math.exp(-x / (24 / strength))) - max(0, x - target_x) * (.48 * strength)
+        jitter = 0 if chart_type == "linear_intersection" else rng.uniform(-noise, noise)
+        points.append({"x": x, "y": round(max(5, min(95, y + jitter)), 2)})
+    target_y = min(points, key=lambda point: abs(point["x"] - target_x))["y"]
+    labels = {
+        "learning_curve": ("Training progress", "Validation score"),
+        "roc_threshold": ("Decision threshold", "Model utility"),
+        "precision_recall": ("Decision threshold", "Precision / recall"),
+        "elbow_curve": ("Model complexity", "Error / inertia"),
+        "convergence": ("Training step", "Loss"),
+        "saturation": ("Resource investment", "Performance"),
+        "regularization": ("Regularization strength", "Validation score"),
+        "linear_intersection": ("Input value (x)", "y = mx + c"),
+        "bias_variance": ("Model complexity", "Combined error"),
+        "quadratic_vertex": ("Input value (x)", "Quadratic value"),
+        "piecewise_transition": ("Input value (x)", "Piecewise output"),
+        "break_even": ("Units / time", "Cost and return"),
+    }[chart_type]
+    return {
+        "title": source["title"], "prompt": source["prompt"], "chart_type": chart_type,
+        "points": points, "secondary_points": secondary_points, "x_label": labels[0], "y_label": labels[1],
+        "target_x": target_x, "target_y": target_y, "tolerance": float(source.get("tolerance", 8)),
+        "explanation": source.get("explanation", ""),
+    }
+
+
+def optimal_point_payload(quiz, user, db):
+    rounds = (quiz.optimal_point_config or {}).get("rounds", [])
+    progress = db.query(models.OptimalPointProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        current = optimal_point_round_data(quiz, user.id, 0)
+        return {"started": False, "finished": False, "round_number": 1, "total_rounds": len(rounds), "remaining_seconds": quiz.duration_seconds, "score": 0, "max_score": len(rounds) * 3 + 1, "round": {k:v for k,v in current.items() if k not in {"target_x","target_y","tolerance","explanation"}}, "results": []}
+    elapsed = int((datetime.utcnow() - progress.started_at).total_seconds())
+    remaining = max(0, quiz.duration_seconds - elapsed)
+    answers = list(progress.answers or [])
+    complete = progress.current_round >= len(rounds)
+    timed_out = remaining == 0 and not complete
+    finished = complete or timed_out or bool(progress.completed_at)
+    base_score = sum(int(answer.get("points", 0)) for answer in answers)
+    perfect = complete and base_score == len(rounds) * 3
+    speed_bonus = 1 if perfect and remaining > 0 else 0
+    submission = db.query(models.Submission).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if finished and not submission:
+        progress.completed_at = progress.completed_at or datetime.utcnow()
+        submission = models.Submission(user_id=user.id, quiz_id=quiz.id, selected_index=-1, is_correct=perfect, score=base_score + speed_bonus, max_score=len(rounds) * 3 + 1)
+        db.add(submission); db.commit()
+    current = None if finished else optimal_point_round_data(quiz, user.id, progress.current_round)
+    if current: current = {k:v for k,v in current.items() if k not in {"target_x","target_y","tolerance","explanation"}}
+    return {"started": True, "finished": finished, "round_number": min(progress.current_round + 1, len(rounds)), "total_rounds": len(rounds), "remaining_seconds": remaining, "score": submission.score if submission else base_score, "max_score": len(rounds) * 3 + 1, "round": current, "results": answers if finished else [], "speed_bonus": speed_bonus if finished else 0, "completion_reason": "completed" if complete else "timeout" if timed_out else None}
 
 
 def sri_lanka_timestamp(value: datetime):
@@ -597,6 +841,10 @@ def get_today_quiz(
 
     if quiz.quiz_type == "word_search":
         quiz_data["word_search"] = word_search_payload(quiz, user, db)
+    elif quiz.quiz_type == "bug_hunt":
+        quiz_data["bug_hunt"] = bug_hunt_payload(quiz, user, db)
+    elif quiz.quiz_type == "optimal_point":
+        quiz_data["optimal_point"] = optimal_point_payload(quiz, user, db)
 
     submission = (
         db.query(models.Submission)
@@ -843,6 +1091,101 @@ def start_word_search(
     return word_search_payload(quiz, user, db)
 
 
+@app.post("/api/quiz/{quiz_id}/bug-hunt/start")
+def start_bug_hunt(
+    quiz_id: int,
+    user: models.User = Depends(get_user_from_header),
+    db: Session = Depends(get_db),
+):
+    quiz = db.query(models.Quiz).filter_by(id=quiz_id, quiz_type="bug_hunt").first()
+    if not quiz or quiz.date != sri_lanka_today() or quiz.expiry < local_naive_now():
+        raise HTTPException(status_code=400, detail="This Bug Hunt is not available.")
+    progress = db.query(models.BugHuntProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        progress = models.BugHuntProgress(user_id=user.id, quiz_id=quiz.id, current_round=0, answers=[])
+        db.add(progress)
+        db.commit()
+    return bug_hunt_payload(quiz, user, db)
+
+
+@app.post("/api/quiz/bug-hunt/answer")
+def answer_bug_hunt(
+    answer: schemas.BugHuntAnswer,
+    user: models.User = Depends(get_user_from_header),
+    db: Session = Depends(get_db),
+):
+    quiz = db.query(models.Quiz).filter_by(id=answer.quiz_id, quiz_type="bug_hunt").first()
+    if not quiz or quiz.date != sri_lanka_today() or quiz.expiry < local_naive_now():
+        raise HTTPException(status_code=400, detail="This Bug Hunt is not available.")
+    progress = db.query(models.BugHuntProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        raise HTTPException(status_code=400, detail="Start the Bug Hunt before submitting an answer.")
+    if progress.completed_at or (datetime.utcnow() - progress.started_at).total_seconds() >= quiz.duration_seconds:
+        return bug_hunt_payload(quiz, user, db)
+    round_data = bug_hunt_round_data(quiz, user.id, progress.current_round)
+    if not round_data:
+        return bug_hunt_payload(quiz, user, db)
+
+    line_correct = answer.line_index == round_data["correct_line"]
+    diagnosis_correct = answer.diagnosis_index == round_data["correct_diagnosis"]
+    fix_correct = answer.fix_index == round_data["correct_fix"]
+    points = int(line_correct) + int(diagnosis_correct) + int(fix_correct)
+    answers = list(progress.answers or [])
+    answers.append({
+        "round": progress.current_round + 1,
+        "points": points,
+        "line_correct": line_correct,
+        "diagnosis_correct": diagnosis_correct,
+        "fix_correct": fix_correct,
+        "explanation": round_data["explanation"],
+    })
+    progress.answers = answers
+    progress.current_round += 1
+    if progress.current_round >= len((quiz.bug_hunt_config or {}).get("rounds", [])):
+        progress.completed_at = datetime.utcnow()
+    db.commit()
+    payload = bug_hunt_payload(quiz, user, db)
+    payload["round_result"] = answers[-1]
+    return payload
+
+
+@app.post("/api/quiz/{quiz_id}/optimal-point/start")
+def start_optimal_point(quiz_id: int, user: models.User = Depends(get_user_from_header), db: Session = Depends(get_db)):
+    quiz = db.query(models.Quiz).filter_by(id=quiz_id, quiz_type="optimal_point").first()
+    if not quiz or quiz.date != sri_lanka_today() or quiz.expiry < local_naive_now():
+        raise HTTPException(status_code=400, detail="This Optimal Point challenge is not available.")
+    progress = db.query(models.OptimalPointProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        progress = models.OptimalPointProgress(user_id=user.id, quiz_id=quiz.id, current_round=0, answers=[])
+        db.add(progress); db.commit()
+    return optimal_point_payload(quiz, user, db)
+
+
+@app.post("/api/quiz/optimal-point/answer")
+def answer_optimal_point(answer: schemas.OptimalPointAnswer, user: models.User = Depends(get_user_from_header), db: Session = Depends(get_db)):
+    quiz = db.query(models.Quiz).filter_by(id=answer.quiz_id, quiz_type="optimal_point").first()
+    if not quiz or quiz.date != sri_lanka_today() or quiz.expiry < local_naive_now():
+        raise HTTPException(status_code=400, detail="This Optimal Point challenge is not available.")
+    progress = db.query(models.OptimalPointProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        raise HTTPException(status_code=400, detail="Touch the chart to start this challenge.")
+    if progress.completed_at or (datetime.utcnow() - progress.started_at).total_seconds() >= quiz.duration_seconds:
+        return optimal_point_payload(quiz, user, db)
+    round_data = optimal_point_round_data(quiz, user.id, progress.current_round)
+    dx = answer.x - round_data["target_x"]
+    dy = answer.y - round_data["target_y"]
+    distance = math.sqrt(dx * dx + dy * dy)
+    tolerance = round_data["tolerance"]
+    points = 3 if distance <= tolerance else 2 if distance <= tolerance * 1.8 else 1 if distance <= tolerance * 3 else 0
+    answers = list(progress.answers or [])
+    answers.append({"round": progress.current_round + 1, "points": points, "distance": round(distance, 1), "selected_x": round(answer.x, 1), "selected_y": round(answer.y, 1), "target_x": round(round_data["target_x"], 1), "target_y": round(round_data["target_y"], 1), "explanation": round_data["explanation"]})
+    progress.answers = answers; progress.current_round += 1
+    if progress.current_round >= len((quiz.optimal_point_config or {}).get("rounds", [])): progress.completed_at = datetime.utcnow()
+    db.commit()
+    payload = optimal_point_payload(quiz, user, db); payload["round_result"] = answers[-1]
+    return payload
+
+
 def user_has_quiz_submission(
     db: Session,
     user_id: int,
@@ -989,6 +1332,8 @@ def create_quiz(
         words = ["".join(ch for ch in str(item.get("word", "")).upper() if ch.isalpha()) for item in items]
         if not 3 <= len(words) <= 10 or any(len(word) < 3 or len(word) > 15 for word in words) or len(set(words)) != len(words):
             raise HTTPException(status_code=400, detail="Word searches require 3–10 unique words of 3–15 letters.")
+    bug_hunt_rounds = validate_bug_hunt_rounds(q.bug_hunt_rounds) if q.quiz_type == "bug_hunt" else []
+    optimal_point_rounds = validate_optimal_point_rounds(q.optimal_point_rounds) if q.quiz_type == "optimal_point" else []
 
     # Keep exactly one active quiz per calendar date.
     existing = (
@@ -1019,6 +1364,8 @@ def create_quiz(
         is_active=True,
         quiz_type=q.quiz_type,
         word_search_config={"items": [{"word": words[index], "clue": str((q.word_search_items or [])[index].get("clue", "")).strip() or "Find the hidden term."} for index in range(len(words))]} if q.quiz_type == "word_search" else None,
+        bug_hunt_config={"rounds": bug_hunt_rounds} if q.quiz_type == "bug_hunt" else None,
+        optimal_point_config={"rounds": optimal_point_rounds} if q.quiz_type == "optimal_point" else None,
         duration_seconds=q.duration_seconds,
     )
 
@@ -1072,11 +1419,58 @@ def admin_quizzes(
                 "status": quiz_status,
                 "quiz_type": q.quiz_type,
                 "word_search_items": (q.word_search_config or {}).get("items", []),
+                "bug_hunt_rounds": (q.bug_hunt_config or {}).get("rounds", []),
+                "optimal_point_rounds": (q.optimal_point_config or {}).get("rounds", []),
                 "duration_seconds": q.duration_seconds,
             }
         )
 
     return {"quizzes": result}
+
+
+@app.delete("/api/admin/quiz/{quiz_id}")
+def delete_admin_quiz(
+    quiz_id: int,
+    force: bool = False,
+    _: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db),
+):
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found.")
+
+    submission_count = db.query(models.Submission).filter(
+        models.Submission.quiz_id == quiz_id,
+    ).count()
+
+    if submission_count and not force:
+        return {
+            "requires_confirmation": True,
+            "submission_count": submission_count,
+        }
+
+    db.query(models.QuizComment).filter(
+        models.QuizComment.quiz_id == quiz_id,
+    ).delete(synchronize_session=False)
+    db.query(models.WordSearchProgress).filter(
+        models.WordSearchProgress.quiz_id == quiz_id,
+    ).delete(synchronize_session=False)
+    db.query(models.BugHuntProgress).filter(
+        models.BugHuntProgress.quiz_id == quiz_id,
+    ).delete(synchronize_session=False)
+    db.query(models.OptimalPointProgress).filter(
+        models.OptimalPointProgress.quiz_id == quiz_id,
+    ).delete(synchronize_session=False)
+    db.query(models.Submission).filter(
+        models.Submission.quiz_id == quiz_id,
+    ).delete(synchronize_session=False)
+    db.delete(quiz)
+    db.commit()
+
+    return {
+        "message": "Quiz deleted successfully.",
+        "deleted_quiz_id": quiz_id,
+    }
 
 
 @app.put("/api/admin/quiz/{quiz_id}")
@@ -1138,6 +1532,8 @@ def update_quiz(
     words = ["".join(ch for ch in str(item.get("word", "")).upper() if ch.isalpha()) for item in items]
     if q.quiz_type == "word_search" and (not 3 <= len(words) <= 10 or any(len(word) < 3 or len(word) > 15 for word in words) or len(set(words)) != len(words)):
         raise HTTPException(status_code=400, detail="Word searches require 3–10 unique words of 3–15 letters.")
+    bug_hunt_rounds = validate_bug_hunt_rounds(q.bug_hunt_rounds) if q.quiz_type == "bug_hunt" else []
+    optimal_point_rounds = validate_optimal_point_rounds(q.optimal_point_rounds) if q.quiz_type == "optimal_point" else []
 
     quiz.question = q.question
     quiz.options = q.options
@@ -1148,6 +1544,8 @@ def update_quiz(
     quiz.is_active = True
     quiz.quiz_type = q.quiz_type
     quiz.word_search_config = {"items": [{"word": words[index], "clue": str(items[index].get("clue", "")).strip() or "Find the hidden term."} for index in range(len(words))]} if q.quiz_type == "word_search" else None
+    quiz.bug_hunt_config = {"rounds": bug_hunt_rounds} if q.quiz_type == "bug_hunt" else None
+    quiz.optimal_point_config = {"rounds": optimal_point_rounds} if q.quiz_type == "optimal_point" else None
     quiz.duration_seconds = q.duration_seconds
 
     if previous_correct_index != q.correct_index:
@@ -1393,8 +1791,12 @@ def admin_stats(
 
     while current_day < month_end.date():
         days[str(current_day)] = {
-            "attempts": 0,
+            "participants": 0,
             "correct": 0,
+            "incorrect": 0,
+            "earned_points": 0,
+            "available_points": 0,
+            "participant_ids": set(),
         }
 
         current_day += timedelta(days=1)
@@ -1407,13 +1809,23 @@ def admin_stats(
         if day not in days:
             continue
 
-        days[day]["attempts"] += 1
+        days[day]["participant_ids"].add(submission.user_id)
         days[day]["correct"] += int(
             submission.is_correct
         )
+        days[day]["incorrect"] += int(not submission.is_correct)
+        days[day]["earned_points"] += max(0, submission.score or 0)
+        days[day]["available_points"] += max(1, submission.max_score or 1)
+
+    for values in days.values():
+        values["participants"] = len(values.pop("participant_ids"))
+        values["score_rate"] = round(
+            (values["earned_points"] / values["available_points"]) * 100
+        ) if values["available_points"] else 0
 
     return {
         "month": month_start.strftime("%Y-%m"),
+        "unique_participants": len({submission.user_id for submission in submissions}),
         "days": [
             {
                 "date": day,

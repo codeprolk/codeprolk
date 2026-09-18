@@ -35,7 +35,7 @@ class UserOut(BaseModel):
 
 
 class QuizCreate(BaseModel):
-    quiz_type: Literal["multiple_choice", "word_search"] = "multiple_choice"
+    quiz_type: Literal["multiple_choice", "word_search", "bug_hunt", "optimal_point"] = "multiple_choice"
     question: str = Field(
         ...,
         min_length=1,
@@ -56,12 +56,27 @@ class QuizCreate(BaseModel):
 
     date: date
     word_search_items: Optional[List[dict]] = None
+    bug_hunt_rounds: Optional[List[dict]] = None
+    optimal_point_rounds: Optional[List[dict]] = None
     duration_seconds: int = Field(default=180, ge=60, le=900)
 
 
 class WordSearchSelection(BaseModel):
     quiz_id: int
     cells: List[List[int]] = Field(..., min_items=2, max_items=30)
+
+
+class BugHuntAnswer(BaseModel):
+    quiz_id: int
+    line_index: int = Field(..., ge=0, le=30)
+    diagnosis_index: int = Field(..., ge=0, le=4)
+    fix_index: int = Field(..., ge=0, le=4)
+
+
+class OptimalPointAnswer(BaseModel):
+    quiz_id: int
+    x: float = Field(..., ge=0, le=100)
+    y: float = Field(..., ge=0, le=100)
 
 
 class QuizOut(BaseModel):

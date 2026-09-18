@@ -21,6 +21,8 @@ import {
   getTokenPayload,
 } from "../utils/auth";
 import WordSearchQuiz from "../components/WordSearchQuiz";
+import BugHuntQuiz from "../components/BugHuntQuiz";
+import OptimalPointQuiz from "../components/OptimalPointQuiz";
 
 
 export default function QuizPage() {
@@ -1346,6 +1348,34 @@ export default function QuizPage() {
           {commentPanel}
         </div>
       </section>
+    );
+  }
+
+  if (quiz.quiz_type === "bug_hunt") {
+    return (
+      <section className="challenge-surface">
+        <div className="quiz-live-layout">
+          {streakPanel}
+          <BugHuntQuiz
+            quiz={quiz}
+            onComplete={async () => {
+              await loadQuiz({ showLoading: false });
+              await loadStreak();
+            }}
+          />
+          {commentPanel}
+        </div>
+      </section>
+    );
+  }
+
+  if (quiz.quiz_type === "optimal_point") {
+    return (
+      <section className="challenge-surface"><div className="quiz-live-layout">
+        {streakPanel}
+        <OptimalPointQuiz quiz={quiz} onComplete={async () => { await loadQuiz({ showLoading: false }); await loadStreak(); }} />
+        {commentPanel}
+      </div></section>
     );
   }
 
