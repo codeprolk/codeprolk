@@ -1168,7 +1168,7 @@ def answer_optimal_point(answer: schemas.OptimalPointAnswer, user: models.User =
         raise HTTPException(status_code=400, detail="This Optimal Point challenge is not available.")
     progress = db.query(models.OptimalPointProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
     if not progress:
-        raise HTTPException(status_code=400, detail="Touch the chart to start this challenge.")
+        raise HTTPException(status_code=400, detail="Enter Signal Lab before submitting an answer.")
     if progress.completed_at or (datetime.utcnow() - progress.started_at).total_seconds() >= quiz.duration_seconds:
         return optimal_point_payload(quiz, user, db)
     round_data = optimal_point_round_data(quiz, user.id, progress.current_round)

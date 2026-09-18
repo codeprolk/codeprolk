@@ -4,7 +4,6 @@ import { getToken } from "../utils/auth";
 
 export default function OptimalPointQuiz({ quiz, onComplete }) {
   const [game, setGame] = useState(quiz.optimal_point);
-  const [armed, setArmed] = useState(game.started);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const chartRef = useRef(null);
@@ -22,18 +21,32 @@ export default function OptimalPointQuiz({ quiz, onComplete }) {
   const polyline = useMemo(() => (game.round?.points || []).map((point) => `${point.x},${100 - point.y}`).join(" "), [game.round]);
   const secondaryPolyline = useMemo(() => (game.round?.secondary_points || []).map((point) => `${point.x},${100 - point.y}`).join(" "), [game.round]);
 
+  const startChallenge = async () => {
+    if (game.started || busy) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const response = await fetch(`/api/quiz/${quiz.id}/optimal-point/start`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Unable to enter Signal Lab.");
+      setGame(data);
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const choosePoint = async (event) => {
-    if (busy || game.finished) return;
+    if (busy || game.finished || !game.started) return;
     const box = chartRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(100, ((event.clientX - box.left) / box.width) * 100));
     const y = Math.max(0, Math.min(100, 100 - ((event.clientY - box.top) / box.height) * 100));
     setBusy(true); setMessage("");
     try {
-      if (!game.started) {
-        const startResponse = await fetch(`/api/quiz/${quiz.id}/optimal-point/start`, { method: "POST", headers: { Authorization: `Bearer ${getToken()}` } });
-        const startData = await startResponse.json();
-        if (!startResponse.ok) throw new Error(startData.detail || "Unable to start the challenge.");
-      }
       const response = await fetch("/api/quiz/optimal-point/answer", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` }, body: JSON.stringify({ quiz_id: quiz.id, x, y }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || "Unable to lock this point.");
@@ -47,14 +60,15 @@ export default function OptimalPointQuiz({ quiz, onComplete }) {
   const minutes = String(Math.floor(game.remaining_seconds / 60)).padStart(2, "0");
   const seconds = String(game.remaining_seconds % 60).padStart(2, "0");
 
-  if (!armed && !game.started) return (
+  if (!game.started) return (
     <section className="optimal-point optimal-point-intro">
       <span className="optimal-point-icon"><Target /></span>
       <p className="optimal-point-kicker">SIGNAL LAB</p>
       <h2>{quiz.question}</h2>
       <p>Read the curve, locate the strongest operating point, and click once to lock your answer.</p>
       <div className="optimal-point-meta"><span>{game.total_rounds} rounds</span><i /><span>{game.remaining_seconds}s</span><i /><span>{game.max_score} pts</span></div>
-      <button type="button" onClick={() => setArmed(true)}>Enter Signal Lab</button>
+      <button type="button" onClick={startChallenge} disabled={busy}>{busy ? "Opening Lab…" : "Enter Signal Lab"}</button>
+      {message && <p role="alert">{message}</p>}
     </section>
   );
 
@@ -85,7 +99,7 @@ export default function OptimalPointQuiz({ quiz, onComplete }) {
           {secondaryPolyline && <polyline className="secondary" points={secondaryPolyline} />}
         </svg>
         <div className="optimal-point-x-label">{round.x_label}</div>
-        <div className="optimal-point-hint"><Crosshair /> Click directly on the curve where performance is optimal. Your first click starts the timer.</div>
+        <div className="optimal-point-hint"><Crosshair /> Click directly on the curve where performance is optimal. The timer is already running.</div>
       </div>
       <footer className="optimal-point-footer"><span>{message || `${game.score} points secured`}</span><strong>{busy ? "CALIBRATING…" : "ONE CLICK LOCKS THIS ROUND"}</strong></footer>
     </section>
