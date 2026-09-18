@@ -51,6 +51,7 @@ def migrate_users_table():
         ))
         connection.execute(text("ALTER TABLE quizzes ADD COLUMN IF NOT EXISTS quiz_type VARCHAR(30) NOT NULL DEFAULT 'multiple_choice'"))
         connection.execute(text("ALTER TABLE quizzes ADD COLUMN IF NOT EXISTS word_search_config JSONB"))
+        connection.execute(text("ALTER TABLE quizzes ADD COLUMN IF NOT EXISTS bug_hunt_config JSONB"))
         connection.execute(text("ALTER TABLE quizzes ADD COLUMN IF NOT EXISTS duration_seconds INTEGER NOT NULL DEFAULT 180"))
         connection.execute(text("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS score INTEGER NOT NULL DEFAULT 0"))
         connection.execute(text("ALTER TABLE submissions ADD COLUMN IF NOT EXISTS max_score INTEGER NOT NULL DEFAULT 1"))
@@ -59,6 +60,13 @@ def migrate_users_table():
             "CREATE TABLE IF NOT EXISTS word_search_progress ("
             "id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, "
             "quiz_id INTEGER NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE, found_words JSONB NOT NULL DEFAULT '[]'::jsonb, "
+            "started_at TIMESTAMP NOT NULL DEFAULT NOW(), completed_at TIMESTAMP, UNIQUE(user_id, quiz_id))"
+        ))
+        connection.execute(text(
+            "CREATE TABLE IF NOT EXISTS bug_hunt_progress ("
+            "id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, "
+            "quiz_id INTEGER NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE, "
+            "current_round INTEGER NOT NULL DEFAULT 0, answers JSONB NOT NULL DEFAULT '[]'::jsonb, "
             "started_at TIMESTAMP NOT NULL DEFAULT NOW(), completed_at TIMESTAMP, UNIQUE(user_id, quiz_id))"
         ))
         connection.execute(text(

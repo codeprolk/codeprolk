@@ -21,6 +21,7 @@ import {
   getTokenPayload,
 } from "../utils/auth";
 import WordSearchQuiz from "../components/WordSearchQuiz";
+import BugHuntQuiz from "../components/BugHuntQuiz";
 
 
 export default function QuizPage() {
@@ -1337,6 +1338,24 @@ export default function QuizPage() {
         <div className="quiz-live-layout">
           {streakPanel}
           <WordSearchQuiz
+            quiz={quiz}
+            onComplete={async () => {
+              await loadQuiz({ showLoading: false });
+              await loadStreak();
+            }}
+          />
+          {commentPanel}
+        </div>
+      </section>
+    );
+  }
+
+  if (quiz.quiz_type === "bug_hunt") {
+    return (
+      <section className="challenge-surface">
+        <div className="quiz-live-layout">
+          {streakPanel}
+          <BugHuntQuiz
             quiz={quiz}
             onComplete={async () => {
               await loadQuiz({ showLoading: false });

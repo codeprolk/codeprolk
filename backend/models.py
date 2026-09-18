@@ -30,6 +30,7 @@ class Quiz(Base):
     explanation = Column(Text, nullable=False, default='')
     quiz_type = Column(String(30), nullable=False, default='multiple_choice')
     word_search_config = Column(JSONB, nullable=True)
+    bug_hunt_config = Column(JSONB, nullable=True)
     duration_seconds = Column(Integer, nullable=False, default=180)
     date = Column(Date, nullable=False, index=True)
     expiry = Column(DateTime, nullable=False)
@@ -61,6 +62,17 @@ class WordSearchProgress(Base):
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     quiz_id = Column(Integer, ForeignKey('quizzes.id', ondelete='CASCADE'), nullable=False, index=True)
     found_words = Column(JSONB, nullable=False, default=list)
+    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    completed_at = Column(DateTime, nullable=True)
+
+
+class BugHuntProgress(Base):
+    __tablename__ = 'bug_hunt_progress'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    quiz_id = Column(Integer, ForeignKey('quizzes.id', ondelete='CASCADE'), nullable=False, index=True)
+    current_round = Column(Integer, nullable=False, default=0)
+    answers = Column(JSONB, nullable=False, default=list)
     started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     completed_at = Column(DateTime, nullable=True)
 

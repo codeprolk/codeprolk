@@ -30,6 +30,31 @@
   font-variant-numeric: tabular-nums;
 }
 
+.admin-bug-hunt-fields { display: grid; gap: 1rem; margin-top: 1rem; padding: clamp(1rem,3vw,1.4rem); border: 1px solid rgba(89,184,255,.22); }
+.admin-bug-hunt-round { display: grid; gap: .65rem; padding: 1rem; background: rgba(2,8,23,.42); border-left: 2px solid rgba(89,184,255,.65); }
+.admin-bug-hunt-round h4 { margin: 0 0 .25rem; color: #eef8ff; font-family: 'PP Neue Montreal Title',Arial,sans-serif; font-size: 1.25rem; font-weight: 500; }
+.admin-bug-config-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(10rem,.45fr); align-items: center; gap: 1rem; padding: .8rem; background: rgba(3,10,24,.5); border: 1px solid rgba(148,181,217,.14); }
+.admin-bug-config-row label { margin: 0; }
+.admin-bug-round-selector { display: grid; grid-template-columns: repeat(auto-fit,minmax(7rem,1fr)); gap: .55rem; }
+.admin-bug-round-selector button { display: grid; gap: .2rem; min-height: 4rem; padding: .7rem .85rem; color: #aac0d9; text-align: left; background: rgba(3,10,24,.72); border: 1px solid rgba(148,181,217,.18); border-radius: 4px; cursor: pointer; transition: border-color .2s ease,background .2s ease,transform .2s ease; }
+.admin-bug-round-selector button:hover { border-color: rgba(89,184,255,.58); transform: translateY(-1px); }
+.admin-bug-round-selector button.is-active { color: #f5fbff; background: linear-gradient(135deg,rgba(11,72,151,.62),rgba(7,27,58,.9)); border-color: #59b8ff; box-shadow: inset 0 -2px 0 #67e8f9; }
+.admin-bug-round-selector span { font-size: .9rem; font-weight: 700; }
+.admin-bug-round-selector small { color: #7f99b6; font-size: .68rem; }
+.admin-bug-round-selector button.is-active small { color: #9be9ff; }
+.admin-bug-round-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: .75rem; border-bottom: 1px solid rgba(148,181,217,.15); }
+.admin-bug-round-heading span { color: #67e8f9; font-size: .65rem; font-weight: 800; letter-spacing: .12em; }
+.admin-bug-round-heading h4 { margin: .25rem 0 0; }
+.admin-bug-round-heading strong { color: rgba(191,219,254,.72); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.admin-delete-confirm { display: inline-flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: .45rem; color: #f4c6ce; font-size: .76rem; }
+.admin-delete-confirm button { min-width: auto; }
+.admin-delete-confirm .admin-delete-confirm-button { color: #fff; background: #a8273e; border-color: #d75369; }
+.admin-delete-confirm .admin-delete-confirm-button:hover:not(:disabled) { background: #c3314c; }
+.admin-page .admin-bug-code { min-height: 9rem; color: #d9ecff; background: #030a16; font-family: ui-monospace,SFMono-Regular,Menlo,monospace; line-height: 1.5; tab-size: 2; }
+.admin-bug-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
+.admin-bug-options>div { display: grid; gap: .5rem; align-content: start; }
+@media(max-width:700px){.admin-bug-options{grid-template-columns:1fr}.admin-bug-config-row{grid-template-columns:1fr}.admin-bug-round-selector{grid-template-columns:repeat(2,minmax(0,1fr));gap:.35rem}.admin-bug-round-selector button{min-height:3.4rem;padding:.55rem}.admin-bug-round-selector span{font-size:.78rem}.admin-bug-round-selector small{font-size:.6rem}}
+
 .admin-insights-section {
   padding: 0;
   overflow: hidden;

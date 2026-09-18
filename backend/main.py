@@ -167,6 +167,121 @@ def word_search_payload(quiz, user, db):
     }
 
 
+def bug_hunt_round_data(quiz, user_id, round_index):
+    rounds = (quiz.bug_hunt_config or {}).get("rounds", [])
+    if round_index < 0 or round_index >= len(rounds):
+        return None
+    source = rounds[round_index]
+    seed = hashlib.sha256(
+        f"bug-hunt:{quiz.id}:{user_id}:{round_index}:{os.getenv('SECRET_KEY', 'codeprolk')}".encode()
+    ).digest()
+    rng = random.Random(seed)
+    diagnosis_order = list(range(len(source["diagnoses"])))
+    fix_order = list(range(len(source["fixes"])))
+    rng.shuffle(diagnosis_order)
+    rng.shuffle(fix_order)
+    return {
+        "title": source.get("title", f"Round {round_index + 1}"),
+        "code_lines": source["code_lines"],
+        "diagnoses": [source["diagnoses"][index] for index in diagnosis_order],
+        "fixes": [source["fixes"][index] for index in fix_order],
+        "correct_line": int(source["buggy_line"]),
+        "correct_diagnosis": diagnosis_order.index(int(source["correct_diagnosis"])),
+        "correct_fix": fix_order.index(int(source["correct_fix"])),
+        "explanation": source.get("explanation", ""),
+    }
+
+
+def bug_hunt_payload(quiz, user, db):
+    rounds = (quiz.bug_hunt_config or {}).get("rounds", [])
+    progress = db.query(models.BugHuntProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        return {
+            "started": False,
+            "finished": False,
+            "round_number": 0,
+            "total_rounds": len(rounds),
+            "remaining_seconds": quiz.duration_seconds,
+            "score": 0,
+            "max_score": len(rounds) * 3 + 1,
+            "round": None,
+            "results": [],
+            "completion_reason": None,
+        }
+
+    elapsed = int((datetime.utcnow() - progress.started_at).total_seconds())
+    remaining = max(0, quiz.duration_seconds - elapsed)
+    answers = list(progress.answers or [])
+    completed_all = progress.current_round >= len(rounds)
+    timed_out = remaining == 0 and not completed_all
+    finished = completed_all or timed_out or bool(progress.completed_at)
+    base_score = sum(int(answer.get("points", 0)) for answer in answers)
+    perfect = completed_all and base_score == len(rounds) * 3
+    speed_bonus = 1 if perfect and remaining > 0 else 0
+    submission = db.query(models.Submission).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+
+    if finished and not submission:
+        if not progress.completed_at:
+            progress.completed_at = datetime.utcnow()
+        submission = models.Submission(
+            user_id=user.id,
+            quiz_id=quiz.id,
+            selected_index=-1,
+            is_correct=perfect,
+            score=base_score + speed_bonus,
+            max_score=len(rounds) * 3 + 1,
+        )
+        db.add(submission)
+        db.commit()
+
+    current = None if finished else bug_hunt_round_data(quiz, user.id, progress.current_round)
+    if current:
+        current = {key: value for key, value in current.items() if not key.startswith("correct_") and key != "explanation"}
+
+    return {
+        "started": True,
+        "finished": finished,
+        "round_number": min(progress.current_round + 1, len(rounds)),
+        "total_rounds": len(rounds),
+        "remaining_seconds": remaining,
+        "score": submission.score if submission else base_score,
+        "max_score": len(rounds) * 3 + 1,
+        "round": current,
+        "results": answers if finished else [],
+        "speed_bonus": speed_bonus if finished else 0,
+        "completion_reason": "completed" if completed_all else "timeout" if timed_out else None,
+    }
+
+
+def validate_bug_hunt_rounds(raw_rounds):
+    rounds = raw_rounds or []
+    if not 1 <= len(rounds) <= 5:
+        raise HTTPException(status_code=400, detail="Bug Hunt requires between one and five rounds.")
+    cleaned = []
+    for number, item in enumerate(rounds, start=1):
+        lines = [str(line).rstrip() for line in item.get("code_lines", []) if str(line).strip()]
+        diagnoses = [str(option).strip() for option in item.get("diagnoses", [])]
+        fixes = [str(option).strip() for option in item.get("fixes", [])]
+        buggy_line = int(item.get("buggy_line", -1))
+        correct_diagnosis = int(item.get("correct_diagnosis", -1))
+        correct_fix = int(item.get("correct_fix", -1))
+        if not 3 <= len(lines) <= 12 or not 3 <= len(diagnoses) <= 5 or not 3 <= len(fixes) <= 5:
+            raise HTTPException(status_code=400, detail=f"Bug Hunt round {number} requires 3–12 code lines and 3–5 diagnosis and repair choices.")
+        if not all(diagnoses) or not all(fixes) or not 0 <= buggy_line < len(lines) or not 0 <= correct_diagnosis < len(diagnoses) or not 0 <= correct_fix < len(fixes):
+            raise HTTPException(status_code=400, detail=f"Bug Hunt round {number} has incomplete or invalid answers.")
+        cleaned.append({
+            "title": str(item.get("title", f"Round {number}")).strip() or f"Round {number}",
+            "code_lines": lines,
+            "buggy_line": buggy_line,
+            "diagnoses": diagnoses,
+            "correct_diagnosis": correct_diagnosis,
+            "fixes": fixes,
+            "correct_fix": correct_fix,
+            "explanation": str(item.get("explanation", "")).strip(),
+        })
+    return cleaned
+
+
 def sri_lanka_timestamp(value: datetime):
     if value.tzinfo is None:
         value = value.replace(tzinfo=timezone.utc)
@@ -597,6 +712,8 @@ def get_today_quiz(
 
     if quiz.quiz_type == "word_search":
         quiz_data["word_search"] = word_search_payload(quiz, user, db)
+    elif quiz.quiz_type == "bug_hunt":
+        quiz_data["bug_hunt"] = bug_hunt_payload(quiz, user, db)
 
     submission = (
         db.query(models.Submission)
@@ -843,6 +960,64 @@ def start_word_search(
     return word_search_payload(quiz, user, db)
 
 
+@app.post("/api/quiz/{quiz_id}/bug-hunt/start")
+def start_bug_hunt(
+    quiz_id: int,
+    user: models.User = Depends(get_user_from_header),
+    db: Session = Depends(get_db),
+):
+    quiz = db.query(models.Quiz).filter_by(id=quiz_id, quiz_type="bug_hunt").first()
+    if not quiz or quiz.date != sri_lanka_today() or quiz.expiry < local_naive_now():
+        raise HTTPException(status_code=400, detail="This Bug Hunt is not available.")
+    progress = db.query(models.BugHuntProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        progress = models.BugHuntProgress(user_id=user.id, quiz_id=quiz.id, current_round=0, answers=[])
+        db.add(progress)
+        db.commit()
+    return bug_hunt_payload(quiz, user, db)
+
+
+@app.post("/api/quiz/bug-hunt/answer")
+def answer_bug_hunt(
+    answer: schemas.BugHuntAnswer,
+    user: models.User = Depends(get_user_from_header),
+    db: Session = Depends(get_db),
+):
+    quiz = db.query(models.Quiz).filter_by(id=answer.quiz_id, quiz_type="bug_hunt").first()
+    if not quiz or quiz.date != sri_lanka_today() or quiz.expiry < local_naive_now():
+        raise HTTPException(status_code=400, detail="This Bug Hunt is not available.")
+    progress = db.query(models.BugHuntProgress).filter_by(user_id=user.id, quiz_id=quiz.id).first()
+    if not progress:
+        raise HTTPException(status_code=400, detail="Start the Bug Hunt before submitting an answer.")
+    if progress.completed_at or (datetime.utcnow() - progress.started_at).total_seconds() >= quiz.duration_seconds:
+        return bug_hunt_payload(quiz, user, db)
+    round_data = bug_hunt_round_data(quiz, user.id, progress.current_round)
+    if not round_data:
+        return bug_hunt_payload(quiz, user, db)
+
+    line_correct = answer.line_index == round_data["correct_line"]
+    diagnosis_correct = answer.diagnosis_index == round_data["correct_diagnosis"]
+    fix_correct = answer.fix_index == round_data["correct_fix"]
+    points = int(line_correct) + int(diagnosis_correct) + int(fix_correct)
+    answers = list(progress.answers or [])
+    answers.append({
+        "round": progress.current_round + 1,
+        "points": points,
+        "line_correct": line_correct,
+        "diagnosis_correct": diagnosis_correct,
+        "fix_correct": fix_correct,
+        "explanation": round_data["explanation"],
+    })
+    progress.answers = answers
+    progress.current_round += 1
+    if progress.current_round >= len((quiz.bug_hunt_config or {}).get("rounds", [])):
+        progress.completed_at = datetime.utcnow()
+    db.commit()
+    payload = bug_hunt_payload(quiz, user, db)
+    payload["round_result"] = answers[-1]
+    return payload
+
+
 def user_has_quiz_submission(
     db: Session,
     user_id: int,
@@ -989,6 +1164,7 @@ def create_quiz(
         words = ["".join(ch for ch in str(item.get("word", "")).upper() if ch.isalpha()) for item in items]
         if not 3 <= len(words) <= 10 or any(len(word) < 3 or len(word) > 15 for word in words) or len(set(words)) != len(words):
             raise HTTPException(status_code=400, detail="Word searches require 3–10 unique words of 3–15 letters.")
+    bug_hunt_rounds = validate_bug_hunt_rounds(q.bug_hunt_rounds) if q.quiz_type == "bug_hunt" else []
 
     # Keep exactly one active quiz per calendar date.
     existing = (
@@ -1019,6 +1195,7 @@ def create_quiz(
         is_active=True,
         quiz_type=q.quiz_type,
         word_search_config={"items": [{"word": words[index], "clue": str((q.word_search_items or [])[index].get("clue", "")).strip() or "Find the hidden term."} for index in range(len(words))]} if q.quiz_type == "word_search" else None,
+        bug_hunt_config={"rounds": bug_hunt_rounds} if q.quiz_type == "bug_hunt" else None,
         duration_seconds=q.duration_seconds,
     )
 
@@ -1072,11 +1249,54 @@ def admin_quizzes(
                 "status": quiz_status,
                 "quiz_type": q.quiz_type,
                 "word_search_items": (q.word_search_config or {}).get("items", []),
+                "bug_hunt_rounds": (q.bug_hunt_config or {}).get("rounds", []),
                 "duration_seconds": q.duration_seconds,
             }
         )
 
     return {"quizzes": result}
+
+
+@app.delete("/api/admin/quiz/{quiz_id}")
+def delete_admin_quiz(
+    quiz_id: int,
+    force: bool = False,
+    _: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db),
+):
+    quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found.")
+
+    submission_count = db.query(models.Submission).filter(
+        models.Submission.quiz_id == quiz_id,
+    ).count()
+
+    if submission_count and not force:
+        return {
+            "requires_confirmation": True,
+            "submission_count": submission_count,
+        }
+
+    db.query(models.QuizComment).filter(
+        models.QuizComment.quiz_id == quiz_id,
+    ).delete(synchronize_session=False)
+    db.query(models.WordSearchProgress).filter(
+        models.WordSearchProgress.quiz_id == quiz_id,
+    ).delete(synchronize_session=False)
+    db.query(models.BugHuntProgress).filter(
+        models.BugHuntProgress.quiz_id == quiz_id,
+    ).delete(synchronize_session=False)
+    db.query(models.Submission).filter(
+        models.Submission.quiz_id == quiz_id,
+    ).delete(synchronize_session=False)
+    db.delete(quiz)
+    db.commit()
+
+    return {
+        "message": "Quiz deleted successfully.",
+        "deleted_quiz_id": quiz_id,
+    }
 
 
 @app.put("/api/admin/quiz/{quiz_id}")
@@ -1138,6 +1358,7 @@ def update_quiz(
     words = ["".join(ch for ch in str(item.get("word", "")).upper() if ch.isalpha()) for item in items]
     if q.quiz_type == "word_search" and (not 3 <= len(words) <= 10 or any(len(word) < 3 or len(word) > 15 for word in words) or len(set(words)) != len(words)):
         raise HTTPException(status_code=400, detail="Word searches require 3–10 unique words of 3–15 letters.")
+    bug_hunt_rounds = validate_bug_hunt_rounds(q.bug_hunt_rounds) if q.quiz_type == "bug_hunt" else []
 
     quiz.question = q.question
     quiz.options = q.options
@@ -1148,6 +1369,7 @@ def update_quiz(
     quiz.is_active = True
     quiz.quiz_type = q.quiz_type
     quiz.word_search_config = {"items": [{"word": words[index], "clue": str(items[index].get("clue", "")).strip() or "Find the hidden term."} for index in range(len(words))]} if q.quiz_type == "word_search" else None
+    quiz.bug_hunt_config = {"rounds": bug_hunt_rounds} if q.quiz_type == "bug_hunt" else None
     quiz.duration_seconds = q.duration_seconds
 
     if previous_correct_index != q.correct_index:

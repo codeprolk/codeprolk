@@ -18,6 +18,27 @@ function readableDate(dateString) {
   });
 }
 
+function emptyBugHuntRound(index) {
+  return {
+    title: `Round ${index + 1}`,
+    code_text: "",
+    buggy_line: 0,
+    diagnoses: ["", "", ""],
+    correct_diagnosis: 0,
+    fixes: ["", "", ""],
+    correct_fix: 0,
+    explanation: "",
+  };
+}
+
+function emptyBugHuntRounds() {
+  return Array.from({ length: 3 }, (_, index) => emptyBugHuntRound(index));
+}
+
+function resizeChoices(choices, size) {
+  return Array.from({ length: size }, (_, index) => choices[index] || "");
+}
+
 function MonthlyInsights({ days, month, onMonthChange }) {
   const [activeDayIndex, setActiveDayIndex] = useState(null);
   const width = 920;
@@ -164,6 +185,8 @@ export default function AdminPage() {
   const [question, setQuestion] = useState("");
   const [quizType, setQuizType] = useState("multiple_choice");
   const [wordSearchItems, setWordSearchItems] = useState(Array.from({ length: 5 }, () => ({ word: "", clue: "" })));
+  const [bugHuntRounds, setBugHuntRounds] = useState(emptyBugHuntRounds);
+  const [activeBugHuntRound, setActiveBugHuntRound] = useState(0);
   const [durationSeconds, setDurationSeconds] = useState(180);
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correct, setCorrect] = useState(0);
@@ -172,6 +195,7 @@ export default function AdminPage() {
   const [message, setMessage] = useState(null);
   const [savingQuiz, setSavingQuiz] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [pendingDeleteQuizId, setPendingDeleteQuizId] = useState(null);
   const [deletingQuizId, setDeletingQuizId] = useState(null);
 
   const longestWordLength = Math.max(0, ...wordSearchItems.map((item) => item.word.length));
@@ -180,6 +204,14 @@ export default function AdminPage() {
     10,
     Math.min(20, Math.max(longestWordLength, Math.ceil(Math.sqrt(totalWordLetters * 3)))),
   );
+
+  const setBugHuntRoundCount = (count) => {
+    setBugHuntRounds((current) => Array.from(
+      { length: count },
+      (_, index) => current[index] || emptyBugHuntRound(index),
+    ));
+    setActiveBugHuntRound((current) => Math.min(current, count - 1));
+  };
 
   const token = getToken();
   const headers = { Authorization: `Bearer ${token}` };
@@ -241,6 +273,8 @@ export default function AdminPage() {
     setQuestion("");
     setQuizType("multiple_choice");
     setWordSearchItems(Array.from({ length: 5 }, () => ({ word: "", clue: "" })));
+    setBugHuntRounds(emptyBugHuntRounds());
+    setActiveBugHuntRound(0);
     setDurationSeconds(180);
     setOptions(["", "", "", ""]);
     setCorrect(0);
@@ -258,6 +292,12 @@ export default function AdminPage() {
     setQuestion(quiz.question);
     setQuizType(quiz.quiz_type || "multiple_choice");
     setWordSearchItems(quiz.word_search_items?.length ? quiz.word_search_items : Array.from({ length: 5 }, () => ({ word: "", clue: "" })));
+    setBugHuntRounds(quiz.bug_hunt_rounds?.length ? quiz.bug_hunt_rounds.map((round, index) => ({
+      ...emptyBugHuntRound(index),
+      ...round,
+      code_text: (round.code_lines || []).join("\n"),
+    })) : emptyBugHuntRounds());
+    setActiveBugHuntRound(0);
     setDurationSeconds(quiz.duration_seconds || 180);
     setOptions(Array.isArray(quiz.options) ? [...quiz.options] : ["", "", "", ""]);
     setCorrect(quiz.correct_index ?? 0);
@@ -275,56 +315,25 @@ export default function AdminPage() {
   const deleteQuiz = async (quiz) => {
     if (quiz.status === "completed") return;
 
-    const firstConfirmed = window.confirm(
-      quiz.status === "today"
-        ? "Delete today's quiz?"
-        : `Delete the quiz scheduled for ${readableDate(quiz.date)}?`,
-    );
-
-    if (!firstConfirmed) return;
-
     setDeletingQuizId(quiz.id);
     setMessage(null);
 
     try {
-      let response = await fetch(`/api/admin/quiz/${quiz.id}`, {
+      const response = await fetch(`/api/admin/quiz/${quiz.id}?force=true`, {
         method: "DELETE",
         headers,
       });
 
-      let data = await response.json().catch(() => null);
+      const data = await response.json().catch(() => null);
 
-      if (!response.ok) {
+      if (!response.ok && response.status !== 404) {
         throw new Error(data?.detail || "Unable to delete quiz.");
       }
 
-      if (data?.requires_confirmation) {
-        const count = data.submission_count || 0;
-        const confirmed = window.confirm(
-          `This quiz has ${count} submission${count === 1 ? "" : "s"}. ` +
-          "Deleting it will also delete those submissions and may change the leaderboard. " +
-          "Do you still want to delete this quiz?",
-        );
-
-        if (!confirmed) {
-          setMessage("Quiz deletion cancelled.");
-          return;
-        }
-
-        response = await fetch(`/api/admin/quiz/${quiz.id}?force=true`, {
-          method: "DELETE",
-          headers,
-        });
-
-        data = await response.json().catch(() => null);
-
-        if (!response.ok) {
-          throw new Error(data?.detail || "Unable to delete quiz.");
-        }
-      }
-
       if (editingQuizId === quiz.id) resetQuizForm();
-      setMessage("Quiz deleted successfully.");
+      setQuizzes((current) => current.filter((item) => item.id !== quiz.id));
+      setPendingDeleteQuizId(null);
+      setMessage(response.status === 404 ? "Quiz was already deleted. The list has been refreshed." : "Quiz deleted successfully.");
       await loadAdminData();
     } catch (error) {
       setMessage(error.message || "Unable to delete quiz.");
@@ -356,6 +365,17 @@ export default function AdminPage() {
       return;
     }
 
+    const incompleteBugHuntRound = quizType === "bug_hunt" ? bugHuntRounds.findIndex((round) => {
+      const lines = round.code_text.split("\n").filter((line) => line.trim());
+      return lines.length < 3 || round.diagnoses.some((item) => !item.trim()) || round.fixes.some((item) => !item.trim());
+    }) : -1;
+
+    if (incompleteBugHuntRound !== -1) {
+      setActiveBugHuntRound(incompleteBugHuntRound);
+      setMessage(`Complete Round ${incompleteBugHuntRound + 1}, including code and every diagnosis and repair choice.`);
+      return;
+    }
+
     if (date < today) {
       setMessage("You cannot schedule a quiz for a past date.");
       return;
@@ -372,6 +392,11 @@ export default function AdminPage() {
         explanation: explanation.trim(),
         date,
         word_search_items: quizType === "word_search" ? wordSearchItems : null,
+        bug_hunt_rounds: quizType === "bug_hunt" ? bugHuntRounds.map((round) => ({
+          ...round,
+          code_lines: round.code_text.split("\n").filter((line) => line.trim()),
+          code_text: undefined,
+        })) : null,
         duration_seconds: Number(durationSeconds),
       };
 
@@ -476,16 +501,26 @@ export default function AdminPage() {
 
   const quizActions = (quiz) => (
     <span className="admin-row-actions">
-      <button type="button" onClick={() => editQuiz(quiz)}>
-        Edit
-      </button>
-      <button
-        type="button"
-        onClick={() => deleteQuiz(quiz)}
-        disabled={deletingQuizId === quiz.id}
-      >
-        {deletingQuizId === quiz.id ? "Deleting..." : "Delete"}
-      </button>
+      {pendingDeleteQuizId === quiz.id ? (
+        <span className="admin-delete-confirm" role="group" aria-label={`Confirm deletion of quiz scheduled for ${quiz.date}`}>
+          <span>Delete permanently?</span>
+          <button type="button" className="admin-delete-confirm-button" onClick={() => deleteQuiz(quiz)} disabled={deletingQuizId === quiz.id}>
+            {deletingQuizId === quiz.id ? "Deleting..." : "Confirm"}
+          </button>
+          <button type="button" onClick={() => setPendingDeleteQuizId(null)} disabled={deletingQuizId === quiz.id}>
+            Cancel
+          </button>
+        </span>
+      ) : (
+        <>
+          <button type="button" onClick={() => editQuiz(quiz)}>
+            Edit
+          </button>
+          <button type="button" onClick={() => setPendingDeleteQuizId(quiz.id)}>
+            Delete
+          </button>
+        </>
+      )}
     </span>
   );
 
@@ -518,8 +553,9 @@ export default function AdminPage() {
           <select id="quiz-type" value={quizType} onChange={(event) => setQuizType(event.target.value)}>
             <option value="multiple_choice">Multiple choice</option>
             <option value="word_search">Word search challenge</option>
+            <option value="bug_hunt">Bug Hunt challenge</option>
           </select>
-          <small>Most days can remain multiple choice. Select word search only for special challenge days.</small>
+          <small>Most days can remain multiple choice. Use Word Search or Bug Hunt for special challenge days.</small>
 
           <label htmlFor="quiz-question">Question</label>
           <textarea
@@ -594,6 +630,101 @@ export default function AdminPage() {
                 <option value={120}>2 minutes</option>
                 <option value={180}>3 minutes</option>
                 <option value={300}>5 minutes</option>
+              </select>
+            </fieldset>
+          )}
+
+          {quizType === "bug_hunt" && (
+            <fieldset className="admin-bug-hunt-fields">
+              <legend>Bug Hunt rounds</legend>
+              <p className="admin-word-search-grid-note">Players earn one point for the faulty line, one for the diagnosis, and one for the repair in every round.</p>
+              <div className="admin-bug-config-row">
+                <label htmlFor="bug-hunt-round-count">Number of rounds</label>
+                <select id="bug-hunt-round-count" value={bugHuntRounds.length} onChange={(event) => setBugHuntRoundCount(Number(event.target.value))}>
+                  {[1, 2, 3, 4, 5].map((count) => <option value={count} key={count}>{count} round{count === 1 ? "" : "s"}</option>)}
+                </select>
+              </div>
+              <div className="admin-bug-round-selector" role="tablist" aria-label="Select a Bug Hunt round">
+                {bugHuntRounds.map((round, roundIndex) => {
+                  const complete = round.code_text.split("\n").filter((line) => line.trim()).length >= 3
+                    && round.diagnoses.every((item) => item.trim())
+                    && round.fixes.every((item) => item.trim());
+                  return (
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeBugHuntRound === roundIndex}
+                      className={activeBugHuntRound === roundIndex ? "is-active" : ""}
+                      onClick={() => setActiveBugHuntRound(roundIndex)}
+                      key={roundIndex}
+                    >
+                      <span>Round {roundIndex + 1}</span>
+                      <small>{complete ? "Ready" : "Needs details"}</small>
+                    </button>
+                  );
+                })}
+              </div>
+              {bugHuntRounds.map((round, roundIndex) => {
+                if (roundIndex !== activeBugHuntRound) return null;
+                const codeLineCount = Math.max(1, round.code_text.split("\n").filter((line) => line.trim()).length);
+                const updateRound = (changes) => setBugHuntRounds((current) => current.map((item, index) => index === roundIndex ? { ...item, ...changes } : item));
+                return (
+                  <section className="admin-bug-hunt-round" role="tabpanel" key={roundIndex}>
+                    <header className="admin-bug-round-heading">
+                      <div>
+                        <span>ROUND {roundIndex + 1} OF {bugHuntRounds.length}</span>
+                        <h4>{round.title || `Round ${roundIndex + 1}`}</h4>
+                      </div>
+                      <strong>{roundIndex + 1}/{bugHuntRounds.length}</strong>
+                    </header>
+                    <label htmlFor={`bug-title-${roundIndex}`}>Round title</label>
+                    <input id={`bug-title-${roundIndex}`} value={round.title} maxLength={100} onChange={(event) => updateRound({ title: event.target.value })} />
+                    <label htmlFor={`bug-code-${roundIndex}`}>Code scene</label>
+                    <textarea id={`bug-code-${roundIndex}`} className="admin-bug-code" rows={7} value={round.code_text} placeholder={"model.fit(training_data)\ntest_data = training_data\naccuracy = model.score(test_data)"} onChange={(event) => updateRound({ code_text: event.target.value, buggy_line: Math.min(round.buggy_line, Math.max(0, event.target.value.split("\n").filter((line) => line.trim()).length - 1)) })} />
+                    <label htmlFor={`bug-line-${roundIndex}`}>Faulty line</label>
+                    <select id={`bug-line-${roundIndex}`} value={round.buggy_line} onChange={(event) => updateRound({ buggy_line: Number(event.target.value) })}>
+                      {Array.from({ length: codeLineCount }, (_, index) => <option value={index} key={index}>Line {index + 1}</option>)}
+                    </select>
+                    <div className="admin-bug-options">
+                      <div>
+                        <label>Diagnosis choices</label>
+                        <select aria-label={`Number of diagnosis choices for Round ${roundIndex + 1}`} value={round.diagnoses.length} onChange={(event) => {
+                          const size = Number(event.target.value);
+                          updateRound({ diagnoses: resizeChoices(round.diagnoses, size), correct_diagnosis: Math.min(round.correct_diagnosis, size - 1) });
+                        }}>
+                          {[3, 4, 5].map((count) => <option value={count} key={count}>{count} choices</option>)}
+                        </select>
+                        {round.diagnoses.map((option, optionIndex) => <input aria-label={`Round ${roundIndex + 1} diagnosis ${optionIndex + 1}`} key={optionIndex} value={option} placeholder={`Diagnosis ${optionIndex + 1}`} onChange={(event) => updateRound({ diagnoses: round.diagnoses.map((item, index) => index === optionIndex ? event.target.value : item) })} />)}
+                        <label htmlFor={`bug-diagnosis-correct-${roundIndex}`}>Correct diagnosis</label>
+                        <select id={`bug-diagnosis-correct-${roundIndex}`} value={round.correct_diagnosis} onChange={(event) => updateRound({ correct_diagnosis: Number(event.target.value) })}>
+                          {round.diagnoses.map((option, index) => <option value={index} key={index}>{option || `Diagnosis ${index + 1}`}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label>Repair choices</label>
+                        <select aria-label={`Number of repair choices for Round ${roundIndex + 1}`} value={round.fixes.length} onChange={(event) => {
+                          const size = Number(event.target.value);
+                          updateRound({ fixes: resizeChoices(round.fixes, size), correct_fix: Math.min(round.correct_fix, size - 1) });
+                        }}>
+                          {[3, 4, 5].map((count) => <option value={count} key={count}>{count} choices</option>)}
+                        </select>
+                        {round.fixes.map((option, optionIndex) => <input aria-label={`Round ${roundIndex + 1} repair ${optionIndex + 1}`} key={optionIndex} value={option} placeholder={`Repair ${optionIndex + 1}`} onChange={(event) => updateRound({ fixes: round.fixes.map((item, index) => index === optionIndex ? event.target.value : item) })} />)}
+                        <label htmlFor={`bug-fix-correct-${roundIndex}`}>Correct repair</label>
+                        <select id={`bug-fix-correct-${roundIndex}`} value={round.correct_fix} onChange={(event) => updateRound({ correct_fix: Number(event.target.value) })}>
+                          {round.fixes.map((option, index) => <option value={index} key={index}>{option || `Repair ${index + 1}`}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <label htmlFor={`bug-explanation-${roundIndex}`}>Explanation shown after completion</label>
+                    <textarea id={`bug-explanation-${roundIndex}`} rows={3} value={round.explanation} maxLength={600} onChange={(event) => updateRound({ explanation: event.target.value })} />
+                  </section>
+                );
+              })}
+              <label htmlFor="bug-hunt-duration">Total time limit</label>
+              <select id="bug-hunt-duration" value={durationSeconds} onChange={(event) => setDurationSeconds(Number(event.target.value))}>
+                <option value={75}>75 seconds</option>
+                <option value={90}>90 seconds</option>
+                <option value={120}>2 minutes</option>
               </select>
             </fieldset>
           )}
