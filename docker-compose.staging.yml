@@ -20,8 +20,6 @@ services:
     restart: unless-stopped
     env_file:
       - ${STAGING_ENV_FILE:-./backend/.env.staging}
-    ports:
-      - "127.0.0.1:8001:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -33,7 +31,7 @@ services:
     environment:
       VITE_BACKEND_URL: http://backend:8000
     ports:
-      - "127.0.0.1:5174:5173"
+      - "127.0.0.1:5180:5173"
     depends_on:
       - backend
 

@@ -8,8 +8,8 @@ production database.
 
 | Service | Production | Staging |
 | --- | --- | --- |
-| Frontend | `5173` | `127.0.0.1:5174` |
-| Backend | `8000` | `127.0.0.1:8001` |
+| Frontend | `5173` | `127.0.0.1:5180` |
+| Backend | `8000` | Docker network only |
 | PostgreSQL | `5432` | Docker network only |
 | Compose project | default | `codeprolk-staging` |
 | Database volume | `postgres_data` | `staging_postgres_data` |
